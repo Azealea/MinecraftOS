@@ -1,0 +1,11 @@
+*
+!/**/
+!*.*
+!makefile
+!Makefile
+
+.cache
+.vscode
+**/compile_commands.json
+**/*.o
+**/*.d
