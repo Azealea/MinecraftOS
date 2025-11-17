@@ -18,12 +18,12 @@ static void setup_error_handling()
     atexit(exit_callback);
 }
 
-void init_glfw(App* app)
+void init_glfw()
 {
     setup_error_handling();
     ASSERT(glfwInit() == GLFW_TRUE, "glfwInit failed");
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, app->windowResizable);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 }
 
 void create_glfw_window(App* app)

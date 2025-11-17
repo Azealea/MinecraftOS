@@ -1,6 +1,7 @@
 #include "vk/vk.h"
 
 #include "vk/vk_device.h"
+#include "vk/vk_swapchain.h"
 
 static void create_instance(App* app)
 {
@@ -43,4 +44,6 @@ void init_vk(App* app)
     select_queue_family(app);
     create_device(app);
     get_queue(app);
+
+    create_swapchain(app);
 }

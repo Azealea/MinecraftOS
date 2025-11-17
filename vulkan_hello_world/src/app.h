@@ -14,7 +14,6 @@ typedef struct
     const char* windowTitle;
     int windowWidth;
     int windowHeight;
-    bool windowResizable;
     bool windowFullscreen;
 
     // GLFW
@@ -33,4 +32,11 @@ typedef struct
     VkDevice device;
     VkQueue queue;
 
+    struct sc
+    {
+        VkSwapchainKHR swapchain;
+        uint32_t swapchainImageCount;
+        VkImage* swapchainImages;
+        VkImageView* swapchainImageViews;
+    } sc;
 } App;
