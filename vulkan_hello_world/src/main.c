@@ -29,7 +29,9 @@ static void init(App* app)
 
 static void loop(App* app)
 {
-    while (!glfwWindowShouldClose(app->window))
+    // temp bootleg counter so that I verify it closes normally
+    int c = 1;
+    while (!glfwWindowShouldClose(app->window) && c++ < 3000000)
     {
         glfwPollEvents();
     }
@@ -37,18 +39,8 @@ static void loop(App* app)
 
 static void cleanup(App* app)
 {
-    for (uint32_t i = 0; i < app->sc.swapchainImageCount; ++i)
-    {
-        vkDestroyImageView(app->device, app->sc.swapchainImageViews[i],
-                           app->allocator);
-    }
-    free(app->sc.swapchainImageViews);
-    free(app->sc.swapchainImages);
-
-    vkDestroySwapchainKHR(app->device, app->sc.swapchain, app->allocator);
-    vkDestroyDevice(app->device, app->allocator);
-    vkDestroySurfaceKHR(app->instance, app->surface, app->allocator);
-    vkDestroyInstance(app->instance, app->allocator);
+    clean_vk(app);
+    glfwDestroyWindow(app->window);
 }
 
 int main()
@@ -57,10 +49,7 @@ int main()
         .applicationName = "hello_world",
         .engineName = "SUN ENGINE",
         .windowTitle = "hello",
-        .windowWidth = 720,
-        .windowHeight = 480,
-        .windowFullscreen = true,
-        .apiVersion = VK_API_VERSION_1_4,
+        .vkApiVersion = VK_API_VERSION_1_4,
     };
 
     init(&app);

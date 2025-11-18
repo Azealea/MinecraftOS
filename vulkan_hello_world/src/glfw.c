@@ -28,17 +28,12 @@ void init_glfw()
 
 void create_glfw_window(App* app)
 {
-    if (app->windowFullscreen)
-    {
-        app->windowMonitor = glfwGetPrimaryMonitor();
+    app->windowMonitor = glfwGetPrimaryMonitor();
 
-        const GLFWvidmode* mode = glfwGetVideoMode(app->windowMonitor);
-        app->windowWidth = mode->width;
-        app->windowHeight = mode->height;
-    }
+    const GLFWvidmode* mode = glfwGetVideoMode(app->windowMonitor);
 
-    app->window = glfwCreateWindow(app->windowWidth, app->windowHeight,
-                                   app->windowTitle, app->windowMonitor, NULL);
+    app->window = glfwCreateWindow(mode->width, mode->height, app->windowTitle,
+                                   app->windowMonitor, NULL);
 
     ASSERT(app->window, "glfwCreateWindow failed");
 }

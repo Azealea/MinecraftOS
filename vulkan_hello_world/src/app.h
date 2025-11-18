@@ -12,31 +12,40 @@ typedef struct
     const char* applicationName;
     const char* engineName;
     const char* windowTitle;
-    int windowWidth;
-    int windowHeight;
-    bool windowFullscreen;
+    uint32_t vkApiVersion;
+    VkAllocationCallbacks* allocator;
 
     // GLFW
     GLFWmonitor* windowMonitor;
     GLFWwindow* window;
 
     // Vulkan
-    uint32_t apiVersion;
-    VkAllocationCallbacks* allocator;
+    struct context
+    {
+        VkInstance instance;
+        VkSurfaceKHR surface;
 
-    VkInstance instance;
-    uint32_t queueFamily;
+        VkPhysicalDevice physicalDevice;
+        uint32_t queueFamily;
+        VkDevice device;
+        VkQueue queue;
+    } context;
 
-    VkPhysicalDevice physicalDevice;
-    VkSurfaceKHR surface;
-    VkDevice device;
-    VkQueue queue;
-
-    struct sc
+    struct swapchain
     {
         VkSwapchainKHR swapchain;
         uint32_t swapchainImageCount;
         VkImage* swapchainImages;
         VkImageView* swapchainImageViews;
-    } sc;
+
+        VkFormat format;
+        VkColorSpaceKHR colorSpace;
+        VkExtent2D imageExtent;
+    } swapchain;
+
+    struct renderer
+    {
+        int nowarningnowhappy;
+    } renderer;
+
 } App;
