@@ -27,6 +27,7 @@
         pkgs.vulkan-headers # headers for building
         pkgs.vulkan-tools # includes `vulkaninfo`
         pkgs.vulkan-validation-layers # VK_LAYER_KHRONOS_validation
+        pkgs.shaderc
 
         # vulkan testing purpose :
         pkgs.glfw

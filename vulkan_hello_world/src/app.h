@@ -45,7 +45,8 @@ typedef struct
 
     struct renderer
     {
-        int nowarningnowhappy;
+        VkPipeline graphicsPipeline;
+        VkPipelineLayout pipelineLayout;
     } renderer;
 
 } App;

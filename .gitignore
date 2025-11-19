@@ -9,3 +9,8 @@
 **/compile_commands.json
 **/*.o
 **/*.d
+
+# shader
+**/*.spv
+**/*.spv.c
+
