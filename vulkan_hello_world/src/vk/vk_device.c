@@ -1,6 +1,6 @@
-#include <stdlib.h>
+#include "vk/vk_device.h"
 
-#include "app.h"
+#include <stdlib.h>
 
 void select_physical_device(App* app)
 {

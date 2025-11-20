@@ -33,7 +33,11 @@ static void loop(App* app)
     int c = 1;
     while (!glfwWindowShouldClose(app->window) && c++ < 3000000)
     {
+        double frameTimeStart = glfwGetTime();
         glfwPollEvents();
+        do_stuff_vk(app);
+        double frameTimeEnd = glfwGetTime();
+        printf("FPS: %f\r", 1 / (frameTimeEnd - frameTimeStart));
     }
 }
 

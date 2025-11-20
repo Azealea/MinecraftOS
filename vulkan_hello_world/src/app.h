@@ -13,6 +13,8 @@ typedef struct
     const char* engineName;
     const char* windowTitle;
     uint32_t vkApiVersion;
+    VkClearValue backgroundColor;
+
     VkAllocationCallbacks* allocator;
 
     // GLFW
@@ -34,19 +36,29 @@ typedef struct
     struct swapchain
     {
         VkSwapchainKHR swapchain;
-        uint32_t swapchainImageCount;
-        VkImage* swapchainImages;
-        VkImageView* swapchainImageViews;
+
+        uint32_t imageCount;
+        VkImage* images;
+        VkImageView* imageViews;
 
         VkFormat format;
         VkColorSpaceKHR colorSpace;
         VkExtent2D imageExtent;
+
+        uint32_t imageAcquiredIndex;
     } swapchain;
 
     struct renderer
     {
         VkPipeline graphicsPipeline;
-        VkPipelineLayout pipelineLayout;
+        VkRenderPass renderpass;
+        VkFramebuffer* framebuffers;
+
+        VkCommandPool commandPool;
+        VkCommandBuffer commandBuffer;
+        VkSemaphore imageAcquiredSemaphore;
+        VkSemaphore renderFinishedSemaphore;
+        VkFence inFlightFence;
     } renderer;
 
 } App;
