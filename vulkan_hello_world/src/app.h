@@ -44,8 +44,6 @@ typedef struct
         VkFormat format;
         VkColorSpaceKHR colorSpace;
         VkExtent2D imageExtent;
-
-        uint32_t imageAcquiredIndex;
     } swapchain;
 
     struct renderer
@@ -55,10 +53,11 @@ typedef struct
         VkFramebuffer* framebuffers;
 
         VkCommandPool commandPool;
-        VkCommandBuffer commandBuffer;
-        VkSemaphore imageAcquiredSemaphore;
-        VkSemaphore renderFinishedSemaphore;
-        VkFence inFlightFence;
+        // arrays of size imageCount
+        VkCommandBuffer* commandBuffers;
+        VkSemaphore* imageAvailableSemaphores;
+        VkSemaphore* renderFinishedSemaphores;
+        VkFence* inFlightFences;
     } renderer;
 
 } App;

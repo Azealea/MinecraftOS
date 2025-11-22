@@ -21,8 +21,23 @@ void clean_vk(App* app)
 
 void do_stuff_vk(App* app)
 {
-    acquire_swapchain_image(app);
-    record_command_buffer(app);
-    submit_command_buffer(app);
-    present_swapchain_image(app);
+    static uint32_t currentFrame = 0;
+    vkWaitForFences(app->context.device, 1,
+                    &app->renderer.inFlightFences[currentFrame], VK_TRUE,
+                    UINT64_MAX);
+    vkResetFences(app->context.device, 1,
+                  &app->renderer.inFlightFences[currentFrame]);
+
+    uint32_t acquiredIndex;
+    vkAcquireNextImageKHR(app->context.device, app->swapchain.swapchain,
+                          UINT64_MAX,
+                          app->renderer.imageAvailableSemaphores[currentFrame],
+                          VK_NULL_HANDLE, &acquiredIndex);
+    // uint32_t acquiredIndex = acquire_swapchain_image(app, currentFrame);
+    vkResetCommandBuffer(app->renderer.commandBuffers[acquiredIndex], 0);
+
+    record_command_buffer(app, acquiredIndex);
+    submit_command_buffer(app, acquiredIndex, currentFrame);
+    present_swapchain_image(app, acquiredIndex, currentFrame);
+    currentFrame = (currentFrame + 1) % app->swapchain.imageCount;
 }

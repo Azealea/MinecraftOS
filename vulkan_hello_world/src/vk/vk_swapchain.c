@@ -201,17 +201,19 @@ void destroy_swapchain(App* app)
                           app->allocator);
 }
 
-void acquire_swapchain_image(App* app)
+uint32_t acquire_swapchain_image(App* app, uint32_t frameIndex)
 {
-    ASSERT(vkAcquireNextImageKHR(app->context.device, app->swapchain.swapchain,
-                                 UINT64_MAX,
-                                 app->renderer.imageAcquiredSemaphore, NULL,
-                                 &app->swapchain.imageAcquiredIndex)
+    uint32_t acquired_index = 0;
+    ASSERT(vkAcquireNextImageKHR(
+               app->context.device, app->swapchain.swapchain, UINT64_MAX,
+               app->renderer.imageAvailableSemaphores[frameIndex], NULL,
+               &acquired_index)
                == VK_SUCCESS,
            "Couldn't acquire next image");
+    return acquired_index;
 }
 
-void present_swapchain_image(App* app)
+void present_swapchain_image(App* app, uint32_t imageIndex, uint32_t frameIndex)
 {
     ASSERT(vkQueuePresentKHR(
                app->context.queue,
@@ -219,20 +221,11 @@ void present_swapchain_image(App* app)
                    .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
                    .swapchainCount = 1,
                    .pSwapchains = &app->swapchain.swapchain,
-                   .pImageIndices = &app->swapchain.imageAcquiredIndex,
+                   .pImageIndices = &imageIndex,
                    .waitSemaphoreCount = 1,
-                   .pWaitSemaphores = &app->renderer.renderFinishedSemaphore,
+                   .pWaitSemaphores =
+                       &app->renderer.renderFinishedSemaphores[frameIndex],
                })
                == VK_SUCCESS,
-           "Couldn't present swapchain image %i",
-           app->swapchain.imageAcquiredIndex);
-
-    ASSERT(vkWaitForFences(app->context.device, 1, &app->renderer.inFlightFence,
-                           VK_FALSE, UINT64_MAX)
-               == VK_SUCCESS,
-           "Couldn't wait for fence")
-
-    ASSERT(vkResetFences(app->context.device, 1, &app->renderer.inFlightFence)
-               == VK_SUCCESS,
-           "Couldn't reset the fence");
+           "Couldn't present swapchain image %i", imageIndex);
 }

@@ -1,5 +1,7 @@
 #include "vk/renderer/vk_command.h"
 
+#include <stdlib.h>
+
 void create_command_pool(App* app)
 {
     ASSERT(vkCreateCommandPool(
@@ -22,23 +24,29 @@ void destroy_command_pool(App* app)
 
 void allocate_command_buffer(App* app)
 {
+    app->renderer.commandBuffers =
+        malloc(sizeof(VkCommandBuffer) * app->swapchain.imageCount);
     ASSERT(vkAllocateCommandBuffers(
                app->context.device,
                &(VkCommandBufferAllocateInfo){
                    .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
                    .commandPool = app->renderer.commandPool,
-                   .commandBufferCount = 1,
+                   .commandBufferCount = app->swapchain.imageCount,
                    .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
                },
-               &app->renderer.commandBuffer)
+               app->renderer.commandBuffers)
                == VK_SUCCESS,
-           "Couldn't allocate command buffer")
+           "Couldn't allocate command buffer");
 }
 
-void record_command_buffer(App* app)
+void destroy_command_buffer(App* app)
 {
-    VkCommandBuffer commandBuffer = app->renderer.commandBuffer;
-    uint32_t imageAcquiredIndex = app->swapchain.imageAcquiredIndex;
+    free(app->renderer.commandBuffers);
+}
+
+void record_command_buffer(App* app, uint32_t imageIndex)
+{
+    VkCommandBuffer commandBuffer = app->renderer.commandBuffers[imageIndex];
 
     ASSERT(vkBeginCommandBuffer(
                commandBuffer,
@@ -46,14 +54,14 @@ void record_command_buffer(App* app)
                    .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
                })
                == VK_SUCCESS,
-           "Couldn't begin command buffer for frame")
+           "Couldn't begin command buffer for frame");
 
     vkCmdBeginRenderPass(
-        app->renderer.commandBuffer,
+        commandBuffer,
         &(VkRenderPassBeginInfo){
             .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
             .renderPass = app->renderer.renderpass,
-            .framebuffer = app->renderer.framebuffers[imageAcquiredIndex],
+            .framebuffer = app->renderer.framebuffers[imageIndex],
             .renderArea =
                 (VkRect2D){
                     .extent = app->swapchain.imageExtent,
@@ -72,23 +80,25 @@ void record_command_buffer(App* app)
            "Couldn't end command buffer");
 }
 
-void submit_command_buffer(App* app)
+void submit_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
 {
     ASSERT(vkQueueSubmit(
                app->context.queue, 1,
                &(VkSubmitInfo){
                    .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
                    .commandBufferCount = 1,
-                   .pCommandBuffers = &app->renderer.commandBuffer,
+                   .pCommandBuffers = &app->renderer.commandBuffers[imageIndex],
                    .waitSemaphoreCount = 1,
-                   .pWaitSemaphores = &app->renderer.imageAcquiredSemaphore,
+                   .pWaitSemaphores =
+                       &app->renderer.imageAvailableSemaphores[frameIndex],
                    .signalSemaphoreCount = 1,
-                   .pSignalSemaphores = &app->renderer.renderFinishedSemaphore,
+                   .pSignalSemaphores =
+                       &app->renderer.renderFinishedSemaphores[frameIndex],
                    .pWaitDstStageMask =
                        (VkPipelineStageFlags[]){
                            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                        } },
-               app->renderer.inFlightFence)
+               app->renderer.inFlightFences[frameIndex])
                == VK_SUCCESS,
            "Couldn't submit command buffer");
 }

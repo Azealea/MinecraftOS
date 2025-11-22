@@ -29,9 +29,7 @@ static void init(App* app)
 
 static void loop(App* app)
 {
-    // temp bootleg counter so that I verify it closes normally
-    int c = 1;
-    while (!glfwWindowShouldClose(app->window) && c++ < 3000000)
+    while (!glfwWindowShouldClose(app->window))
     {
         double frameTimeStart = glfwGetTime();
         glfwPollEvents();
