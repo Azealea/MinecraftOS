@@ -37,6 +37,7 @@ static void loop(App* app)
         double frameTimeEnd = glfwGetTime();
         printf("FPS: %f\r", 1 / (frameTimeEnd - frameTimeStart));
     }
+    vkQueueWaitIdle(app->context.queue);
 }
 
 static void cleanup(App* app)
@@ -52,6 +53,8 @@ int main()
         .engineName = "SUN ENGINE",
         .windowTitle = "hello",
         .vkApiVersion = VK_API_VERSION_1_4,
+        .backgroundColor = { { { 0.01f, 0.1f, 0.1f, 0.01f } } },
+        .maxFramesInFlight = 3,
     };
 
     init(&app);

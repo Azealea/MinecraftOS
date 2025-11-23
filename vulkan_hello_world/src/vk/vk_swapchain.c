@@ -203,29 +203,36 @@ void destroy_swapchain(App* app)
 
 uint32_t acquire_swapchain_image(App* app, uint32_t frameIndex)
 {
-    uint32_t acquired_index = 0;
-    ASSERT(vkAcquireNextImageKHR(
-               app->context.device, app->swapchain.swapchain, UINT64_MAX,
-               app->renderer.imageAvailableSemaphores[frameIndex], NULL,
-               &acquired_index)
-               == VK_SUCCESS,
-           "Couldn't acquire next image");
+    uint32_t acquired_index;
+
+    VkResult result = vkAcquireNextImageKHR(
+        app->context.device, app->swapchain.swapchain, UINT64_MAX,
+        app->renderer.imageAvailableSemaphores[frameIndex], VK_NULL_HANDLE,
+        &acquired_index);
+
+    ASSERT(result == VK_SUCCESS,
+           "Failed to acquire swapchain image (result = %d)", result);
     return acquired_index;
 }
 
-void present_swapchain_image(App* app, uint32_t imageIndex, uint32_t frameIndex)
+void present_swapchain_image(App* app, uint32_t imageIndex)
 {
-    ASSERT(vkQueuePresentKHR(
-               app->context.queue,
-               &(VkPresentInfoKHR){
-                   .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-                   .swapchainCount = 1,
-                   .pSwapchains = &app->swapchain.swapchain,
-                   .pImageIndices = &imageIndex,
-                   .waitSemaphoreCount = 1,
-                   .pWaitSemaphores =
-                       &app->renderer.renderFinishedSemaphores[frameIndex],
-               })
-               == VK_SUCCESS,
-           "Couldn't present swapchain image %i", imageIndex);
+    VkSwapchainKHR swapchains[] = { app->swapchain.swapchain };
+
+    VkPresentInfoKHR presentInfo = {
+        .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        .pNext = NULL,
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores =
+            (VkSemaphore[]){
+                app->renderer.renderFinishedSemaphores[imageIndex] },
+        .swapchainCount = 1,
+        .pSwapchains = swapchains,
+        .pImageIndices = &imageIndex,
+        .pResults = NULL,
+    };
+
+    VkResult result = vkQueuePresentKHR(app->context.queue, &presentInfo);
+    ASSERT(result == VK_SUCCESS,
+           "Failed to present swapchain image (result = %d)", result);
 }

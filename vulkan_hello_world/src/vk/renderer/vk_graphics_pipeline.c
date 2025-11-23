@@ -70,16 +70,14 @@ void create_graphics_pipeline(App* app)
                            VK_SHADER_STAGE_FRAGMENT_BIT),
     };
 
-    VkExtent2D imageExtent = app->swapchain.imageExtent;
-
     VkViewport viewports[] = { {
-        .width = (float)imageExtent.width,
-        .height = (float)imageExtent.height,
+        .width = (float)app->swapchain.imageExtent.width,
+        .height = (float)app->swapchain.imageExtent.height,
         .maxDepth = 1.0f,
     } };
 
     VkRect2D scissors[] = { {
-        .extent = imageExtent,
+        .extent = app->swapchain.imageExtent,
     } };
 
     VkPipelineColorBlendAttachmentState colorBlendAttachmentStates[] = { {
@@ -173,7 +171,6 @@ void create_framebuffers(App* app)
         malloc(framebufferCount * sizeof(VkFramebuffer));
     ASSERT(app->renderer.framebuffers != nullptr,
            "Couldn't allocate memory for framebuffers array");
-    VkExtent2D framebufferExtent = app->swapchain.imageExtent;
 
     for (uint32_t framebufferIndex = 0; framebufferIndex < framebufferCount;
          ++framebufferIndex)
@@ -184,8 +181,8 @@ void create_framebuffers(App* app)
                        .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
                        .layers = 1,
                        .renderPass = app->renderer.renderpass,
-                       .width = framebufferExtent.width,
-                       .height = framebufferExtent.height,
+                       .width = app->swapchain.imageExtent.width,
+                       .height = app->swapchain.imageExtent.height,
                        .attachmentCount = 1,
                        .pAttachments =
                            &app->swapchain.imageViews[framebufferIndex],

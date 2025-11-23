@@ -14,6 +14,7 @@ typedef struct
     const char* windowTitle;
     uint32_t vkApiVersion;
     VkClearValue backgroundColor;
+    uint32_t maxFramesInFlight;
 
     VkAllocationCallbacks* allocator;
 
@@ -53,7 +54,7 @@ typedef struct
         VkFramebuffer* framebuffers;
 
         VkCommandPool commandPool;
-        // arrays of size imageCount
+        // arrays of size maxFramesInFlight
         VkCommandBuffer* commandBuffers;
         VkSemaphore* imageAvailableSemaphores;
         VkSemaphore* renderFinishedSemaphores;

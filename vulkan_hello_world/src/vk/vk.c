@@ -19,25 +19,32 @@ void clean_vk(App* app)
     destroy_vk_context(app);
 }
 
-void do_stuff_vk(App* app)
+void drawFrame(App* app)
 {
     static uint32_t currentFrame = 0;
-    vkWaitForFences(app->context.device, 1,
-                    &app->renderer.inFlightFences[currentFrame], VK_TRUE,
-                    UINT64_MAX);
-    vkResetFences(app->context.device, 1,
-                  &app->renderer.inFlightFences[currentFrame]);
 
-    uint32_t acquiredIndex;
-    vkAcquireNextImageKHR(app->context.device, app->swapchain.swapchain,
-                          UINT64_MAX,
-                          app->renderer.imageAvailableSemaphores[currentFrame],
-                          VK_NULL_HANDLE, &acquiredIndex);
-    // uint32_t acquiredIndex = acquire_swapchain_image(app, currentFrame);
-    vkResetCommandBuffer(app->renderer.commandBuffers[acquiredIndex], 0);
+    VkDevice device = app->context.device;
 
-    record_command_buffer(app, acquiredIndex);
-    submit_command_buffer(app, acquiredIndex, currentFrame);
-    present_swapchain_image(app, acquiredIndex, currentFrame);
-    currentFrame = (currentFrame + 1) % app->swapchain.imageCount;
+    ASSERT(vkWaitForFences(device, 1,
+                           &app->renderer.inFlightFences[currentFrame], VK_TRUE,
+                           UINT64_MAX)
+               == VK_SUCCESS,
+           "Failed to wait for in-flight fence for frame %u", currentFrame);
+
+    uint32_t imageIndex = acquire_swapchain_image(app, currentFrame);
+
+    ASSERT(vkResetFences(device, 1, &app->renderer.inFlightFences[currentFrame])
+               == VK_SUCCESS,
+           "Failed to reset in-flight fence for frame %u", currentFrame);
+
+    record_command_buffer(app, imageIndex, currentFrame);
+    submit_command_buffer(app, imageIndex, currentFrame);
+    present_swapchain_image(app, imageIndex);
+
+    currentFrame = (currentFrame + 1) % app->maxFramesInFlight;
+}
+
+void do_stuff_vk(App* app)
+{
+    drawFrame(app);
 }

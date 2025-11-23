@@ -17,8 +17,6 @@ void create_renderer(App* app)
 
 void destroy_renderer(App* app)
 {
-    vkQueueWaitIdle(app->context.queue);
-
     destroy_sync_objects(app);
     destroy_command_pool(app);
 
