@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "vk/renderer/vk_shaders.h"
+#include "vk/vertex/vertex.h"
 
 void create_renderpass(App* app)
 {
@@ -95,63 +96,82 @@ void create_graphics_pipeline(App* app)
                == VK_SUCCESS,
            "Couldn't create pipeline layout");
 
-    ASSERT(
-        vkCreateGraphicsPipelines(
-            app->context.device, NULL, 1,
-            &(VkGraphicsPipelineCreateInfo){
-                .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-                .pStages =
-                    (const VkPipelineShaderStageCreateInfo*)&shaderStages,
-                .stageCount = sizeof(shaderStages) / sizeof(*shaderStages),
-                .pVertexInputState =
-                    &(VkPipelineVertexInputStateCreateInfo){
-                        .sType =
-                            VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-                    },
-                .pInputAssemblyState =
-                    &(VkPipelineInputAssemblyStateCreateInfo){
-                        .sType =
-                            VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-                        .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-                    },
-                .pViewportState =
-                    &(VkPipelineViewportStateCreateInfo){
-                        .sType =
-                            VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
-                        .viewportCount = sizeof(viewports) / sizeof(*viewports),
-                        .pViewports = viewports,
-                        .scissorCount = sizeof(scissors) / sizeof(*scissors),
-                        .pScissors = scissors,
-                    },
-                .pRasterizationState =
-                    &(VkPipelineRasterizationStateCreateInfo){
-                        .sType =
-                            VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
-                        .lineWidth = 1.0,
-                        .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
-                        .cullMode = VK_CULL_MODE_BACK_BIT,
-                        .polygonMode = VK_POLYGON_MODE_FILL,
-                    },
-                .pMultisampleState =
-                    &(VkPipelineMultisampleStateCreateInfo){
-                        .sType =
-                            VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-                        .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
-                    },
-                .pColorBlendState =
-                    &(VkPipelineColorBlendStateCreateInfo){
-                        .sType =
-                            VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-                        .attachmentCount = sizeof(colorBlendAttachmentStates)
-                            / sizeof(*colorBlendAttachmentStates),
-                        .pAttachments = colorBlendAttachmentStates,
-                    },
-                .layout = pipelineLayout,
-                .renderPass = app->renderer.renderpass,
-            },
-            app->allocator, &app->renderer.graphicsPipeline)
-            == VK_SUCCESS,
-        "Couldn't create graphics pipeline");
+    VkResult res = vkCreateGraphicsPipelines(
+        app->context.device, NULL, 1,
+        &(VkGraphicsPipelineCreateInfo){
+            .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+            .pStages = (const VkPipelineShaderStageCreateInfo*)&shaderStages,
+            .stageCount = sizeof(shaderStages) / sizeof(*shaderStages),
+            .pVertexInputState =
+                &(VkPipelineVertexInputStateCreateInfo){
+                    .sType =
+                        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+                    .vertexBindingDescriptionCount = 1,
+                    .pVertexBindingDescriptions =
+                        (VkVertexInputBindingDescription[]){ {
+                            .binding = 0,
+                            .stride = sizeof(Vertex),
+                            .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
+                        } },
+                    .vertexAttributeDescriptionCount = 2,
+                    .pVertexAttributeDescriptions =
+                        (VkVertexInputAttributeDescription[]){
+                            {
+                                .binding = 0,
+                                .location = 0,
+                                .format = VK_FORMAT_R32G32_SFLOAT,
+                                .offset = offsetof(Vertex, pos),
+                            },
+                            {
+                                .binding = 0,
+                                .location = 1,
+                                .format = VK_FORMAT_R32G32B32_SFLOAT,
+                                .offset = offsetof(Vertex, color),
+                            } },
+                },
+            .pInputAssemblyState =
+                &(VkPipelineInputAssemblyStateCreateInfo){
+                    .sType =
+                        VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+                    .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+                },
+            .pViewportState =
+                &(VkPipelineViewportStateCreateInfo){
+                    .sType =
+                        VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+                    .viewportCount = sizeof(viewports) / sizeof(*viewports),
+                    .pViewports = viewports,
+                    .scissorCount = sizeof(scissors) / sizeof(*scissors),
+                    .pScissors = scissors,
+                },
+            .pRasterizationState =
+                &(VkPipelineRasterizationStateCreateInfo){
+                    .sType =
+                        VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+                    .lineWidth = 1.0,
+                    .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
+                    .cullMode = VK_CULL_MODE_BACK_BIT,
+                    .polygonMode = VK_POLYGON_MODE_FILL,
+                },
+            .pMultisampleState =
+                &(VkPipelineMultisampleStateCreateInfo){
+                    .sType =
+                        VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+                    .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+                },
+            .pColorBlendState =
+                &(VkPipelineColorBlendStateCreateInfo){
+                    .sType =
+                        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+                    .attachmentCount = sizeof(colorBlendAttachmentStates)
+                        / sizeof(*colorBlendAttachmentStates),
+                    .pAttachments = colorBlendAttachmentStates,
+                },
+            .layout = pipelineLayout,
+            .renderPass = app->renderer.renderpass,
+        },
+        app->allocator, &app->renderer.graphicsPipeline);
+    ASSERT(res == VK_SUCCESS, "Couldn't create graphics pipeline");
 
     vkDestroyPipelineLayout(app->context.device, pipelineLayout,
                             app->allocator);

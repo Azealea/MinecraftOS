@@ -61,4 +61,7 @@ typedef struct
         VkFence* inFlightFences;
     } renderer;
 
+    VkBuffer vertexBuffer;
+    VkDeviceMemory vertexBufferMemory;
+
 } App;

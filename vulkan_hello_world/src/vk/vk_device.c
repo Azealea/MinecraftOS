@@ -77,3 +77,24 @@ void get_queue(App* app)
     vkGetDeviceQueue(app->context.device, app->context.queueFamily, 0,
                      &app->context.queue);
 }
+
+uint32_t find_memory_type(App* app, uint32_t typeFilter,
+                          VkMemoryPropertyFlags properties)
+{
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(app->context.physicalDevice,
+                                        &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+    {
+        if ((typeFilter & (1u << i))
+            && (memProperties.memoryTypes[i].propertyFlags & properties)
+                == properties)
+        {
+            return i;
+        }
+    }
+
+    ASSERT(1, "No suitable memory type\n");
+    return 0;
+}

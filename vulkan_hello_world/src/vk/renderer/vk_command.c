@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 
+#include "vk/vertex/vertex.h"
+
 void create_command_pool(App* app)
 {
     ASSERT(vkCreateCommandPool(
@@ -46,9 +48,9 @@ void destroy_command_buffer(App* app)
 
 void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
 {
-    VkCommandBuffer commandBuffer = app->renderer.commandBuffers[frameIndex];
+    VkCommandBuffer cmd = app->renderer.commandBuffers[frameIndex];
 
-    ASSERT(vkResetCommandBuffer(commandBuffer, 0) == VK_SUCCESS,
+    ASSERT(vkResetCommandBuffer(cmd, 0) == VK_SUCCESS,
            "Failed to reset command buffer");
 
     VkCommandBufferBeginInfo beginInfo = {
@@ -58,7 +60,7 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
         .pInheritanceInfo = NULL,
     };
 
-    ASSERT(vkBeginCommandBuffer(commandBuffer, &beginInfo) == VK_SUCCESS,
+    ASSERT(vkBeginCommandBuffer(cmd, &beginInfo) == VK_SUCCESS,
            "Failed to begin recording command buffer");
 
     VkRenderPassBeginInfo renderPassInfo = {
@@ -74,17 +76,20 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
         .pClearValues = (VkClearValue[]) { app->backgroundColor},
     };
 
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo,
-                         VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
                       app->renderer.graphicsPipeline);
 
-    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+    VkBuffer vertexBuffers[] = { app->vertexBuffer };
+    VkDeviceSize offsets[] = { 0 };
+    vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
 
-    vkCmdEndRenderPass(commandBuffer);
+    vkCmdDraw(cmd, vertex_count(), 1, 0, 0);
 
-    ASSERT(vkEndCommandBuffer(commandBuffer) == VK_SUCCESS,
+    vkCmdEndRenderPass(cmd);
+
+    ASSERT(vkEndCommandBuffer(cmd) == VK_SUCCESS,
            "Failed to record command buffer for image %u", imageIndex);
 }
 

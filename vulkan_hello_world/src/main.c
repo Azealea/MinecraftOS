@@ -37,7 +37,6 @@ static void loop(App* app)
         double frameTimeEnd = glfwGetTime();
         printf("FPS: %f\r", 1 / (frameTimeEnd - frameTimeStart));
     }
-    vkQueueWaitIdle(app->context.queue);
 }
 
 static void cleanup(App* app)
