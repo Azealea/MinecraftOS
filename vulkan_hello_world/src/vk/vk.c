@@ -9,9 +9,9 @@
 void init_vk(App* app)
 {
     create_vk_context(app);
-    create_vertex_buffer(app);
     create_swapchain(app);
     create_renderer(app);
+    create_vertex_buffer(app);
 }
 
 void clean_vk(App* app)
