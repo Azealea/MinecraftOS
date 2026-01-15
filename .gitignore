@@ -14,3 +14,4 @@
 **/*.spv
 **/*.spv.c
 
+.direnv/
