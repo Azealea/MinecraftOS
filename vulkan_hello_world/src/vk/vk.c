@@ -12,6 +12,7 @@ void init_vk(App* app)
     create_swapchain(app);
     create_renderer(app);
     create_vertex_buffer(app);
+    create_index_buffer(app);
 }
 
 void clean_vk(App* app)
@@ -19,6 +20,7 @@ void clean_vk(App* app)
     vkQueueWaitIdle(app->context.queue);
     destroy_renderer(app);
     destroy_swapchain(app);
+    destroy_index_buffer(app);
     destroy_vertex_buffer(app);
     destroy_vk_context(app);
 }

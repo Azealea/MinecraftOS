@@ -13,3 +13,6 @@ uint32_t vertex_count(void);
 
 void create_vertex_buffer(App* app);
 void destroy_vertex_buffer(App* app);
+
+void create_index_buffer(App* app);
+void destroy_index_buffer(App* app);

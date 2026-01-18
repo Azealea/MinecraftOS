@@ -85,7 +85,9 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
     VkDeviceSize offsets[] = { 0 };
     vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
 
-    vkCmdDraw(cmd, vertex_count(), 1, 0, 0);
+    vkCmdBindIndexBuffer(cmd, app->indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+    vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
 
     vkCmdEndRenderPass(cmd);
 
