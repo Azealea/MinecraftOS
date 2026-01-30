@@ -1,6 +1,7 @@
 #include "vk/vk.h"
 
 #include "vk/renderer/vk_command.h"
+#include "vk/renderer/vk_despcriptor_layout.h"
 #include "vk/renderer/vk_renderer.h"
 #include "vk/vertex/vertex.h"
 #include "vk/vk_context.h"
@@ -10,6 +11,7 @@ void init_vk(App* app)
 {
     create_vk_context(app);
     create_swapchain(app);
+    create_descriptor_set_layout(app);
     create_renderer(app);
     create_vertex_buffer(app);
     create_index_buffer(app);
@@ -20,6 +22,7 @@ void clean_vk(App* app)
     vkQueueWaitIdle(app->context.queue);
     destroy_renderer(app);
     destroy_swapchain(app);
+    destroy_descriptor_set_layout(app);
     destroy_index_buffer(app);
     destroy_vertex_buffer(app);
     destroy_vk_context(app);

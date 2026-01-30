@@ -86,13 +86,14 @@ void create_graphics_pipeline(App* app)
             | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
     } };
 
-    VkPipelineLayout pipelineLayout;
     ASSERT(vkCreatePipelineLayout(
                app->context.device,
                &(VkPipelineLayoutCreateInfo){
                    .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+                   .setLayoutCount = 1,
+                   .pSetLayouts = &app->renderer.descriptorSetLayout,
                },
-               app->allocator, &pipelineLayout)
+               app->allocator, &app->renderer.pipelineLayout)
                == VK_SUCCESS,
            "Couldn't create pipeline layout");
 
@@ -167,13 +168,13 @@ void create_graphics_pipeline(App* app)
                         / sizeof(*colorBlendAttachmentStates),
                     .pAttachments = colorBlendAttachmentStates,
                 },
-            .layout = pipelineLayout,
+            .layout = app->renderer.pipelineLayout,
             .renderPass = app->renderer.renderpass,
         },
         app->allocator, &app->renderer.graphicsPipeline);
     ASSERT(res == VK_SUCCESS, "Couldn't create graphics pipeline");
 
-    vkDestroyPipelineLayout(app->context.device, pipelineLayout,
+    vkDestroyPipelineLayout(app->context.device, app->renderer.pipelineLayout,
                             app->allocator);
 
     for (uint32_t i = 0; i < sizeof(shaderStages) / sizeof(shaderStages[0]);

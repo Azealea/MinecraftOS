@@ -49,6 +49,9 @@ typedef struct
 
     struct renderer
     {
+        VkDescriptorSetLayout descriptorSetLayout;
+        VkPipelineLayout pipelineLayout;
+
         VkPipeline graphicsPipeline;
         VkRenderPass renderpass;
         VkFramebuffer* framebuffers;
