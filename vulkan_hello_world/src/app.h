@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 
-#include "utils.h"
+#include "utils/utils.h"
 
 typedef struct
 {

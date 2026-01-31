@@ -3,7 +3,7 @@
 #include <string.h>
 #include <vulkan/vulkan_core.h>
 
-#include "utils.h"
+#include "utils/time.h"
 #include "vk/vertex/buffer.h"
 
 const Vertex vertices[] = { { { -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
