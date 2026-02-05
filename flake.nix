@@ -37,9 +37,9 @@
 
         pkgs.gcc
         pkgs.pkg-config
-        #  pkgs.meson
-        # pkgs.ninja
-        # pkgs.cmake
+
+        # math helper
+        pkgs.cglm
       ];
 
       shellHook = ''
