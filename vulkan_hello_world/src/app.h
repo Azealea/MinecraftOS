@@ -17,6 +17,7 @@ typedef struct
     uint32_t maxFramesInFlight;
 
     VkAllocationCallbacks* allocator;
+    double start_time;
 
     // GLFW
     GLFWmonitor* windowMonitor;
@@ -68,5 +69,13 @@ typedef struct
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
+
+    // // arrays of size maxFramesInFlight
+    VkBuffer* uniformBuffers;
+    VkDeviceMemory* uniformBuffersMemory;
+    void** uniformBuffersMapped;
+
+    VkDescriptorPool descriptorPool;
+    VkDescriptorSet* descriptorSets;
 
 } App;

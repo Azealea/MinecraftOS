@@ -3,15 +3,14 @@
 #include <string.h>
 #include <vulkan/vulkan_core.h>
 
-#include "utils/time.h"
-#include "vk/vertex/buffer.h"
+#include "vk/buffer/buffer.h"
 
 const Vertex vertices[] = { { { -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
                             { { 0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
                             { { 0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f } },
                             { { -0.5f, 0.5f }, { 1.0f, 1.0f, 1.0f } } };
 
-const uint16_t indices[] = { 0, 2, 1, 2, 0, 3 };
+const uint16_t indices[] = { 0, 1, 2, 2, 3, 0 };
 
 uint32_t vertex_count(void)
 {

@@ -3,6 +3,7 @@
 
 #include "app.h"
 #include "glfw.h"
+#include "utils/time.h"
 #include "vk/vk.h"
 
 static void display_info()
@@ -49,11 +50,12 @@ int main()
 {
     App app = {
         .applicationName = "hello_world",
-        .engineName = "SUN ENGINE",
+        .engineName = "AZEA ENGINE",
         .windowTitle = "hello",
         .vkApiVersion = VK_API_VERSION_1_4,
         .backgroundColor = { { { 0.01f, 0.1f, 0.1f, 0.01f } } },
         .maxFramesInFlight = 3,
+        .start_time = current_time(),
     };
 
     init(&app);

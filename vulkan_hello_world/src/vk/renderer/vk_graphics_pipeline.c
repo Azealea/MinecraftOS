@@ -2,8 +2,8 @@
 
 #include <stdlib.h>
 
+#include "vk/buffer/vertex.h"
 #include "vk/renderer/vk_shaders.h"
-#include "vk/vertex/vertex.h"
 
 void create_renderpass(App* app)
 {
@@ -174,9 +174,6 @@ void create_graphics_pipeline(App* app)
         app->allocator, &app->renderer.graphicsPipeline);
     ASSERT(res == VK_SUCCESS, "Couldn't create graphics pipeline");
 
-    vkDestroyPipelineLayout(app->context.device, app->renderer.pipelineLayout,
-                            app->allocator);
-
     for (uint32_t i = 0; i < sizeof(shaderStages) / sizeof(shaderStages[0]);
          i++)
     {
@@ -231,6 +228,8 @@ void destroy_framebuffers(App* app)
 
 void destroy_graphics_pipeline(App* app)
 {
+    vkDestroyPipelineLayout(app->context.device, app->renderer.pipelineLayout,
+                            app->allocator);
     vkDestroyPipeline(app->context.device, app->renderer.graphicsPipeline,
                       app->allocator);
 }

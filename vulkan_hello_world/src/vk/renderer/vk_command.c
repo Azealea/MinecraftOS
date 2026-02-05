@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-#include "vk/vertex/vertex.h"
+#include "vk/buffer/vertex.h"
 
 void create_command_pool(App* app)
 {
@@ -87,7 +87,11 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
 
     vkCmdBindIndexBuffer(cmd, app->indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-    vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            app->renderer.pipelineLayout, 0, 1,
+                            &app->descriptorSets[frameIndex], 0, nullptr);
+
+    vkCmdDrawIndexed(cmd, index_count(), 1, 0, 0, 0);
 
     vkCmdEndRenderPass(cmd);
 
