@@ -13,33 +13,33 @@ void create_sync_objects(App* app)
 
     for (uint32_t i = 0; i < app->maxFramesInFlight; i++)
     {
-        ASSERT(vkCreateFence(app->context.device,
-                             &(VkFenceCreateInfo){
-                                 .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-                                 .flags = VK_FENCE_CREATE_SIGNALED_BIT },
-                             app->allocator, &app->renderer.inFlightFences[i])
-                   == VK_SUCCESS,
-               "Couldn't create in-flight fence");
-        ASSERT(vkCreateSemaphore(
-                   app->context.device,
-                   &(VkSemaphoreCreateInfo){
-                       .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-                   },
-                   app->allocator, &app->renderer.imageAvailableSemaphores[i])
-                   == VK_SUCCESS,
-               "Couldn't create image acquired semaphore");
+        ASSERTVK(vkCreateFence(app->context.device,
+                               &(VkFenceCreateInfo){
+                                   .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+                                   .flags = VK_FENCE_CREATE_SIGNALED_BIT },
+                               app->allocator,
+                               &app->renderer.inFlightFences[i]),
+                 "Couldn't create in-flight fence");
+        ASSERTVK(vkCreateSemaphore(
+                     app->context.device,
+                     &(VkSemaphoreCreateInfo){
+                         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+                     },
+                     app->allocator,
+                     &app->renderer.imageAvailableSemaphores[i]),
+                 "Couldn't create image acquired semaphore");
     }
 
     for (uint32_t i = 0; i < app->swapchain.imageCount; i++)
     {
-        ASSERT(vkCreateSemaphore(
-                   app->context.device,
-                   &(VkSemaphoreCreateInfo){
-                       .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-                   },
-                   app->allocator, &app->renderer.renderFinishedSemaphores[i])
-                   == VK_SUCCESS,
-               "Couldn't create render finished semaphore");
+        ASSERTVK(vkCreateSemaphore(
+                     app->context.device,
+                     &(VkSemaphoreCreateInfo){
+                         .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+                     },
+                     app->allocator,
+                     &app->renderer.renderFinishedSemaphores[i]),
+                 "Couldn't create render finished semaphore");
     }
 }
 void destroy_sync_objects(App* app)

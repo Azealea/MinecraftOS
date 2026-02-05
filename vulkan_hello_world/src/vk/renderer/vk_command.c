@@ -6,16 +6,15 @@
 
 void create_command_pool(App* app)
 {
-    ASSERT(vkCreateCommandPool(
-               app->context.device,
-               &(VkCommandPoolCreateInfo){
-                   .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-                   .queueFamilyIndex = app->context.queueFamily,
-                   .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-               },
-               app->allocator, &app->renderer.commandPool)
-               == VK_SUCCESS,
-           "Couldn't create command pool")
+    ASSERTVK(vkCreateCommandPool(
+                 app->context.device,
+                 &(VkCommandPoolCreateInfo){
+                     .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+                     .queueFamilyIndex = app->context.queueFamily,
+                     .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+                 },
+                 app->allocator, &app->renderer.commandPool),
+             "Couldn't create command pool")
 }
 
 void destroy_command_pool(App* app)
@@ -28,17 +27,16 @@ void allocate_command_buffer(App* app)
 {
     app->renderer.commandBuffers =
         malloc(sizeof(VkCommandBuffer) * app->maxFramesInFlight);
-    ASSERT(vkAllocateCommandBuffers(
-               app->context.device,
-               &(VkCommandBufferAllocateInfo){
-                   .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-                   .commandPool = app->renderer.commandPool,
-                   .commandBufferCount = app->maxFramesInFlight,
-                   .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-               },
-               app->renderer.commandBuffers)
-               == VK_SUCCESS,
-           "Couldn't allocate command buffer");
+    ASSERTVK(vkAllocateCommandBuffers(
+                 app->context.device,
+                 &(VkCommandBufferAllocateInfo){
+                     .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+                     .commandPool = app->renderer.commandPool,
+                     .commandBufferCount = app->maxFramesInFlight,
+                     .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+                 },
+                 app->renderer.commandBuffers),
+             "Couldn't allocate command buffer");
 }
 
 void destroy_command_buffer(App* app)
@@ -50,8 +48,7 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
 {
     VkCommandBuffer cmd = app->renderer.commandBuffers[frameIndex];
 
-    ASSERT(vkResetCommandBuffer(cmd, 0) == VK_SUCCESS,
-           "Failed to reset command buffer");
+    ASSERTVK(vkResetCommandBuffer(cmd, 0), "Failed to reset command buffer");
 
     VkCommandBufferBeginInfo beginInfo = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
@@ -60,8 +57,8 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
         .pInheritanceInfo = NULL,
     };
 
-    ASSERT(vkBeginCommandBuffer(cmd, &beginInfo) == VK_SUCCESS,
-           "Failed to begin recording command buffer");
+    ASSERTVK(vkBeginCommandBuffer(cmd, &beginInfo),
+             "Failed to begin recording command buffer");
 
     VkRenderPassBeginInfo renderPassInfo = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
@@ -95,8 +92,8 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
 
     vkCmdEndRenderPass(cmd);
 
-    ASSERT(vkEndCommandBuffer(cmd) == VK_SUCCESS,
-           "Failed to record command buffer for image %u", imageIndex);
+    ASSERTVK(vkEndCommandBuffer(cmd),
+             "Failed to record command buffer for image %u", imageIndex);
 }
 
 void submit_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
@@ -120,8 +117,7 @@ void submit_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
                 app->renderer.renderFinishedSemaphores[imageIndex] },
     };
 
-    ASSERT(vkQueueSubmit(app->context.queue, 1, &submitInfo,
-                         app->renderer.inFlightFences[frameIndex])
-               == VK_SUCCESS,
-           "Failed to submit draw command buffer for frame %u", frameIndex);
+    ASSERTVK(vkQueueSubmit(app->context.queue, 1, &submitInfo,
+                           app->renderer.inFlightFences[frameIndex]),
+             "Failed to submit draw command buffer for frame %u", frameIndex);
 }

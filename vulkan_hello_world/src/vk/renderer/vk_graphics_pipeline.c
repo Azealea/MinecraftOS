@@ -31,7 +31,7 @@ void create_renderpass(App* app)
         .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
     } };
 
-    ASSERT(
+    ASSERTVK(
         vkCreateRenderPass(
             app->context.device,
             &(VkRenderPassCreateInfo){
@@ -54,8 +54,7 @@ void create_renderpass(App* app)
                         .dstStageMask =
                             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                     } },
-            app->allocator, &app->renderer.renderpass)
-            == VK_SUCCESS,
+            app->allocator, &app->renderer.renderpass),
         "Couldn't create renderpass")
 }
 
@@ -86,16 +85,15 @@ void create_graphics_pipeline(App* app)
             | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
     } };
 
-    ASSERT(vkCreatePipelineLayout(
-               app->context.device,
-               &(VkPipelineLayoutCreateInfo){
-                   .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-                   .setLayoutCount = 1,
-                   .pSetLayouts = &app->renderer.descriptorSetLayout,
-               },
-               app->allocator, &app->renderer.pipelineLayout)
-               == VK_SUCCESS,
-           "Couldn't create pipeline layout");
+    ASSERTVK(vkCreatePipelineLayout(
+                 app->context.device,
+                 &(VkPipelineLayoutCreateInfo){
+                     .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+                     .setLayoutCount = 1,
+                     .pSetLayouts = &app->renderer.descriptorSetLayout,
+                 },
+                 app->allocator, &app->renderer.pipelineLayout),
+             "Couldn't create pipeline layout");
 
     VkResult res = vkCreateGraphicsPipelines(
         app->context.device, NULL, 1,
@@ -172,7 +170,7 @@ void create_graphics_pipeline(App* app)
             .renderPass = app->renderer.renderpass,
         },
         app->allocator, &app->renderer.graphicsPipeline);
-    ASSERT(res == VK_SUCCESS, "Couldn't create graphics pipeline");
+    ASSERTVK(res, "Couldn't create graphics pipeline");
 
     for (uint32_t i = 0; i < sizeof(shaderStages) / sizeof(shaderStages[0]);
          i++)
@@ -193,22 +191,21 @@ void create_framebuffers(App* app)
     for (uint32_t framebufferIndex = 0; framebufferIndex < framebufferCount;
          ++framebufferIndex)
     {
-        ASSERT(vkCreateFramebuffer(
-                   app->context.device,
-                   &(VkFramebufferCreateInfo){
-                       .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-                       .layers = 1,
-                       .renderPass = app->renderer.renderpass,
-                       .width = app->swapchain.imageExtent.width,
-                       .height = app->swapchain.imageExtent.height,
-                       .attachmentCount = 1,
-                       .pAttachments =
-                           &app->swapchain.imageViews[framebufferIndex],
-                   },
-                   app->allocator,
-                   &app->renderer.framebuffers[framebufferIndex])
-                   == VK_SUCCESS,
-               "Couldn't create framebuffer %i", framebufferIndex);
+        ASSERTVK(vkCreateFramebuffer(
+                     app->context.device,
+                     &(VkFramebufferCreateInfo){
+                         .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+                         .layers = 1,
+                         .renderPass = app->renderer.renderpass,
+                         .width = app->swapchain.imageExtent.width,
+                         .height = app->swapchain.imageExtent.height,
+                         .attachmentCount = 1,
+                         .pAttachments =
+                             &app->swapchain.imageViews[framebufferIndex],
+                     },
+                     app->allocator,
+                     &app->renderer.framebuffers[framebufferIndex]),
+                 "Couldn't create framebuffer %i", framebufferIndex);
     }
 }
 void destroy_framebuffers(App* app)

@@ -8,30 +8,28 @@ static void create_instance(App* app)
     const char** requiredExtensions =
         glfwGetRequiredInstanceExtensions(&requiredExtensionsCount);
 
-    ASSERT(vkCreateInstance(
-               &(VkInstanceCreateInfo){
-                   .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-                   .pApplicationInfo =
-                       &(VkApplicationInfo){
-                           .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-                           .apiVersion = app->vkApiVersion,
-                           .pApplicationName = app->applicationName,
-                           .pEngineName = app->engineName,
-                       },
-                   .enabledExtensionCount = requiredExtensionsCount,
-                   .ppEnabledExtensionNames = requiredExtensions,
-               },
-               app->allocator, &app->context.instance)
-               == VK_SUCCESS,
-           "Couldn't create instance")
+    ASSERTVK(vkCreateInstance(
+                 &(VkInstanceCreateInfo){
+                     .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+                     .pApplicationInfo =
+                         &(VkApplicationInfo){
+                             .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+                             .apiVersion = app->vkApiVersion,
+                             .pApplicationName = app->applicationName,
+                             .pEngineName = app->engineName,
+                         },
+                     .enabledExtensionCount = requiredExtensionsCount,
+                     .ppEnabledExtensionNames = requiredExtensions,
+                 },
+                 app->allocator, &app->context.instance),
+             "Couldn't create instance")
 }
 
 static void create_surface(App* app)
 {
-    ASSERT(glfwCreateWindowSurface(app->context.instance, app->window,
-                                   app->allocator, &app->context.surface)
-               == VK_SUCCESS,
-           "Couldn't create window surface");
+    ASSERTVK(glfwCreateWindowSurface(app->context.instance, app->window,
+                                     app->allocator, &app->context.surface),
+             "Couldn't create window surface");
 }
 
 void create_vk_context(App* app)
