@@ -95,6 +95,10 @@ void create_graphics_pipeline(App* app)
                  app->allocator, &app->renderer.pipelineLayout),
              "Couldn't create pipeline layout");
 
+    auto binding_descr = get_binding_description();
+    int attribute_descr_size;
+    auto attribute_descr = get_attribute_descriptions(&attribute_descr_size);
+
     VkResult res = vkCreateGraphicsPipelines(
         app->context.device, NULL, 1,
         &(VkGraphicsPipelineCreateInfo){
@@ -106,35 +110,9 @@ void create_graphics_pipeline(App* app)
                     .sType =
                         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
                     .vertexBindingDescriptionCount = 1,
-                    .pVertexBindingDescriptions =
-                        (VkVertexInputBindingDescription[]){ {
-                            .binding = 0,
-                            .stride = sizeof(Vertex),
-                            .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
-                        } },
-                    .vertexAttributeDescriptionCount = 3,
-                    .pVertexAttributeDescriptions =
-                        (VkVertexInputAttributeDescription[]){
-                            {
-                                .binding = 0,
-                                .location = 0,
-                                .format = VK_FORMAT_R32G32_SFLOAT,
-                                .offset = offsetof(Vertex, pos),
-                            },
-                            {
-                                .binding = 0,
-                                .location = 1,
-                                .format = VK_FORMAT_R32G32B32_SFLOAT,
-                                .offset = offsetof(Vertex, color),
-                            },
-                            {
-                                .binding = 0,
-                                .location = 2,
-                                .format = VK_FORMAT_R32G32_SFLOAT,
-                                .offset = offsetof(Vertex, texCoord),
-                            },
-                        },
-                },
+                    .pVertexBindingDescriptions = &binding_descr,
+                    .vertexAttributeDescriptionCount = attribute_descr_size,
+                    .pVertexAttributeDescriptions = attribute_descr },
             .pInputAssemblyState =
                 &(VkPipelineInputAssemblyStateCreateInfo){
                     .sType =

@@ -24,6 +24,45 @@ uint32_t index_count(void)
     return sizeof(indices) / sizeof(indices[0]);
 }
 
+VkVertexInputBindingDescription get_binding_description()
+{
+    VkVertexInputBindingDescription bindingDescription = {
+        .binding = 0,
+        .stride = sizeof(Vertex),
+        .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
+    };
+
+    return bindingDescription;
+}
+
+VkVertexInputAttributeDescription* get_attribute_descriptions(int* out_size)
+{
+    static VkVertexInputAttributeDescription attributeDescriptions[] = 
+	{
+		[0] = {
+    .binding = 0,
+    .location = 0,
+    .format = VK_FORMAT_R32G32_SFLOAT,
+    .offset = offsetof(Vertex, pos),
+	},
+		[1] = {
+    .binding = 0,
+    .location = 1,
+    .format = VK_FORMAT_R32G32B32_SFLOAT,
+    .offset = offsetof(Vertex, color),
+	},
+		[2] = {
+    .binding = 0,
+    .location = 2,
+    .format = VK_FORMAT_R32G32_SFLOAT,
+    .offset = offsetof(Vertex, texCoord),
+	},
+	};
+
+    *out_size = sizeof(attributeDescriptions) / sizeof(*attributeDescriptions);
+    return attributeDescriptions;
+}
+
 void create_vertex_buffer(App* app)
 {
     VkDeviceSize bufferSize = sizeof(vertices);
