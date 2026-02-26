@@ -1,7 +1,6 @@
 #include "vertex.h"
 
 #include <string.h>
-#include <vulkan/vulkan_core.h>
 
 #include "vk/buffer/buffer.h"
 
@@ -24,12 +23,12 @@ const uint16_t indices[] = {
 
 uint32_t vertex_count(void)
 {
-    return sizeof(vertices) / sizeof(vertices[0]);
+    return COUNTOF(vertices);
 }
 
 uint32_t index_count(void)
 {
-    return sizeof(indices) / sizeof(indices[0]);
+    return COUNTOF(indices);
 }
 
 VkVertexInputBindingDescription get_binding_description()
@@ -67,7 +66,7 @@ VkVertexInputAttributeDescription* get_attribute_descriptions(int* out_size)
 	},
 	};
 
-    *out_size = sizeof(attributeDescriptions) / sizeof(*attributeDescriptions);
+    *out_size = COUNTOF(attributeDescriptions);
     return attributeDescriptions;
 }
 

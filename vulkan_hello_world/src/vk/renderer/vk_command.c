@@ -112,7 +112,7 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
             .offset = { 0, 0 },
             .extent = app->swapchain.imageExtent,
         },
-        .clearValueCount = sizeof(clearValues)/sizeof(*clearValues),
+        .clearValueCount = COUNTOF(clearValues),
         .pClearValues = clearValues,
     };
 

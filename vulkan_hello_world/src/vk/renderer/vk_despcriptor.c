@@ -26,7 +26,7 @@ void create_descriptor_set_layout(App* app)
                                                  samplerLayoutBinding };
     VkDescriptorSetLayoutCreateInfo layoutInfo = {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .bindingCount = sizeof(bindings) / sizeof(*bindings),
+        .bindingCount = COUNTOF(bindings),
         .pBindings = bindings,
     };
 
@@ -58,7 +58,7 @@ void create_descriptor_pool(App* app)
 
     VkDescriptorPoolCreateInfo poolInfo = {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .poolSizeCount = sizeof(poolSize) / sizeof(*poolSize),
+        .poolSizeCount = COUNTOF(poolSize),
         .pPoolSizes = poolSize,
         .maxSets = app->maxFramesInFlight,
     };
@@ -121,9 +121,7 @@ void create_descriptor_sets(App* app)
             .pImageInfo = &imageInfo,
 			},
         };
-        vkUpdateDescriptorSets(app->context.device,
-                               sizeof(descriptorWrite)
-                                   / sizeof(*descriptorWrite),
+        vkUpdateDescriptorSets(app->context.device, COUNTOF(descriptorWrite),
                                descriptorWrite, 0, nullptr);
     }
 

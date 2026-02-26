@@ -63,7 +63,7 @@ void create_renderpass(App* app)
                                               depthAttachment };
     VkRenderPassCreateInfo renderPassInfo = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-        .attachmentCount = sizeof(attachments) / sizeof(*attachments),
+        .attachmentCount = COUNTOF(attachments),
         .pAttachments = attachments,
         .subpassCount = 1,
         .pSubpasses = &subpass,
@@ -122,7 +122,7 @@ void create_graphics_pipeline(App* app)
         &(VkGraphicsPipelineCreateInfo){
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
             .pStages = (const VkPipelineShaderStageCreateInfo*)&shaderStages,
-            .stageCount = sizeof(shaderStages) / sizeof(*shaderStages),
+            .stageCount = COUNTOF(shaderStages),
             .pVertexInputState =
                 &(VkPipelineVertexInputStateCreateInfo){
                     .sType =
@@ -141,9 +141,9 @@ void create_graphics_pipeline(App* app)
                 &(VkPipelineViewportStateCreateInfo){
                     .sType =
                         VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
-                    .viewportCount = sizeof(viewports) / sizeof(*viewports),
+                    .viewportCount = COUNTOF(viewports),
                     .pViewports = viewports,
-                    .scissorCount = sizeof(scissors) / sizeof(*scissors),
+                    .scissorCount = COUNTOF(scissors),
                     .pScissors = scissors,
                 },
             .pRasterizationState =
@@ -179,8 +179,7 @@ void create_graphics_pipeline(App* app)
                 &(VkPipelineColorBlendStateCreateInfo){
                     .sType =
                         VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-                    .attachmentCount = sizeof(colorBlendAttachmentStates)
-                        / sizeof(*colorBlendAttachmentStates),
+                    .attachmentCount = COUNTOF(colorBlendAttachmentStates),
                     .pAttachments = colorBlendAttachmentStates,
                 },
             .layout = app->renderer.pipelineLayout,
@@ -189,8 +188,7 @@ void create_graphics_pipeline(App* app)
         app->allocator, &app->renderer.graphicsPipeline);
     ASSERTVK(res, "Couldn't create graphics pipeline");
 
-    for (uint32_t i = 0; i < sizeof(shaderStages) / sizeof(shaderStages[0]);
-         i++)
+    for (uint32_t i = 0; i < COUNTOF(shaderStages); i++)
     {
         vkDestroyShaderModule(app->context.device, shaderStages[i].module,
                               app->allocator);
@@ -213,7 +211,7 @@ void create_framebuffers(App* app)
         VkFramebufferCreateInfo framebufferInfo = {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
             .renderPass = app->renderer.renderpass,
-            .attachmentCount = sizeof(attachments) / sizeof(*attachments),
+            .attachmentCount = COUNTOF(attachments),
             .pAttachments = attachments,
             .width = app->swapchain.imageExtent.width,
             .height = app->swapchain.imageExtent.height,
