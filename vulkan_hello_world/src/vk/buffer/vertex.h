@@ -6,6 +6,8 @@ typedef struct Vertex
 {
     float pos[2];
     float color[3];
+
+    float texCoord[2];
 } Vertex;
 
 extern const Vertex vertices[];

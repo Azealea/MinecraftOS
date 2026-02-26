@@ -4,6 +4,45 @@
 
 #include "vk/buffer/vertex.h"
 
+VkCommandBuffer begin_single_time_commands(App* app)
+{
+    VkCommandBufferAllocateInfo allocInfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandPool = app->renderer.commandPool,
+        .commandBufferCount = 1,
+    };
+
+    VkCommandBuffer commandBuffer;
+    vkAllocateCommandBuffers(app->context.device, &allocInfo, &commandBuffer);
+
+    VkCommandBufferBeginInfo beginInfo = {
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+    };
+
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    return commandBuffer;
+}
+
+void end_single_time_commands(App* app, VkCommandBuffer commandBuffer)
+{
+    vkEndCommandBuffer(commandBuffer);
+
+    VkSubmitInfo submitInfo = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &commandBuffer,
+    };
+
+    vkQueueSubmit(app->context.queue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(app->context.queue);
+
+    vkFreeCommandBuffers(app->context.device, app->renderer.commandPool, 1,
+                         &commandBuffer);
+}
+
 void create_command_pool(App* app)
 {
     ASSERTVK(vkCreateCommandPool(

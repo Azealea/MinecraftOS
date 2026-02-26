@@ -111,6 +111,29 @@ static void get_swapchain_images(App* app)
              "Couldn't get swapchain images");
 }
 
+VkImageView create_image_view(App* app, VkImage image, VkFormat format,
+                              VkImageAspectFlags aspectFlags)
+{
+    VkImageViewCreateInfo viewInfo = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .image = image,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = format,
+        .subresourceRange.aspectMask = aspectFlags,
+        .subresourceRange.baseMipLevel = 0,
+        .subresourceRange.levelCount = 1,
+        .subresourceRange.baseArrayLayer = 0,
+        .subresourceRange.layerCount = 1,
+    };
+
+    VkImageView imageView;
+    ASSERTVK(vkCreateImageView(app->context.device, &viewInfo, app->allocator,
+                               &imageView),
+             "failed to create image view!")
+
+    return imageView;
+}
+
 static void create_swapchain_image_views(App* app)
 {
     app->swapchain.imageViews =
@@ -120,23 +143,9 @@ static void create_swapchain_image_views(App* app)
 
     for (uint32_t i = 0; i < app->swapchain.imageCount; ++i)
     {
-        ASSERTVK(vkCreateImageView(
-                     app->context.device,
-                     &(VkImageViewCreateInfo){
-                         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-                         .format = app->swapchain.format,
-                         .image = app->swapchain.images[i],
-                         .components = (VkComponentMapping){},
-                         .subresourceRange =
-                             (VkImageSubresourceRange){
-                                 .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                                 .layerCount = 1,
-                                 .levelCount = 1,
-                             },
-                         .viewType = VK_IMAGE_VIEW_TYPE_2D,
-                     },
-                     app->allocator, &app->swapchain.imageViews[i]),
-                 "Couldn't create image view %i", i);
+        app->swapchain.imageViews[i] =
+            create_image_view(app, app->swapchain.images[i],
+                              app->swapchain.format, VK_IMAGE_ASPECT_COLOR_BIT);
     }
 }
 

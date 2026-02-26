@@ -70,12 +70,17 @@ typedef struct
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
 
-    // // arrays of size maxFramesInFlight
+    // arrays of size maxFramesInFlight
     VkBuffer* uniformBuffers;
     VkDeviceMemory* uniformBuffersMemory;
     void** uniformBuffersMapped;
 
     VkDescriptorPool descriptorPool;
     VkDescriptorSet* descriptorSets;
+
+    VkImage textureImage;
+    VkDeviceMemory textureImageMemory;
+    VkImageView textureImageView;
+    VkSampler textureSampler;
 
 } App;

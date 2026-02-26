@@ -112,7 +112,7 @@ void create_graphics_pipeline(App* app)
                             .stride = sizeof(Vertex),
                             .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
                         } },
-                    .vertexAttributeDescriptionCount = 2,
+                    .vertexAttributeDescriptionCount = 3,
                     .pVertexAttributeDescriptions =
                         (VkVertexInputAttributeDescription[]){
                             {
@@ -126,7 +126,14 @@ void create_graphics_pipeline(App* app)
                                 .location = 1,
                                 .format = VK_FORMAT_R32G32B32_SFLOAT,
                                 .offset = offsetof(Vertex, color),
-                            } },
+                            },
+                            {
+                                .binding = 0,
+                                .location = 2,
+                                .format = VK_FORMAT_R32G32_SFLOAT,
+                                .offset = offsetof(Vertex, texCoord),
+                            },
+                        },
                 },
             .pInputAssemblyState =
                 &(VkPipelineInputAssemblyStateCreateInfo){
@@ -147,10 +154,14 @@ void create_graphics_pipeline(App* app)
                 &(VkPipelineRasterizationStateCreateInfo){
                     .sType =
                         VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
-                    .lineWidth = 1.0,
-                    .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
-                    .cullMode = VK_CULL_MODE_BACK_BIT,
+                    .depthClampEnable = VK_FALSE,
+                    .rasterizerDiscardEnable = VK_FALSE,
                     .polygonMode = VK_POLYGON_MODE_FILL,
+                    .lineWidth = 1.0f,
+                    .cullMode = VK_CULL_MODE_BACK_BIT,
+                    .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
+                    .depthBiasEnable = VK_FALSE,
+
                 },
             .pMultisampleState =
                 &(VkPipelineMultisampleStateCreateInfo){

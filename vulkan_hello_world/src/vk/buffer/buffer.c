@@ -1,5 +1,6 @@
 #include "buffer.h"
 
+#include "vk/renderer/vk_command.h"
 #include "vk/vk_device.h"
 
 void create_buffer(App* app, VkDeviceSize size, VkBufferUsageFlags usage,
@@ -38,35 +39,13 @@ void create_buffer(App* app, VkDeviceSize size, VkBufferUsageFlags usage,
 void copyBuffer(App* app, VkBuffer srcBuffer, VkBuffer dstBuffer,
                 VkDeviceSize size)
 {
-    VkCommandBufferAllocateInfo allocInfo = {
-        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-        .commandPool = app->renderer.commandPool,
-        .commandBufferCount = 1,
+    VkCommandBuffer commandBuffer = begin_single_time_commands(app);
+
+    VkBufferCopy copyRegion = {
+        .size = size,
     };
 
-    VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(app->context.device, &allocInfo, &commandBuffer);
-
-    VkCommandBufferBeginInfo beginInfo = {
-        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
-    };
-
-    vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
-    VkBufferCopy copyRegion = { .size = size };
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
-    vkEndCommandBuffer(commandBuffer);
-    VkSubmitInfo submitInfo = {
-        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        .commandBufferCount = 1,
-        .pCommandBuffers = &commandBuffer,
-    };
-
-    vkQueueSubmit(app->context.queue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(app->context.queue);
-    vkFreeCommandBuffers(app->context.device, app->renderer.commandPool, 1,
-                         &commandBuffer);
+    end_single_time_commands(app, commandBuffer);
 }

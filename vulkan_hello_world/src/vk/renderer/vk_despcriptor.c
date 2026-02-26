@@ -13,10 +13,21 @@ void create_descriptor_set_layout(App* app)
         .descriptorCount = 1,
         .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
     };
+
+    VkDescriptorSetLayoutBinding samplerLayoutBinding = {
+        .binding = 1,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        .pImmutableSamplers = nullptr,
+        .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+    };
+
+    VkDescriptorSetLayoutBinding bindings[2] = { uboLayoutBinding,
+                                                 samplerLayoutBinding };
     VkDescriptorSetLayoutCreateInfo layoutInfo = {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        .bindingCount = 1,
-        .pBindings = &uboLayoutBinding,
+        .bindingCount = sizeof(bindings) / sizeof(*bindings),
+        .pBindings = bindings,
     };
 
     ASSERTVK(vkCreateDescriptorSetLayout(app->context.device, &layoutInfo,
@@ -33,15 +44,22 @@ void destroy_descriptor_set_layout(App* app)
 
 void create_descriptor_pool(App* app)
 {
-    VkDescriptorPoolSize poolSize = {
+    VkDescriptorPoolSize poolSize[2] = {
+		[0] = {
         .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
         .descriptorCount = app->maxFramesInFlight,
+		},
+
+		[1] = {
+        .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        .descriptorCount = app->maxFramesInFlight,
+		},
     };
 
     VkDescriptorPoolCreateInfo poolInfo = {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .poolSizeCount = 1,
-        .pPoolSizes = &poolSize,
+        .poolSizeCount = sizeof(poolSize) / sizeof(*poolSize),
+        .pPoolSizes = poolSize,
         .maxSets = app->maxFramesInFlight,
     };
     ASSERTVK(vkCreateDescriptorPool(app->context.device, &poolInfo, nullptr,
@@ -77,8 +95,14 @@ void create_descriptor_sets(App* app)
             .offset = 0,
             .range = sizeof(struct UniformBufferObject),
         };
+        VkDescriptorImageInfo imageInfo = {
+            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .imageView = app->textureImageView,
+            .sampler = app->textureSampler,
+        };
 
-        VkWriteDescriptorSet descriptorWrite = {
+        VkWriteDescriptorSet descriptorWrite[2] = {
+			[0] = {
             .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
             .dstSet = app->descriptorSets[i],
             .dstBinding = 0,
@@ -86,9 +110,21 @@ void create_descriptor_sets(App* app)
             .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             .descriptorCount = 1,
             .pBufferInfo = &bufferInfo,
+			},
+			[1] = {
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstSet = app->descriptorSets[i],
+            .dstBinding = 1,
+            .dstArrayElement = 0,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1,
+            .pImageInfo = &imageInfo,
+			},
         };
-        vkUpdateDescriptorSets(app->context.device, 1, &descriptorWrite, 0,
-                               nullptr);
+        vkUpdateDescriptorSets(app->context.device,
+                               sizeof(descriptorWrite)
+                                   / sizeof(*descriptorWrite),
+                               descriptorWrite, 0, nullptr);
     }
 
     // TODO maybe we dont deallocate now ?

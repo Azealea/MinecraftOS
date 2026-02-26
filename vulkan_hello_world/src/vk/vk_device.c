@@ -12,6 +12,12 @@ void select_physical_device(App* app)
         app->context.instance, &(uint32_t){ 1 }, &app->context.physicalDevice);
     ASSERT(res == VK_SUCCESS || res == VK_INCOMPLETE,
            "Couldn't enumerate physical devices count");
+
+    VkPhysicalDeviceFeatures supportedFeatures;
+    vkGetPhysicalDeviceFeatures(app->context.physicalDevice,
+                                &supportedFeatures);
+
+    ASSERT(supportedFeatures.samplerAnisotropy, "no anisotropy support!");
 }
 
 void select_queue_family(App* app)
@@ -66,6 +72,10 @@ void create_device(App* app)
                 .enabledExtensionCount = 1,
                 .ppEnabledExtensionNames =
                     &(const char*){ VK_KHR_SWAPCHAIN_EXTENSION_NAME },
+                .pEnabledFeatures =
+                    &(VkPhysicalDeviceFeatures){
+                        .samplerAnisotropy = VK_TRUE,
+                    },
             },
             app->allocator, &app->context.device),
         "Couldn't create device and queues");
