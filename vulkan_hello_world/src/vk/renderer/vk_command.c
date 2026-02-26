@@ -99,6 +99,10 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
     ASSERTVK(vkBeginCommandBuffer(cmd, &beginInfo),
              "Failed to begin recording command buffer");
 
+    VkClearValue clearValues[2];
+    clearValues[0] = app->backgroundColor;
+    clearValues[1].depthStencil = (VkClearDepthStencilValue){ 1.0f, 0 };
+
     VkRenderPassBeginInfo renderPassInfo = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .pNext = NULL,
@@ -108,8 +112,8 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
             .offset = { 0, 0 },
             .extent = app->swapchain.imageExtent,
         },
-        .clearValueCount = 1,
-        .pClearValues = (VkClearValue[]) { app->backgroundColor},
+        .clearValueCount = sizeof(clearValues)/sizeof(*clearValues),
+        .pClearValues = clearValues,
     };
 
     vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);

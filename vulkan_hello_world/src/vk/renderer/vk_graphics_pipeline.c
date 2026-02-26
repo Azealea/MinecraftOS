@@ -4,58 +4,76 @@
 
 #include "vk/buffer/vertex.h"
 #include "vk/renderer/vk_shaders.h"
+#include "vk/vk_depth.h"
 
 void create_renderpass(App* app)
 {
-    VkFormat image_format = app->swapchain.format;
-
-    VkAttachmentReference color_attachment_references[] = { {
-        .attachment = 0,
-        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-    } };
-
-    VkSubpassDescription subpass_descriptions[] = { {
-        .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-        .colorAttachmentCount = 1,
-        .pColorAttachments = color_attachment_references,
-    } };
-
-    VkAttachmentDescription attachment_descriptions[] = { {
-        .format = image_format,
+    VkAttachmentDescription colorAttachment = {
+        .format = app->swapchain.format,
         .samples = VK_SAMPLE_COUNT_1_BIT,
-        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
         .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
         .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
         .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
         .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-    } };
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+    };
 
-    ASSERTVK(
-        vkCreateRenderPass(
-            app->context.device,
-            &(VkRenderPassCreateInfo){
-                .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-                .subpassCount = sizeof(subpass_descriptions)
-                    / sizeof(*subpass_descriptions),
-                .pSubpasses =
-                    (const VkSubpassDescription*)&subpass_descriptions,
-                .attachmentCount = sizeof(attachment_descriptions)
-                    / sizeof(*attachment_descriptions),
-                .pAttachments = attachment_descriptions,
-                .pDependencies =
-                    &(VkSubpassDependency){
-                        .srcSubpass = VK_SUBPASS_EXTERNAL,
-                        .dstSubpass = 0,
-                        .srcAccessMask = 0,
-                        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                        .srcStageMask =
-                            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                        .dstStageMask =
-                            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                    } },
-            app->allocator, &app->renderer.renderpass),
-        "Couldn't create renderpass")
+    VkAttachmentDescription depthAttachment = {
+        .format = findDepthFormat(app),
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+        .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+    };
+
+    VkAttachmentReference colorAttachmentRef = {
+        .attachment = 0,
+        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+    };
+
+    VkAttachmentReference depthAttachmentRef = {
+        .attachment = 1,
+        .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+    };
+
+    VkSubpassDescription subpass = {
+        .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+        .colorAttachmentCount = 1,
+        .pColorAttachments = &colorAttachmentRef,
+        .pDepthStencilAttachment = &depthAttachmentRef,
+    };
+
+    VkSubpassDependency dependency = {
+        .srcSubpass = VK_SUBPASS_EXTERNAL,
+        .dstSubpass = 0,
+        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+            | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+        .srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+            | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+            | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+    };
+
+    VkAttachmentDescription attachments[] = { colorAttachment,
+                                              depthAttachment };
+    VkRenderPassCreateInfo renderPassInfo = {
+        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+        .attachmentCount = sizeof(attachments) / sizeof(*attachments),
+        .pAttachments = attachments,
+        .subpassCount = 1,
+        .pSubpasses = &subpass,
+        .dependencyCount = 1,
+        .pDependencies = &dependency,
+    };
+
+    ASSERTVK(vkCreateRenderPass(app->context.device, &renderPassInfo,
+                                app->allocator, &app->renderer.renderpass),
+             "failed to create render pass!");
 }
 
 void create_graphics_pipeline(App* app)
@@ -147,6 +165,16 @@ void create_graphics_pipeline(App* app)
                         VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
                     .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
                 },
+            .pDepthStencilState =
+                &(VkPipelineDepthStencilStateCreateInfo){
+                    .sType =
+                        VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+                    .depthTestEnable = VK_TRUE,
+                    .depthWriteEnable = VK_TRUE,
+                    .depthCompareOp = VK_COMPARE_OP_LESS,
+                    .depthBoundsTestEnable = VK_FALSE,
+                    .stencilTestEnable = VK_FALSE,
+                },
             .pColorBlendState =
                 &(VkPipelineColorBlendStateCreateInfo){
                     .sType =
@@ -177,26 +205,27 @@ void create_framebuffers(App* app)
     ASSERT(app->renderer.framebuffers != nullptr,
            "Couldn't allocate memory for framebuffers array");
 
-    for (uint32_t framebufferIndex = 0; framebufferIndex < framebufferCount;
-         ++framebufferIndex)
+    for (uint32_t i = 0; i < framebufferCount; ++i)
     {
-        ASSERTVK(vkCreateFramebuffer(
-                     app->context.device,
-                     &(VkFramebufferCreateInfo){
-                         .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-                         .layers = 1,
-                         .renderPass = app->renderer.renderpass,
-                         .width = app->swapchain.imageExtent.width,
-                         .height = app->swapchain.imageExtent.height,
-                         .attachmentCount = 1,
-                         .pAttachments =
-                             &app->swapchain.imageViews[framebufferIndex],
-                     },
-                     app->allocator,
-                     &app->renderer.framebuffers[framebufferIndex]),
-                 "Couldn't create framebuffer %i", framebufferIndex);
+        VkImageView attachments[] = { app->swapchain.imageViews[i],
+                                      app->depthImageView };
+
+        VkFramebufferCreateInfo framebufferInfo = {
+            .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+            .renderPass = app->renderer.renderpass,
+            .attachmentCount = sizeof(attachments) / sizeof(*attachments),
+            .pAttachments = attachments,
+            .width = app->swapchain.imageExtent.width,
+            .height = app->swapchain.imageExtent.height,
+            .layers = 1,
+        };
+        ASSERTVK(vkCreateFramebuffer(app->context.device, &framebufferInfo,
+                                     app->allocator,
+                                     &app->renderer.framebuffers[i]),
+                 "Couldn't create framebuffer %i", i);
     }
 }
+
 void destroy_framebuffers(App* app)
 {
     uint32_t framebuffer_count = app->swapchain.imageCount;
