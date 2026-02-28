@@ -4,9 +4,7 @@
 
 typedef struct Vertex
 {
-    float pos[3];
-    float color[3];
-
+    int32_t pos[3];
     float texCoord[2];
 } Vertex;
 
