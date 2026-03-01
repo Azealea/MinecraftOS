@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "vk/buffer/cam.h"
+#include "vk/camera_ubo.h"
 
 void create_descriptor_set_layout(App* app)
 {

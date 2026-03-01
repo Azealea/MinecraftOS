@@ -1,7 +1,7 @@
 #include "vk/vk.h"
 
-#include "vk/buffer/cam.h"
 #include "vk/buffer/vertex.h"
+#include "vk/camera_ubo.h"
 #include "vk/renderer/vk_command.h"
 #include "vk/renderer/vk_despcriptor.h"
 #include "vk/renderer/vk_graphics_pipeline.h"

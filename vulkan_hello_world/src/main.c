@@ -4,6 +4,7 @@
 #include "app.h"
 #include "glfw.h"
 #include "utils/time.h"
+#include "vk/camera.h"
 #include "vk/vk.h"
 
 static void display_info()
@@ -56,6 +57,7 @@ int main()
         .backgroundColor = { { { 0.01f, 0.1f, 0.1f, 0.01f } } },
         .maxFramesInFlight = 3,
         .start_time = current_time(),
+        .camera = camera_init(),
     };
 
     init(&app);

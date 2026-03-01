@@ -5,6 +5,7 @@
 #include <vulkan/vulkan.h>
 
 #include "utils/utils.h"
+#include "vk/camera.h"
 
 typedef struct
 {
@@ -22,6 +23,8 @@ typedef struct
     // GLFW
     GLFWmonitor* windowMonitor;
     GLFWwindow* window;
+
+    Camera camera;
 
     // Vulkan
     struct context
