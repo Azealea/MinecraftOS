@@ -4,7 +4,6 @@
 #include "vk/buffer/buffer.h"
 #include "vk/renderer/vk_command.h"
 #include "vk/vk_device.h"
-#include "vk/vk_swapchain.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -51,7 +50,7 @@ void create_image(App* app, uint32_t width, uint32_t height, VkFormat format,
     vkBindImageMemory(app->context.device, *image, *imageMemory, 0);
 }
 
-void transition_image_layout(App* app, VkImage image, VkFormat format,
+void transition_image_layout(App* app, VkImage image, uint32_t layerCount,
                              VkImageLayout oldLayout, VkImageLayout newLayout)
 {
     VkCommandBuffer commandBuffer = begin_single_time_commands(app);
@@ -67,7 +66,7 @@ void transition_image_layout(App* app, VkImage image, VkFormat format,
         .subresourceRange.baseMipLevel = 0,
         .subresourceRange.levelCount = 1,
         .subresourceRange.baseArrayLayer = 0,
-        .subresourceRange.layerCount = 1,
+        .subresourceRange.layerCount = layerCount,
     };
 
     VkPipelineStageFlags sourceStage = {};
@@ -93,7 +92,7 @@ void transition_image_layout(App* app, VkImage image, VkFormat format,
     }
     else
     {
-        ASSERT(false, "unsupported layout transition!");
+        ASSERT(false, "Unsupported layout transition!");
     }
 
     vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0,
@@ -101,6 +100,7 @@ void transition_image_layout(App* app, VkImage image, VkFormat format,
 
     end_single_time_commands(app, commandBuffer);
 }
+
 void copyBufferToImage(App* app, VkBuffer buffer, VkImage image, uint32_t width,
                        uint32_t height)
 {
@@ -124,46 +124,140 @@ void copyBufferToImage(App* app, VkBuffer buffer, VkImage image, uint32_t width,
     end_single_time_commands(app, commandBuffer);
 }
 
-void create_texture_image(App* app)
+void create_texture_image(App* app, uint32_t layerCount)
 {
-    int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load("assets/grass.jpg", &texWidth, &texHeight,
-                                &texChannels, STBI_rgb_alpha);
-    ASSERT(pixels, "failed to load texture image!");
+    static const char* textures[] = {
+        "assets/grass.png",
+        "assets/dirt.png",
+        "assets/grass_side.png",
+    };
 
-    VkDeviceSize imageSize = texWidth * texHeight * 4;
+    int texWidth = 0;
+    int texHeight = 0;
+    int texChannels;
+
+    stbi_uc** allPixels = malloc(sizeof(stbi_uc*) * layerCount);
+
+    for (uint32_t i = 0; i < layerCount; i++)
+    {
+        int w, h;
+
+        allPixels[i] =
+            stbi_load(textures[i], &w, &h, &texChannels, STBI_rgb_alpha);
+
+        ASSERT(allPixels[i], "Failed to load texture");
+
+        if (i == 0)
+        {
+            texWidth = w;
+            texHeight = h;
+        }
+        else
+        {
+            ASSERT(w == texWidth && h == texHeight,
+                   "All textures must have same dimensions");
+        }
+    }
+
+    VkDeviceSize layerSize = texWidth * texHeight * 4;
+    VkDeviceSize totalSize = layerSize * layerCount;
+
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    create_buffer(app, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+
+    create_buffer(app, totalSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
                       | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                   &stagingBuffer, &stagingBufferMemory);
 
     void* data;
-    vkMapMemory(app->context.device, stagingBufferMemory, 0, imageSize, 0,
+    vkMapMemory(app->context.device, stagingBufferMemory, 0, totalSize, 0,
                 &data);
-    memcpy(data, pixels, (size_t)imageSize);
+
+    for (uint32_t i = 0; i < layerCount; i++)
+    {
+        memcpy((char*)data + layerSize * i, allPixels[i], layerSize);
+
+        stbi_image_free(allPixels[i]);
+    }
+
     vkUnmapMemory(app->context.device, stagingBufferMemory);
+    free(allPixels);
 
-    stbi_image_free(pixels);
+    VkImageCreateInfo imageInfo = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .extent.width = texWidth,
+        .extent.height = texHeight,
+        .extent.depth = 1,
+        .mipLevels = 1,
+        .arrayLayers = layerCount,
+        .format = VK_FORMAT_R8G8B8A8_SRGB,
+        .tiling = VK_IMAGE_TILING_OPTIMAL,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+    };
 
-    create_image(app, texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB,
-                 VK_IMAGE_TILING_OPTIMAL,
-                 VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &app->textureImage,
-                 &app->textureImageMemory);
+    ASSERTVK(vkCreateImage(app->context.device, &imageInfo, app->allocator,
+                           &app->textureImage),
+             "failed to create image!")
 
-    transition_image_layout(app, app->textureImage, VK_FORMAT_R8G8B8A8_SRGB,
+    VkMemoryRequirements memRequirements;
+    vkGetImageMemoryRequirements(app->context.device, app->textureImage,
+                                 &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo = {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .allocationSize = memRequirements.size,
+        .memoryTypeIndex =
+            find_memory_type(app, memRequirements.memoryTypeBits,
+                             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT),
+    };
+
+    ASSERTVK(vkAllocateMemory(app->context.device, &allocInfo, app->allocator,
+                              &app->textureImageMemory),
+             "failed to allocate image memory!");
+
+    vkBindImageMemory(app->context.device, app->textureImage,
+                      app->textureImageMemory, 0);
+
+    transition_image_layout(app, app->textureImage, layerCount,
                             VK_IMAGE_LAYOUT_UNDEFINED,
                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    copyBufferToImage(app, stagingBuffer, app->textureImage, (uint32_t)texWidth,
-                      (uint32_t)texHeight);
-    transition_image_layout(app, app->textureImage, VK_FORMAT_R8G8B8A8_SRGB,
+
+    VkCommandBuffer commandBuffer = begin_single_time_commands(app);
+
+    VkBufferImageCopy* regions = malloc(sizeof(VkBufferImageCopy) * layerCount);
+
+    for (uint32_t i = 0; i < layerCount; i++)
+    {
+        regions[i] = (VkBufferImageCopy){
+            .bufferOffset = texWidth * texHeight * 4 * i,
+            .bufferRowLength = 0,
+            .bufferImageHeight = 0,
+            .imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+            .imageSubresource.mipLevel = 0,
+            .imageSubresource.baseArrayLayer = i,
+            .imageSubresource.layerCount = 1,
+            .imageOffset = (VkOffset3D){ 0, 0, 0 },
+            .imageExtent = (VkExtent3D){ texWidth, texHeight, 1 },
+        };
+    }
+
+    vkCmdCopyBufferToImage(commandBuffer, stagingBuffer, app->textureImage,
+                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, layerCount,
+                           regions);
+
+    end_single_time_commands(app, commandBuffer);
+    transition_image_layout(app, app->textureImage, layerCount,
                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     vkDestroyBuffer(app->context.device, stagingBuffer, app->allocator);
     vkFreeMemory(app->context.device, stagingBufferMemory, app->allocator);
+    free(regions);
 }
 
 void destroy_texture_image(App* app)
@@ -172,11 +266,23 @@ void destroy_texture_image(App* app)
     vkFreeMemory(app->context.device, app->textureImageMemory, app->allocator);
 }
 
-void create_texture_image_view(App* app)
+void create_texture_image_view(App* app, uint32_t layerCount)
 {
-    app->textureImageView =
-        create_image_view(app, app->textureImage, VK_FORMAT_R8G8B8A8_SRGB,
-                          VK_IMAGE_ASPECT_COLOR_BIT);
+    VkImageViewCreateInfo viewInfo = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .image = app->textureImage,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+        .format = VK_FORMAT_R8G8B8A8_SRGB,
+        .subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .subresourceRange.baseMipLevel = 0,
+        .subresourceRange.levelCount = 1,
+        .subresourceRange.baseArrayLayer = 0,
+        .subresourceRange.layerCount = layerCount,
+    };
+
+    ASSERTVK(vkCreateImageView(app->context.device, &viewInfo, app->allocator,
+                               &app->textureImageView),
+             "failed to create image view!")
 }
 
 void destroy_texture_image_view(App* app)
@@ -214,4 +320,18 @@ void create_texture_sampler(App* app)
 void destroy_texture_sampler(App* app)
 {
     vkDestroySampler(app->context.device, app->textureSampler, app->allocator);
+}
+
+void create_texture_stuff(App* app)
+{
+    int layerCount = 3;
+    create_texture_image(app, layerCount);
+    create_texture_image_view(app, layerCount);
+    create_texture_sampler(app);
+}
+void destroy_texture_stuff(App* app)
+{
+    destroy_texture_sampler(app);
+    destroy_texture_image_view(app);
+    destroy_texture_image(app);
 }

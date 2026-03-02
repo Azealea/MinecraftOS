@@ -21,9 +21,7 @@ void init_vk(App* app)
     create_command_pool(app);
     create_depth_resources(app);
     create_framebuffers(app);
-    create_texture_image(app);
-    create_texture_image_view(app);
-    create_texture_sampler(app);
+    create_texture_stuff(app);
     create_vertex_buffer(app);
     create_index_buffer(app);
     create_uniform_buffers(app);
@@ -43,9 +41,7 @@ void clean_vk(App* app)
     destroy_renderpass(app);
     destroy_uniform_buffers(app);
     destroy_descriptor_pool(app);
-    destroy_texture_sampler(app);
-    destroy_texture_image_view(app);
-    destroy_texture_image(app);
+    destroy_texture_stuff(app);
     destroy_descriptor_set_layout(app);
     destroy_index_buffer(app);
     destroy_vertex_buffer(app);

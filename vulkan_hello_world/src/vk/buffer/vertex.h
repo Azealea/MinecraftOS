@@ -6,6 +6,7 @@ typedef struct Vertex
 {
     int32_t pos[3];
     float texCoord[2];
+    int32_t textureid;
 } Vertex;
 
 extern const Vertex vertices[];
