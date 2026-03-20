@@ -10,7 +10,7 @@
 
 void update_camera(App* app)
 {
-    static vec3 worldup = { 0.0f, 0.0f, 1.0f };
+    static vec3 worldup = {0.0f, 0.0f, 1.0f};
     GLFWwindow* window = app->window;
 
     float movescale = 0.0002f;
@@ -25,7 +25,7 @@ void update_camera(App* app)
 
     tabPressedLastFrame = tabPressed;
 
-    vec3 delta = { 0 };
+    vec3 delta = {0};
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
@@ -89,9 +89,9 @@ void update_camera(App* app)
     if (app->camera.pitch < glm_rad(-89.9f))
         app->camera.pitch = glm_rad(-89.9f);
 
-    vec3 front = { cosf(app->camera.yaw) * cosf(app->camera.pitch),
-                   sinf(app->camera.yaw) * cosf(app->camera.pitch),
-                   sinf(app->camera.pitch) };
+    vec3 front = {cosf(app->camera.yaw) * cosf(app->camera.pitch),
+                  sinf(app->camera.yaw) * cosf(app->camera.pitch),
+                  sinf(app->camera.pitch)};
 
     glm_normalize(front);
     glm_vec3_copy(front, app->camera.basis.front);
@@ -142,10 +142,10 @@ void destroy_uniform_buffers(App* app)
 
 void update_uniform_buffer(App* app, uint32_t currentImage)
 {
-    static vec3 worldup = { 0.0f, 0.0f, 1.0f };
+    static vec3 worldup = {0.0f, 0.0f, 1.0f};
     update_camera(app);
 
-    struct UniformBufferObject ubo = { 0 };
+    struct UniformBufferObject ubo = {0};
 
     glm_mat4_identity(ubo.model);
 
@@ -168,7 +168,7 @@ Camera camera_init(void)
 {
     Camera camera;
 
-    glm_vec3_copy((vec3){ 0.0f, -3.0f, 1.0f }, camera.pos);
+    glm_vec3_copy((vec3){0.0f, -3.0f, 1.0f}, camera.pos);
     camera.yaw = glm_rad(90.0f);
     camera.pitch = 0.0f;
 
@@ -176,13 +176,13 @@ Camera camera_init(void)
     camera.lastX = 0.0;
     camera.lastY = 0.0;
 
-    vec3 front = { cosf(camera.yaw) * cosf(camera.pitch),
-                   sinf(camera.yaw) * cosf(camera.pitch), sinf(camera.pitch) };
+    vec3 front = {cosf(camera.yaw) * cosf(camera.pitch),
+                  sinf(camera.yaw) * cosf(camera.pitch), sinf(camera.pitch)};
     glm_normalize(front);
     glm_vec3_copy(front, camera.basis.front);
 
     // todo give proper worldup at least a variable or something
-    static vec3 worldup = { 0.0f, 0.0f, 1.0f };
+    static vec3 worldup = {0.0f, 0.0f, 1.0f};
     glm_vec3_cross(camera.basis.front, worldup, camera.basis.right);
     glm_normalize(camera.basis.right);
 

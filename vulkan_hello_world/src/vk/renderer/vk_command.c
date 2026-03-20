@@ -101,17 +101,18 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
 
     VkClearValue clearValues[2];
     clearValues[0] = app->backgroundColor;
-    clearValues[1].depthStencil = (VkClearDepthStencilValue){ 1.0f, 0 };
+    clearValues[1].depthStencil = (VkClearDepthStencilValue){1.0f, 0};
 
     VkRenderPassBeginInfo renderPassInfo = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .pNext = NULL,
         .renderPass = app->renderer.renderpass,
         .framebuffer = app->renderer.framebuffers[imageIndex],
-        .renderArea = {
-            .offset = { 0, 0 },
-            .extent = app->swapchain.imageExtent,
-        },
+        .renderArea =
+            {
+                .offset = {0, 0},
+                .extent = app->swapchain.imageExtent,
+            },
         .clearValueCount = COUNTOF(clearValues),
         .pClearValues = clearValues,
     };
@@ -121,8 +122,8 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
                       app->renderer.graphicsPipeline);
 
-    VkBuffer vertexBuffers[] = { app->vertexBuffer };
-    VkDeviceSize offsets[] = { 0 };
+    VkBuffer vertexBuffers[] = {app->vertexBuffer};
+    VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
 
     vkCmdBindIndexBuffer(cmd, app->indexBuffer, 0, VK_INDEX_TYPE_UINT16);
@@ -146,8 +147,7 @@ void submit_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
         .pNext = NULL,
         .waitSemaphoreCount = 1,
         .pWaitSemaphores =
-            (VkSemaphore[]){
-                app->renderer.imageAvailableSemaphores[frameIndex] },
+            (VkSemaphore[]){app->renderer.imageAvailableSemaphores[frameIndex]},
         .pWaitDstStageMask =
             (VkPipelineStageFlags[]){
                 VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -156,8 +156,7 @@ void submit_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
         .pCommandBuffers = &app->renderer.commandBuffers[frameIndex],
         .signalSemaphoreCount = 1,
         .pSignalSemaphores =
-            (VkSemaphore[]){
-                app->renderer.renderFinishedSemaphores[imageIndex] },
+            (VkSemaphore[]){app->renderer.renderFinishedSemaphores[imageIndex]},
     };
 
     ASSERTVK(vkQueueSubmit(app->context.queue, 1, &submitInfo,

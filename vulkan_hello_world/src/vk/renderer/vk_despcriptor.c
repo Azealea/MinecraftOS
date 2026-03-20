@@ -22,8 +22,8 @@ void create_descriptor_set_layout(App* app)
         .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
     };
 
-    VkDescriptorSetLayoutBinding bindings[2] = { uboLayoutBinding,
-                                                 samplerLayoutBinding };
+    VkDescriptorSetLayoutBinding bindings[2] = {uboLayoutBinding,
+                                                samplerLayoutBinding};
     VkDescriptorSetLayoutCreateInfo layoutInfo = {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         .bindingCount = COUNTOF(bindings),
@@ -45,15 +45,17 @@ void destroy_descriptor_set_layout(App* app)
 void create_descriptor_pool(App* app)
 {
     VkDescriptorPoolSize poolSize[2] = {
-		[0] = {
-        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = app->maxFramesInFlight,
-		},
+        [0] =
+            {
+                .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                .descriptorCount = app->maxFramesInFlight,
+            },
 
-		[1] = {
-        .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-        .descriptorCount = app->maxFramesInFlight,
-		},
+        [1] =
+            {
+                .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .descriptorCount = app->maxFramesInFlight,
+            },
     };
 
     VkDescriptorPoolCreateInfo poolInfo = {
@@ -102,24 +104,26 @@ void create_descriptor_sets(App* app)
         };
 
         VkWriteDescriptorSet descriptorWrite[2] = {
-			[0] = {
-            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstSet = app->descriptorSets[i],
-            .dstBinding = 0,
-            .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-            .descriptorCount = 1,
-            .pBufferInfo = &bufferInfo,
-			},
-			[1] = {
-            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstSet = app->descriptorSets[i],
-            .dstBinding = 1,
-            .dstArrayElement = 0,
-            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .descriptorCount = 1,
-            .pImageInfo = &imageInfo,
-			},
+            [0] =
+                {
+                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                    .dstSet = app->descriptorSets[i],
+                    .dstBinding = 0,
+                    .dstArrayElement = 0,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                    .descriptorCount = 1,
+                    .pBufferInfo = &bufferInfo,
+                },
+            [1] =
+                {
+                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+                    .dstSet = app->descriptorSets[i],
+                    .dstBinding = 1,
+                    .dstArrayElement = 0,
+                    .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                    .descriptorCount = 1,
+                    .pImageInfo = &imageInfo,
+                },
         };
         vkUpdateDescriptorSets(app->context.device, COUNTOF(descriptorWrite),
                                descriptorWrite, 0, nullptr);

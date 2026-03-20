@@ -16,7 +16,7 @@ void create_sync_objects(App* app)
         ASSERTVK(vkCreateFence(app->context.device,
                                &(VkFenceCreateInfo){
                                    .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-                                   .flags = VK_FENCE_CREATE_SIGNALED_BIT },
+                                   .flags = VK_FENCE_CREATE_SIGNALED_BIT},
                                app->allocator,
                                &app->renderer.inFlightFences[i]),
                  "Couldn't create in-flight fence");

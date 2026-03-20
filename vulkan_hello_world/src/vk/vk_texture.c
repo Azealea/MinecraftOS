@@ -115,8 +115,8 @@ void copyBufferToImage(App* app, VkBuffer buffer, VkImage image, uint32_t width,
         .imageSubresource.mipLevel = 0,
         .imageSubresource.baseArrayLayer = 0,
         .imageSubresource.layerCount = 1,
-        .imageOffset = { 0, 0, 0 },
-        .imageExtent = { width, height, 1 },
+        .imageOffset = {0, 0, 0},
+        .imageExtent = {width, height, 1},
     };
 
     vkCmdCopyBufferToImage(commandBuffer, buffer, image,
@@ -236,8 +236,8 @@ void create_texture_image(App* app, uint32_t layerCount)
             .imageSubresource.mipLevel = 0,
             .imageSubresource.baseArrayLayer = i,
             .imageSubresource.layerCount = 1,
-            .imageOffset = (VkOffset3D){ 0, 0, 0 },
-            .imageExtent = (VkExtent3D){ texWidth, texHeight, 1 },
+            .imageOffset = (VkOffset3D){0, 0, 0},
+            .imageExtent = (VkExtent3D){texWidth, texHeight, 1},
         };
     }
 

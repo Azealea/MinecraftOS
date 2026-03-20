@@ -34,10 +34,10 @@ VkFormat findSupportedFormat(App* app, const VkFormat* candidates,
 
 VkFormat findDepthFormat(App* app)
 {
-    static const VkFormat candidates[] = { VK_FORMAT_D32_SFLOAT,
+    static const VkFormat candidates[] = {VK_FORMAT_D32_SFLOAT,
 
-                                           VK_FORMAT_D32_SFLOAT_S8_UINT,
-                                           VK_FORMAT_D24_UNORM_S8_UINT };
+                                          VK_FORMAT_D32_SFLOAT_S8_UINT,
+                                          VK_FORMAT_D24_UNORM_S8_UINT};
     return findSupportedFormat(app, candidates, 3, VK_IMAGE_TILING_OPTIMAL,
                                VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }

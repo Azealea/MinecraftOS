@@ -91,7 +91,7 @@ get_extent_from_capabilities(const App* app,
     uint32_t height =
         clamp((uint32_t)mode->height, capabilities->minImageExtent.height,
               capabilities->maxImageExtent.height);
-    return (VkExtent2D){ .width = width, .height = height };
+    return (VkExtent2D){.width = width, .height = height};
 }
 
 static void get_swapchain_images(App* app)
@@ -217,15 +217,14 @@ uint32_t acquire_swapchain_image(App* app, uint32_t frameIndex)
 
 void present_swapchain_image(App* app, uint32_t imageIndex)
 {
-    VkSwapchainKHR swapchains[] = { app->swapchain.swapchain };
+    VkSwapchainKHR swapchains[] = {app->swapchain.swapchain};
 
     VkPresentInfoKHR presentInfo = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
         .pNext = NULL,
         .waitSemaphoreCount = 1,
         .pWaitSemaphores =
-            (VkSemaphore[]){
-                app->renderer.renderFinishedSemaphores[imageIndex] },
+            (VkSemaphore[]){app->renderer.renderFinishedSemaphores[imageIndex]},
         .swapchainCount = 1,
         .pSwapchains = swapchains,
         .pImageIndices = &imageIndex,

@@ -55,7 +55,7 @@ int main()
         .engineName = "AZEA ENGINE",
         .windowTitle = "KubeOs",
         .vkApiVersion = VK_API_VERSION_1_4,
-        .backgroundColor = { { { 0.01f, 0.1f, 0.1f, 0.01f } } },
+        .backgroundColor = {{{0.01f, 0.1f, 0.1f, 0.01f}}},
         .maxFramesInFlight = 3,
         .start_time = current_time(),
         .camera = camera_init(),

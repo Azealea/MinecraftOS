@@ -37,8 +37,7 @@ void create_renderpass(App* app)
 
     VkAttachmentReference depthAttachmentRef = {
         .attachment = 1,
-        .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-    };
+        .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
 
     VkSubpassDescription subpass = {
         .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -59,8 +58,7 @@ void create_renderpass(App* app)
             | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
     };
 
-    VkAttachmentDescription attachments[] = { colorAttachment,
-                                              depthAttachment };
+    VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment};
     VkRenderPassCreateInfo renderPassInfo = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
         .attachmentCount = COUNTOF(attachments),
@@ -88,20 +86,20 @@ void create_graphics_pipeline(App* app)
                            VK_SHADER_STAGE_FRAGMENT_BIT),
     };
 
-    VkViewport viewports[] = { {
+    VkViewport viewports[] = {{
         .width = (float)app->swapchain.imageExtent.width,
         .height = (float)app->swapchain.imageExtent.height,
         .maxDepth = 1.0f,
-    } };
+    }};
 
-    VkRect2D scissors[] = { {
+    VkRect2D scissors[] = {{
         .extent = app->swapchain.imageExtent,
-    } };
+    }};
 
-    VkPipelineColorBlendAttachmentState colorBlendAttachmentStates[] = { {
+    VkPipelineColorBlendAttachmentState colorBlendAttachmentStates[] = {{
         .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT
             | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
-    } };
+    }};
 
     ASSERTVK(vkCreatePipelineLayout(
                  app->context.device,
@@ -130,7 +128,7 @@ void create_graphics_pipeline(App* app)
                     .vertexBindingDescriptionCount = 1,
                     .pVertexBindingDescriptions = &binding_descr,
                     .vertexAttributeDescriptionCount = attribute_descr_size,
-                    .pVertexAttributeDescriptions = attribute_descr },
+                    .pVertexAttributeDescriptions = attribute_descr},
             .pInputAssemblyState =
                 &(VkPipelineInputAssemblyStateCreateInfo){
                     .sType =
@@ -205,8 +203,8 @@ void create_framebuffers(App* app)
 
     for (uint32_t i = 0; i < framebufferCount; ++i)
     {
-        VkImageView attachments[] = { app->swapchain.imageViews[i],
-                                      app->depthImageView };
+        VkImageView attachments[] = {app->swapchain.imageViews[i],
+                                     app->depthImageView};
 
         VkFramebufferCreateInfo framebufferInfo = {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
