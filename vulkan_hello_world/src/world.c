@@ -8,7 +8,7 @@ World world_constr(void)
     World w = {0};
     w.chunk = chunk_constr(0, 0);
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 5; i++)
     {
         chunk_set(w.chunk, i * 2, 0, 0, (Block){.type = i});
     }

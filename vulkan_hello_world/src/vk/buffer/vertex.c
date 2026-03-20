@@ -39,11 +39,13 @@ void recreate_vertices(const Chunk* chunk)
         {{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}}, // -Z
     };
 
-    static const float uvs[4][2] = {
-        {0.f, 0.f},
-        {1.f, 0.f},
-        {1.f, 1.f},
-        {0.f, 1.f},
+    static const float faceUVs[6][4][2] = {
+        {{0, 1}, {1, 1}, {1, 0}, {0, 0}}, // +X G
+        {{1, 0}, {0, 0}, {0, 1}, {1, 1}}, // -X G
+        {{1, 0}, {0, 0}, {0, 1}, {1, 1}}, // +Y G
+        {{0, 1}, {1, 1}, {1, 0}, {0, 0}}, // -Y G
+        {{0, 0}, {1, 0}, {1, 1}, {0, 1}}, // +Z
+        {{1, 0}, {0, 0}, {0, 1}, {1, 1}}, // -Z
     };
 
     for (size_t x = 0; x < CHUNK_SIZE; x++)
@@ -77,8 +79,8 @@ void recreate_vertices(const Chunk* chunk)
                                 },
                             .texCoord =
                                 {
-                                    uvs[v][0],
-                                    uvs[v][1],
+                                    faceUVs[f][v][0],
+                                    faceUVs[f][v][1],
                                 },
                             .textureid = BlockTexture[b->type][f],
                         };

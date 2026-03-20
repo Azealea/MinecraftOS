@@ -6,6 +6,7 @@ typedef enum BlockType
     BLK_GRASS,
     BLK_DIRT,
     BLK_STONE,
+    BLK_OAK,
 } BlockType;
 
 #define FACE_COUNT 6
