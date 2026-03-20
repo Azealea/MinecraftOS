@@ -6,6 +6,7 @@
 
 #include "utils/utils.h"
 #include "vk/camera.h"
+#include "world.h"
 
 typedef struct
 {
@@ -89,4 +90,6 @@ typedef struct
     VkImage depthImage;
     VkDeviceMemory depthImageMemory;
     VkImageView depthImageView;
+
+    World world;
 } App;

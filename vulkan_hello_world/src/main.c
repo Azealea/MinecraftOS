@@ -4,6 +4,7 @@
 #include "app.h"
 #include "glfw.h"
 #include "utils/time.h"
+#include "vk/buffer/vertex.h"
 #include "vk/camera.h"
 #include "vk/vk.h"
 
@@ -52,13 +53,16 @@ int main()
     App app = {
         .applicationName = "hello_world",
         .engineName = "AZEA ENGINE",
-        .windowTitle = "hello",
+        .windowTitle = "KubeOs",
         .vkApiVersion = VK_API_VERSION_1_4,
         .backgroundColor = { { { 0.01f, 0.1f, 0.1f, 0.01f } } },
         .maxFramesInFlight = 3,
         .start_time = current_time(),
         .camera = camera_init(),
+        .world = world_constr(),
     };
+
+    recreate_vertices(app.world.chunk);
 
     init(&app);
     loop(&app);

@@ -2,41 +2,107 @@
 
 #include <string.h>
 
+#include "app.h"
+#include "block.h"
+#include "chunk.h"
 #include "vk/buffer/buffer.h"
 
-const Vertex vertices[] = {
-    { { 1, 0, 0 }, { 1.0f, 0.0f }, 0 }, { { 1, 1, 0 }, { 1.0f, 1.0f }, 0 },
-    { { 1, 1, 1 }, { 0.0f, 1.0f }, 0 }, { { 1, 0, 1 }, { 0.0f, 0.0f }, 0 },
+#define VERT_MAX 5000
+#define INDICES_MAX VERT_MAX * 3
 
-    { { 0, 0, 1 }, { 1.0f, 0.0f }, 2 }, { { 0, 1, 1 }, { 1.0f, 1.0f }, 2 },
-    { { 0, 1, 0 }, { 0.0f, 1.0f }, 2 }, { { 0, 0, 0 }, { 0.0f, 0.0f }, 2 },
+Vertex vertices[VERT_MAX] = {};
+size_t vertices_count = 0;
 
-    { { 0, 1, 0 }, { 0.0f, 0.0f }, 0 }, { { 0, 1, 1 }, { 0.0f, 1.0f }, 0 },
-    { { 1, 1, 1 }, { 1.0f, 1.0f }, 0 }, { { 1, 1, 0 }, { 1.0f, 0.0f }, 0 },
+uint16_t indices[VERT_MAX] = {};
+size_t indices_count = 0;
 
-    { { 0, 0, 1 }, { 0.0f, 0.0f }, 0 }, { { 0, 0, 0 }, { 0.0f, 1.0f }, 0 },
-    { { 1, 0, 0 }, { 1.0f, 1.0f }, 0 }, { { 1, 0, 1 }, { 1.0f, 0.0f }, 0 },
+void recreate_vertices(const Chunk* chunk)
+{
+    vertices_count = 0;
+    indices_count = 0;
 
-    { { 0, 0, 1 }, { 0.0f, 0.0f }, 0 }, { { 1, 0, 1 }, { 1.0f, 0.0f }, 0 },
-    { { 1, 1, 1 }, { 1.0f, 1.0f }, 0 }, { { 0, 1, 1 }, { 0.0f, 1.0f }, 0 },
+    static const int neighbourDirs[6][3] = {
+        {1, 0, 0}, // +X
+        {-1, 0, 0}, // -X
+        {0, 1, 0}, // +Y
+        {0, -1, 0}, // -Y
+        {0, 0, 1}, // +Z
+        {0, 0, -1}, // -Z
+    };
 
-    { { 1, 0, 0 }, { 0.0f, 0.0f }, 0 }, { { 0, 0, 0 }, { 1.0f, 0.0f }, 0 },
-    { { 0, 1, 0 }, { 1.0f, 1.0f }, 0 }, { { 1, 1, 0 }, { 0.0f, 1.0f }, 0 },
-};
+    static const int faceVertsOffsets[6][4][3] = {
+        {{1, 0, 0}, {1, 1, 0}, {1, 1, 1}, {1, 0, 1}}, // +X
+        {{0, 0, 1}, {0, 1, 1}, {0, 1, 0}, {0, 0, 0}}, // -X
+        {{0, 1, 1}, {1, 1, 1}, {1, 1, 0}, {0, 1, 0}}, // +Y
+        {{0, 0, 0}, {1, 0, 0}, {1, 0, 1}, {0, 0, 1}}, // -Y
+        {{1, 0, 1}, {1, 1, 1}, {0, 1, 1}, {0, 0, 1}}, // +Z
+        {{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}}, // -Z
+    };
 
-const uint16_t indices[] = {
-    0,  1,  2,  2,  3,  0,  4,  5,  6,  6,  7,  4,  8,  9,  10, 10, 11, 8,
-    12, 13, 14, 14, 15, 12, 16, 17, 18, 18, 19, 16, 20, 21, 22, 22, 23, 20,
-};
+    static const float uvs[4][2] = {
+        {0.f, 0.f},
+        {1.f, 0.f},
+        {1.f, 1.f},
+        {0.f, 1.f},
+    };
+
+    for (size_t x = 0; x < CHUNK_SIZE; x++)
+        for (size_t y = 0; y < CHUNK_SIZE; y++)
+            for (size_t z = 0; z < CHUNK_SIZE; z++)
+            {
+                const Block* b = chunk_get(chunk, x, y, z);
+                if (b->type == BLK_AIR)
+                    continue;
+
+                for (int f = 0; f < 6; f++)
+                {
+                    int nx = x + neighbourDirs[f][0];
+                    int ny = y + neighbourDirs[f][1];
+                    int nz = z + neighbourDirs[f][2];
+
+                    if (chunk_is_in_bound(nx, ny, nz)
+                        && chunk_get(chunk, nx, ny, nz)->type != BLK_AIR)
+                        continue;
+
+                    uint16_t baseIndex = (uint16_t)vertices_count;
+
+                    for (int v = 0; v < 4; v++)
+                    {
+                        vertices[vertices_count++] = (Vertex){
+                            .pos =
+                                {
+                                    chunk->x + x + faceVertsOffsets[f][v][0],
+                                    chunk->y + y + faceVertsOffsets[f][v][1],
+                                    chunk->z + z + faceVertsOffsets[f][v][2],
+                                },
+                            .texCoord =
+                                {
+                                    uvs[v][0],
+                                    uvs[v][1],
+                                },
+                            .textureid = BlockTexture[b->type][f],
+                        };
+                    }
+
+                    indices[indices_count++] = baseIndex + 0;
+                    indices[indices_count++] = baseIndex + 1;
+                    indices[indices_count++] = baseIndex + 2;
+
+                    indices[indices_count++] = baseIndex + 2;
+                    indices[indices_count++] = baseIndex + 3;
+                    indices[indices_count++] = baseIndex + 0;
+                }
+            }
+}
 
 uint32_t vertex_count(void)
 {
-    return COUNTOF(vertices);
+    return vertices_count;
 }
 
 uint32_t index_count(void)
 {
-    return COUNTOF(indices);
+    return indices_count;
 }
 
 VkVertexInputBindingDescription get_binding_description()
@@ -52,27 +118,29 @@ VkVertexInputBindingDescription get_binding_description()
 
 VkVertexInputAttributeDescription* get_attribute_descriptions(int* out_size)
 {
-    static VkVertexInputAttributeDescription attributeDescriptions[] = 
-	{
-		[0] = {
-    .binding = 0,
-    .location = 0,
-    .format = VK_FORMAT_R32G32B32_SINT,
-    .offset = offsetof(Vertex, pos),
-	},
-		[1] = {
-    .binding = 0,
-    .location = 1,
-    .format = VK_FORMAT_R32G32_SFLOAT,
-    .offset = offsetof(Vertex, texCoord),
-	},
-		[2] = {
-    .binding = 0,
-    .location = 2,
-    .format = VK_FORMAT_R32_SINT,
-    .offset = offsetof(Vertex, textureid),
-	},
-	};
+    static VkVertexInputAttributeDescription attributeDescriptions[] = {
+        [0] =
+            {
+                .binding = 0,
+                .location = 0,
+                .format = VK_FORMAT_R32G32B32_SINT,
+                .offset = offsetof(Vertex, pos),
+            },
+        [1] =
+            {
+                .binding = 0,
+                .location = 1,
+                .format = VK_FORMAT_R32G32_SFLOAT,
+                .offset = offsetof(Vertex, texCoord),
+            },
+        [2] =
+            {
+                .binding = 0,
+                .location = 2,
+                .format = VK_FORMAT_R32_SINT,
+                .offset = offsetof(Vertex, textureid),
+            },
+    };
 
     *out_size = COUNTOF(attributeDescriptions);
     return attributeDescriptions;

@@ -9,9 +9,10 @@ typedef struct Vertex
     int32_t textureid;
 } Vertex;
 
-extern const Vertex vertices[];
 uint32_t vertex_count(void);
 uint32_t index_count(void);
+
+void recreate_vertices(const Chunk* chunk);
 
 VkVertexInputBindingDescription get_binding_description();
 VkVertexInputAttributeDescription* get_attribute_descriptions(int* out_size);

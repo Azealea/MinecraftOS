@@ -1,5 +1,6 @@
 #include "vk_texture.h"
 
+#include "texture_enum.h"
 #include "utils/utils.h"
 #include "vk/buffer/buffer.h"
 #include "vk/renderer/vk_command.h"
@@ -126,12 +127,6 @@ void copyBufferToImage(App* app, VkBuffer buffer, VkImage image, uint32_t width,
 
 void create_texture_image(App* app, uint32_t layerCount)
 {
-    static const char* textures[] = {
-        "assets/grass.png",
-        "assets/dirt.png",
-        "assets/grass_side.png",
-    };
-
     int texWidth = 0;
     int texHeight = 0;
     int texChannels;
@@ -143,7 +138,7 @@ void create_texture_image(App* app, uint32_t layerCount)
         int w, h;
 
         allPixels[i] =
-            stbi_load(textures[i], &w, &h, &texChannels, STBI_rgb_alpha);
+            stbi_load(TexturePaths[i], &w, &h, &texChannels, STBI_rgb_alpha);
 
         ASSERT(allPixels[i], "Failed to load texture");
 
@@ -326,7 +321,7 @@ void destroy_texture_sampler(App* app)
 
 void create_texture_stuff(App* app)
 {
-    int layerCount = 3;
+    int layerCount = TEXTURE_COUNT;
     create_texture_image(app, layerCount);
     create_texture_image_view(app, layerCount);
     create_texture_sampler(app);
