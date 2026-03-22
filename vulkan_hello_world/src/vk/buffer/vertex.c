@@ -7,19 +7,14 @@
 #include "chunk.h"
 #include "vk/buffer/buffer.h"
 
-#define VERT_MAX 5000
-#define INDICES_MAX VERT_MAX * 3
+#define INSTANCE_MAX (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 6)
 
-Vertex vertices[VERT_MAX] = {};
-size_t vertices_count = 0;
-
-uint16_t indices[VERT_MAX] = {};
-size_t indices_count = 0;
+Face face_instances[INSTANCE_MAX];
+size_t face_instance_count = 0;
 
 void recreate_vertices(const Chunk* chunk)
 {
-    vertices_count = 0;
-    indices_count = 0;
+    face_instance_count = 0;
 
     static const int neighbourDirs[6][3] = {
         {1, 0, 0}, // +X
@@ -28,24 +23,6 @@ void recreate_vertices(const Chunk* chunk)
         {0, -1, 0}, // -Y
         {0, 0, 1}, // +Z
         {0, 0, -1}, // -Z
-    };
-
-    static const int faceVertsOffsets[6][4][3] = {
-        {{1, 0, 0}, {1, 1, 0}, {1, 1, 1}, {1, 0, 1}}, // +X
-        {{0, 0, 1}, {0, 1, 1}, {0, 1, 0}, {0, 0, 0}}, // -X
-        {{0, 1, 1}, {1, 1, 1}, {1, 1, 0}, {0, 1, 0}}, // +Y
-        {{0, 0, 0}, {1, 0, 0}, {1, 0, 1}, {0, 0, 1}}, // -Y
-        {{1, 0, 1}, {1, 1, 1}, {0, 1, 1}, {0, 0, 1}}, // +Z
-        {{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}}, // -Z
-    };
-
-    static const float faceUVs[6][4][2] = {
-        {{0, 1}, {1, 1}, {1, 0}, {0, 0}}, // +X G
-        {{1, 0}, {0, 0}, {0, 1}, {1, 1}}, // -X G
-        {{1, 0}, {0, 0}, {0, 1}, {1, 1}}, // +Y G
-        {{0, 1}, {1, 1}, {1, 0}, {0, 0}}, // -Y G
-        {{1, 0}, {0, 0}, {0, 1}, {1, 1}}, // +Z ? coherent but could be wrong
-        {{0, 1}, {1, 1}, {1, 0}, {0, 0}}, // -Z ?
     };
 
     for (size_t x = 0; x < CHUNK_SIZE; x++)
@@ -66,53 +43,26 @@ void recreate_vertices(const Chunk* chunk)
                         && chunk_get(chunk, nx, ny, nz)->type != BLK_AIR)
                         continue;
 
-                    uint16_t baseIndex = (uint16_t)vertices_count;
-
-                    for (int v = 0; v < 4; v++)
-                    {
-                        vertices[vertices_count++] = (Vertex){
-                            .pos =
-                                {
-                                    chunk->x + x + faceVertsOffsets[f][v][0],
-                                    chunk->y + y + faceVertsOffsets[f][v][1],
-                                    chunk->z + z + faceVertsOffsets[f][v][2],
-                                },
-                            .texCoord =
-                                {
-                                    faceUVs[f][v][0],
-                                    faceUVs[f][v][1],
-                                },
-                            .textureid = BlockTexture[b->type][f],
-                        };
-                    }
-
-                    indices[indices_count++] = baseIndex + 0;
-                    indices[indices_count++] = baseIndex + 1;
-                    indices[indices_count++] = baseIndex + 2;
-
-                    indices[indices_count++] = baseIndex + 2;
-                    indices[indices_count++] = baseIndex + 3;
-                    indices[indices_count++] = baseIndex + 0;
+                    face_instances[face_instance_count++] = (Face){
+                        .pos = {chunk->x + x, chunk->y + y, chunk->z + z},
+                        .face_id = f,
+                        .texture_id = BlockTexture[b->type][f],
+                    };
                 }
             }
 }
 
-uint32_t vertex_count(void)
+uint32_t instance_count(void)
 {
-    return vertices_count;
-}
-
-uint32_t index_count(void)
-{
-    return indices_count;
+    return (uint32_t)face_instance_count;
 }
 
 VkVertexInputBindingDescription get_binding_description()
 {
     VkVertexInputBindingDescription bindingDescription = {
         .binding = 0,
-        .stride = sizeof(Vertex),
-        .inputRate = VK_VERTEX_INPUT_RATE_VERTEX,
+        .stride = sizeof(Face),
+        .inputRate = VK_VERTEX_INPUT_RATE_INSTANCE,
     };
 
     return bindingDescription;
@@ -126,21 +76,21 @@ VkVertexInputAttributeDescription* get_attribute_descriptions(int* out_size)
                 .binding = 0,
                 .location = 0,
                 .format = VK_FORMAT_R32G32B32_SINT,
-                .offset = offsetof(Vertex, pos),
+                .offset = offsetof(Face, pos),
             },
         [1] =
             {
                 .binding = 0,
                 .location = 1,
-                .format = VK_FORMAT_R32G32_SFLOAT,
-                .offset = offsetof(Vertex, texCoord),
+                .format = VK_FORMAT_R32_SINT,
+                .offset = offsetof(Face, face_id),
             },
         [2] =
             {
                 .binding = 0,
                 .location = 2,
                 .format = VK_FORMAT_R32_SINT,
-                .offset = offsetof(Vertex, textureid),
+                .offset = offsetof(Face, texture_id),
             },
     };
 
@@ -150,7 +100,7 @@ VkVertexInputAttributeDescription* get_attribute_descriptions(int* out_size)
 
 void create_vertex_buffer(App* app)
 {
-    VkDeviceSize bufferSize = sizeof(vertices);
+    VkDeviceSize bufferSize = sizeof(face_instances);
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -163,7 +113,7 @@ void create_vertex_buffer(App* app)
     ASSERTVK(vkMapMemory(app->context.device, stagingBufferMemory, 0,
                          bufferSize, 0, &data),
              "Failed to map");
-    memcpy(data, vertices, (size_t)bufferSize);
+    memcpy(data, face_instances, (size_t)bufferSize);
     vkUnmapMemory(app->context.device, stagingBufferMemory);
 
     create_buffer(app, bufferSize,
@@ -182,39 +132,4 @@ void destroy_vertex_buffer(App* app)
 {
     vkDestroyBuffer(app->context.device, app->vertexBuffer, app->allocator);
     vkFreeMemory(app->context.device, app->vertexBufferMemory, app->allocator);
-}
-
-void create_index_buffer(App* app)
-{
-    VkDeviceSize bufferSize = sizeof(indices[0]) * index_count();
-
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    create_buffer(app, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-                      | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                  &stagingBuffer, &stagingBufferMemory);
-
-    void* data;
-    vkMapMemory(app->context.device, stagingBufferMemory, 0, bufferSize, 0,
-                &data);
-    memcpy(data, indices, (size_t)bufferSize);
-    vkUnmapMemory(app->context.device, stagingBufferMemory);
-
-    create_buffer(app, bufferSize,
-                  VK_BUFFER_USAGE_TRANSFER_DST_BIT
-                      | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &app->indexBuffer,
-                  &app->indexBufferMemory);
-
-    copyBuffer(app, stagingBuffer, app->indexBuffer, bufferSize);
-
-    vkDestroyBuffer(app->context.device, stagingBuffer, app->allocator);
-    vkFreeMemory(app->context.device, stagingBufferMemory, app->allocator);
-}
-
-void destroy_index_buffer(App* app)
-{
-    vkDestroyBuffer(app->context.device, app->indexBuffer, app->allocator);
-    vkFreeMemory(app->context.device, app->indexBufferMemory, app->allocator);
 }

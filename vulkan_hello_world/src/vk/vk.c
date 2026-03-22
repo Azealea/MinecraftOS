@@ -23,7 +23,6 @@ void init_vk(App* app)
     create_framebuffers(app);
     create_texture_stuff(app);
     create_vertex_buffer(app);
-    create_index_buffer(app);
     create_uniform_buffers(app);
     create_descriptor_pool(app);
     create_descriptor_sets(app);
@@ -43,7 +42,6 @@ void clean_vk(App* app)
     destroy_descriptor_pool(app);
     destroy_texture_stuff(app);
     destroy_descriptor_set_layout(app);
-    destroy_index_buffer(app);
     destroy_vertex_buffer(app);
     destroy_sync_objects(app);
     destroy_command_pool(app);

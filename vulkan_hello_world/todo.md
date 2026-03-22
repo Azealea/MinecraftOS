@@ -1,6 +1,6 @@
 - [X] check up&bot uv
-- [ ] put uvs directly in shaders
-- [ ] give to gpu faces instead of vertices
+- [X] put uvs directly in shaders
+- [X] give to gpu faces instead of vertices
 - [ ] basic actor
 - [ ] multiple chunks
 - [ ] place block

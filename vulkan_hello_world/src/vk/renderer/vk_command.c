@@ -86,7 +86,6 @@ void destroy_command_buffer(App* app)
 void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
 {
     VkCommandBuffer cmd = app->renderer.commandBuffers[frameIndex];
-
     ASSERTVK(vkResetCommandBuffer(cmd, 0), "Failed to reset command buffer");
 
     VkCommandBufferBeginInfo beginInfo = {
@@ -95,7 +94,6 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
         .flags = 0,
         .pInheritanceInfo = NULL,
     };
-
     ASSERTVK(vkBeginCommandBuffer(cmd, &beginInfo),
              "Failed to begin recording command buffer");
 
@@ -118,24 +116,20 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
     };
 
     vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
                       app->renderer.graphicsPipeline);
 
-    VkBuffer vertexBuffers[] = {app->vertexBuffer};
+    VkBuffer instanceBuffers[] = {app->vertexBuffer};
     VkDeviceSize offsets[] = {0};
-    vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
-
-    vkCmdBindIndexBuffer(cmd, app->indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+    vkCmdBindVertexBuffers(cmd, 0, 1, instanceBuffers, offsets);
 
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
                             app->renderer.pipelineLayout, 0, 1,
-                            &app->descriptorSets[frameIndex], 0, nullptr);
+                            &app->descriptorSets[frameIndex], 0, NULL);
 
-    vkCmdDrawIndexed(cmd, index_count(), 1, 0, 0, 0);
+    vkCmdDraw(cmd, 6, instance_count(), 0, 0);
 
     vkCmdEndRenderPass(cmd);
-
     ASSERTVK(vkEndCommandBuffer(cmd),
              "Failed to record command buffer for image %u", imageIndex);
 }
