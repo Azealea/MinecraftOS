@@ -1,6 +1,6 @@
 #include "block.h"
 
-#include "texture_enum.h"
+#include "textures/base_texture_enum.h"
 
 #define MAP_BARREL(SIDE, TOPBOT)                                               \
     {(SIDE), (SIDE), (SIDE), (SIDE), (TOPBOT), (TOPBOT)}

@@ -1,6 +1,6 @@
 #include "vk_texture.h"
 
-#include "texture_enum.h"
+#include "textures/base_texture_enum.h"
 #include "utils/utils.h"
 #include "vk/buffer/buffer.h"
 #include "vk/renderer/vk_command.h"
