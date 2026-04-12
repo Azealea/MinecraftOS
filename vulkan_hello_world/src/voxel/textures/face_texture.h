@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "texture_array_atlas.h"
+#include "voxel/textures/array_atlas.h"
 
 typedef struct
 {
@@ -52,5 +52,4 @@ typedef struct FaceTextureBuilder
 uint16_t face_texture_resolve(const FaceTexture* f, uint8_t neighbor_mask,
                               bool activated, uint8_t hash_pos);
 
-FaceTexture face_texture_build(const FaceTextureBuilder* fb,
-                               TextureArrayAtlas* atlas);
+FaceTexture face_texture_build(const FaceTextureBuilder* fb, ArrayAtlas* atlas);

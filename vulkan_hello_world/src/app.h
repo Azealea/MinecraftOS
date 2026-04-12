@@ -6,11 +6,10 @@
 
 #include "utils/utils.h"
 #include "vk/camera.h"
-#include "world.h"
+#include "voxel/world.h"
 
 typedef struct
 {
-    // Configurable
     const char* applicationName;
     const char* engineName;
     const char* windowTitle;
@@ -18,6 +17,7 @@ typedef struct
     VkClearValue backgroundColor;
     uint32_t maxFramesInFlight;
 
+    // extent of the configurable field
     VkAllocationCallbacks* allocator;
     double start_time;
 

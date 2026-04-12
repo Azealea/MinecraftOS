@@ -1,7 +1,7 @@
 #pragma once
 
-#include "block.h"
 #include "stdint.h"
+#include "voxel/block.h"
 
 #define CHUNK_SIZE 32
 

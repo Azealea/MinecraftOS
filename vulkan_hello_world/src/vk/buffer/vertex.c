@@ -3,10 +3,9 @@
 #include <string.h>
 
 #include "app.h"
-#include "block.h"
-#include "chunk.h"
-#include "textures/face_texture.h"
 #include "vk/buffer/buffer.h"
+#include "voxel/chunk.h"
+#include "voxel/textures/face_texture.h"
 
 #define INSTANCE_MAX (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 6)
 

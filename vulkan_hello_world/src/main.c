@@ -4,7 +4,6 @@
 #include "app.h"
 #include "glfw.h"
 #include "utils/time.h"
-#include "vk/buffer/vertex.h"
 #include "vk/camera.h"
 #include "vk/vk.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "chunk.h"
+#include "voxel/chunk.h"
 
 typedef struct World
 {

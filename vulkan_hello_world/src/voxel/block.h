@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "textures/face_texture.h"
+#include "voxel/textures/face_texture.h"
 
 typedef enum BlockType : uint16_t
 {

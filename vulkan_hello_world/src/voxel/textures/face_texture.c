@@ -1,9 +1,8 @@
 #include "face_texture.h"
 
 #include <assert.h>
-#include <stdio.h>
 
-#include "textures/texture_array_atlas.h"
+#include "voxel/textures/array_atlas.h"
 
 uint16_t face_texture_resolve(const FaceTexture* f, uint8_t neighbor_mask,
                               bool activated, uint8_t hash_pos)
@@ -30,7 +29,7 @@ uint16_t face_texture_resolve(const FaceTexture* f, uint8_t neighbor_mask,
 }
 
 static void consume_leaf(const FaceTextureBuilder* fb, FaceTexture* res,
-                         TextureArrayAtlas* atlas)
+                         ArrayAtlas* atlas)
 {
     if (res->frame_count == 0)
         res->frame_count = fb->leaf.count;
@@ -40,7 +39,7 @@ static void consume_leaf(const FaceTextureBuilder* fb, FaceTexture* res,
 }
 
 static void consume_connected(const FaceTextureBuilder* fb, FaceTexture* res,
-                              TextureArrayAtlas* atlas)
+                              ArrayAtlas* atlas)
 {
     if (!(fb->type & (FACETXT_CONNECTED4_BIT | FACETXT_CONNECTED8_BIT)))
     {
@@ -73,7 +72,7 @@ static void consume_connected(const FaceTextureBuilder* fb, FaceTexture* res,
 }
 
 static void consume_activated(const FaceTextureBuilder* fb, FaceTexture* res,
-                              TextureArrayAtlas* atlas)
+                              ArrayAtlas* atlas)
 {
     if (!(fb->type & FACETXT_ACTIVATED_BIT))
     {
@@ -86,7 +85,7 @@ static void consume_activated(const FaceTextureBuilder* fb, FaceTexture* res,
 }
 
 static void consume_variant(const FaceTextureBuilder* fb, FaceTexture* res,
-                            TextureArrayAtlas* atlas)
+                            ArrayAtlas* atlas)
 {
     if (!(fb->type & FACETXT_VARIANT_BIT))
     {
@@ -99,8 +98,7 @@ static void consume_variant(const FaceTextureBuilder* fb, FaceTexture* res,
         consume_activated(fb->variant.children[i], res, atlas);
 }
 
-FaceTexture face_texture_build(const FaceTextureBuilder* fb,
-                               TextureArrayAtlas* atlas)
+FaceTexture face_texture_build(const FaceTextureBuilder* fb, ArrayAtlas* atlas)
 {
     FaceTexture res = {
         .base_id = atlas_get_current_slot(atlas),

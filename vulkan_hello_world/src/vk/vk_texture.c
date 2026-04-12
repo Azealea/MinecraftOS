@@ -2,12 +2,12 @@
 
 #include <string.h>
 
-#include "assets.h"
-#include "textures/texture_array_atlas.h"
 #include "utils/utils.h"
 #include "vk/buffer/buffer.h"
 #include "vk/renderer/vk_command.h"
 #include "vk/vk_device.h"
+#include "voxel/assets.h"
+#include "voxel/textures/array_atlas.h"
 
 void create_image(App* app, uint32_t width, uint32_t height, VkFormat format,
                   VkImageTiling tiling, VkImageUsageFlags usage,
@@ -125,7 +125,7 @@ void copyBufferToImage(App* app, VkBuffer buffer, VkImage image, uint32_t width,
     end_single_time_commands(app, commandBuffer);
 }
 
-void create_texture_image_from_atlas(App* app, TextureArrayAtlas* atlas)
+void create_texture_image_from_atlas(App* app, ArrayAtlas* atlas)
 {
     assert(atlas != NULL);
     assert(atlas->count > 0);
@@ -296,7 +296,7 @@ void destroy_texture_sampler(App* app)
 
 void create_texture_stuff(App* app)
 {
-    TextureArrayAtlas atlas = {0};
+    ArrayAtlas atlas = {0};
     atlas_init(&atlas);
     load_texture_into_atlas(&atlas);
     //    debug_print_block_faces();
