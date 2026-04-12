@@ -35,5 +35,6 @@ void create_glfw_window(App* app)
     app->window = glfwCreateWindow(mode->width, mode->height, app->windowTitle,
                                    app->windowMonitor, NULL);
 
+    glfwSetInputMode(app->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     ASSERT(app->window, "glfwCreateWindow failed");
 }
