@@ -1,6 +1,7 @@
 - [X] check up&bot uv
 - [X] put uvs directly in shaders
 - [X] give to gpu faces instead of vertices
+- [ ] make basic system for texture variants : basic, activated, connected, variant
 - [ ] basic actor
 - [ ] multiple chunks
 - [ ] place block

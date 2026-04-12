@@ -22,6 +22,9 @@ void init_vk(App* app)
     create_depth_resources(app);
     create_framebuffers(app);
     create_texture_stuff(app);
+
+    recreate_vertices(app->world.chunk);
+
     create_vertex_buffer(app);
     create_uniform_buffers(app);
     create_descriptor_pool(app);

@@ -9,7 +9,7 @@ echo "// auto-generated from $ASSET_DIR the $(date +%Y-%m-%d)" > $HEADER
 echo "#pragma once" >> $HEADER
 echo "" >> $HEADER
 
-echo "typedef enum FACE_TEXTURE {" >> $HEADER
+echo -e "typedef enum BASE_TEXTURE\n{" >> $HEADER
 
 COUNT=0
 for file in "$ASSET_DIR"/*.PNG; do
@@ -19,17 +19,18 @@ for file in "$ASSET_DIR"/*.PNG; do
     COUNT=$((COUNT + 1))
 done
 
-echo "} FACE_TEXTURE;" >> $HEADER
+echo "} BASE_TEXTURE;" >> $HEADER
 echo "" >> $HEADER
 echo "#define TEXTURE_COUNT $COUNT" >> $HEADER
 echo "" >> $HEADER
 
-echo "extern const char *TexturePaths[TEXTURE_COUNT];" >> $HEADER
+echo "extern const char* TexturePaths[TEXTURE_COUNT];" >> $HEADER
 
 echo "// auto-generated source from $ASSET_DIR the $(date +%Y-%m-%d)" > $SOURCE
 echo "#include \"$HEADER\"" >> $SOURCE
 echo "" >> $SOURCE
 
+echo "// clang-format off" >> $SOURCE
 echo "const char* TexturePaths[TEXTURE_COUNT] = {" >> $SOURCE
 
 for file in "$ASSET_DIR"/*.PNG; do

@@ -62,8 +62,6 @@ int main()
         .world = world_constr(),
     };
 
-    recreate_vertices(app.world.chunk);
-
     init(&app);
     loop(&app);
     cleanup(&app);

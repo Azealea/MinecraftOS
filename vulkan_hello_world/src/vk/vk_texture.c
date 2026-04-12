@@ -1,13 +1,13 @@
 #include "vk_texture.h"
 
-#include "textures/base_texture_enum.h"
+#include <string.h>
+
+#include "assets.h"
+#include "textures/texture_array_atlas.h"
 #include "utils/utils.h"
 #include "vk/buffer/buffer.h"
 #include "vk/renderer/vk_command.h"
 #include "vk/vk_device.h"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 void create_image(App* app, uint32_t width, uint32_t height, VkFormat format,
                   VkImageTiling tiling, VkImageUsageFlags usage,
@@ -125,37 +125,14 @@ void copyBufferToImage(App* app, VkBuffer buffer, VkImage image, uint32_t width,
     end_single_time_commands(app, commandBuffer);
 }
 
-void create_texture_image(App* app, uint32_t layerCount)
+void create_texture_image_from_atlas(App* app, TextureArrayAtlas* atlas)
 {
-    int texWidth = 0;
-    int texHeight = 0;
-    int texChannels;
-
-    stbi_uc** allPixels = malloc(sizeof(stbi_uc*) * layerCount);
-
-    for (uint32_t i = 0; i < layerCount; i++)
-    {
-        int w, h;
-
-        allPixels[i] =
-            stbi_load(TexturePaths[i], &w, &h, &texChannels, STBI_rgb_alpha);
-
-        ASSERT(allPixels[i], "Failed to load texture");
-
-        if (i == 0)
-        {
-            texWidth = w;
-            texHeight = h;
-        }
-        else
-        {
-            ASSERT(w == texWidth && h == texHeight,
-                   "All textures must have same dimensions");
-        }
-    }
-
-    VkDeviceSize layerSize = texWidth * texHeight * 4;
+    assert(atlas != NULL);
+    assert(atlas->count > 0);
+    uint32_t layerCount = atlas->count;
+    VkDeviceSize layerSize = TEXTURE_WIDTH_HEIGHT * TEXTURE_WIDTH_HEIGHT * 4;
     VkDeviceSize totalSize = layerSize * layerCount;
+    assert(totalSize > 0);
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -171,19 +148,16 @@ void create_texture_image(App* app, uint32_t layerCount)
 
     for (uint32_t i = 0; i < layerCount; i++)
     {
-        memcpy((char*)data + layerSize * i, allPixels[i], layerSize);
-
-        stbi_image_free(allPixels[i]);
+        memcpy((char*)data + layerSize * i, atlas->pixels[i], layerSize);
     }
 
     vkUnmapMemory(app->context.device, stagingBufferMemory);
-    free(allPixels);
 
     VkImageCreateInfo imageInfo = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
         .imageType = VK_IMAGE_TYPE_2D,
-        .extent.width = texWidth,
-        .extent.height = texHeight,
+        .extent.width = TEXTURE_WIDTH_HEIGHT,
+        .extent.height = TEXTURE_WIDTH_HEIGHT,
         .extent.depth = 1,
         .mipLevels = 1,
         .arrayLayers = layerCount,
@@ -223,13 +197,12 @@ void create_texture_image(App* app, uint32_t layerCount)
                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
     VkCommandBuffer commandBuffer = begin_single_time_commands(app);
-
     VkBufferImageCopy* regions = malloc(sizeof(VkBufferImageCopy) * layerCount);
 
     for (uint32_t i = 0; i < layerCount; i++)
     {
         regions[i] = (VkBufferImageCopy){
-            .bufferOffset = texWidth * texHeight * 4 * i,
+            .bufferOffset = layerSize * i,
             .bufferRowLength = 0,
             .bufferImageHeight = 0,
             .imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -237,7 +210,8 @@ void create_texture_image(App* app, uint32_t layerCount)
             .imageSubresource.baseArrayLayer = i,
             .imageSubresource.layerCount = 1,
             .imageOffset = (VkOffset3D){0, 0, 0},
-            .imageExtent = (VkExtent3D){texWidth, texHeight, 1},
+            .imageExtent =
+                (VkExtent3D){TEXTURE_WIDTH_HEIGHT, TEXTURE_WIDTH_HEIGHT, 1},
         };
     }
 
@@ -246,13 +220,14 @@ void create_texture_image(App* app, uint32_t layerCount)
                            regions);
 
     end_single_time_commands(app, commandBuffer);
+    free(regions);
+
     transition_image_layout(app, app->textureImage, layerCount,
                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
     vkDestroyBuffer(app->context.device, stagingBuffer, app->allocator);
     vkFreeMemory(app->context.device, stagingBufferMemory, app->allocator);
-    free(regions);
 }
 
 void destroy_texture_image(App* app)
@@ -321,10 +296,14 @@ void destroy_texture_sampler(App* app)
 
 void create_texture_stuff(App* app)
 {
-    int layerCount = TEXTURE_COUNT;
-    create_texture_image(app, layerCount);
-    create_texture_image_view(app, layerCount);
+    TextureArrayAtlas atlas = {0};
+    atlas_init(&atlas);
+    load_texture_into_atlas(&atlas);
+    //    debug_print_block_faces();
+    create_texture_image_from_atlas(app, &atlas);
+    create_texture_image_view(app, atlas.count);
     create_texture_sampler(app);
+    atlas_free(&atlas);
 }
 void destroy_texture_stuff(App* app)
 {

@@ -10,7 +10,7 @@ World world_constr(void)
 
     for (int i = 0; i < 5; i++)
     {
-        chunk_set(w.chunk, i * 2, 0, 0, (Block){.type = i});
+        chunk_set(w.chunk, i, 0, 0, (Block){.type = i});
     }
 
     return w;

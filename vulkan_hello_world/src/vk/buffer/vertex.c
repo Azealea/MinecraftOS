@@ -5,6 +5,7 @@
 #include "app.h"
 #include "block.h"
 #include "chunk.h"
+#include "textures/face_texture.h"
 #include "vk/buffer/buffer.h"
 
 #define INSTANCE_MAX (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 6)
@@ -46,7 +47,9 @@ void recreate_vertices(const Chunk* chunk)
                     face_instances[face_instance_count++] = (Face){
                         .pos = {chunk->x + x, chunk->y + y, chunk->z + z},
                         .face_id = f,
-                        .texture_id = BlockTexture[b->type][f],
+
+                        .texture_id = face_texture_resolve(
+                            &BlockFaces[b->type][f], 0, 0, 0),
                     };
                 }
             }

@@ -1,49 +1,32 @@
 #pragma once
 
-typedef enum BlockType
+#include <stdint.h>
+
+#include "textures/face_texture.h"
+
+typedef enum BlockType : uint16_t
 {
     BLK_AIR = 0,
     BLK_GRASS,
     BLK_DIRT,
     BLK_STONE,
     BLK_OAK,
+    BLK_LAMP,
+    // BLK_APP_CONTROLLER,
+    // BLK_SCREEN,
+    BLOCK_COUNT
 } BlockType;
 
 #define FACE_COUNT 6
 
-extern const int BlockTexture[][FACE_COUNT];
-
-// enum BlockSateAxe
-//{
-//     BLK_STATE_AXE_Y,
-//     BLK_STATE_AXE_X,
-//     BLK_STATE_AXE_Z,
-// };
-//
-// enum BlockSateFacing
-//{
-//     BLK_STATE_FACING_XP,
-//     BLK_STATE_FACING_XM,
-//     BLK_STATE_FACING_ZP,
-//     BLK_STATE_FACING_ZM,
-// };
-//
-// enum BlockSateRotaion
-//{
-//     BLK_STATE_ROTATION_XP,
-//     BLK_STATE_ROTATION_XM,
-//     BLK_STATE_ROTATION_ZP,
-//     BLK_STATE_ROTATION_ZM,
-//     BLK_STATE_ROTATION_YP,
-//     BLK_STATE_ROTATION_YM,
-// };
-
 typedef struct Block
 {
     BlockType type;
-    // union
-    //{
-    // enum BlockSateAxe axis;
-    // enum BlockSateFacing facing;
-    // };
+    uint16_t state;
+    uint16_t entity_id;
 } Block;
+
+extern const FaceTextureBuilder BlockFaceBuilders[][FACE_COUNT];
+extern const int BlockFaceBuildersCount;
+
+extern FaceTexture BlockFaces[][FACE_COUNT];
