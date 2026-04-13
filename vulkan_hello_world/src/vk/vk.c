@@ -79,5 +79,6 @@ void drawFrame(App* app)
 
 void do_stuff_vk(App* app)
 {
+    update_camera_pos(&app->camera, &app->inputState);
     drawFrame(app);
 }

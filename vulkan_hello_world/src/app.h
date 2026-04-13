@@ -1,5 +1,6 @@
 #pragma once
 
+#include "input.h"
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
@@ -18,6 +19,8 @@ typedef struct
     uint32_t maxFramesInFlight;
 
     // extent of the configurable field
+
+    Input inputState;
     VkAllocationCallbacks* allocator;
     double start_time;
 

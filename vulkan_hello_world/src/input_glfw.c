@@ -1,0 +1,28 @@
+#include "input.h"
+
+#include <GLFW/glfw3.h>
+#include <string.h>
+
+void input_poll(Input* state, void* backend_ctx)
+{
+    static const int glfw_key_map[KEY_COUNT] = {
+        [KEY_W] = GLFW_KEY_W,         [KEY_S] = GLFW_KEY_S,
+        [KEY_A] = GLFW_KEY_A,         [KEY_D] = GLFW_KEY_D,
+        [KEY_SPACE] = GLFW_KEY_SPACE, [KEY_LEFT_SHIFT] = GLFW_KEY_LEFT_SHIFT,
+        [KEY_TAB] = GLFW_KEY_TAB,
+    };
+    GLFWwindow* window = (GLFWwindow*)backend_ctx;
+
+    memcpy(state->keys_prev, state->keys, sizeof(state->keys));
+    for (int i = 0; i < KEY_COUNT; i++)
+    {
+        state->keys[i] = glfwGetKey(window, glfw_key_map[i]) == GLFW_PRESS;
+    }
+
+    double new_x, new_y;
+    glfwGetCursorPos(window, &new_x, &new_y);
+    state->mouse_dx = new_x - state->mouse_x;
+    state->mouse_dy = new_y - state->mouse_y;
+    state->mouse_x = new_x;
+    state->mouse_y = new_y;
+}

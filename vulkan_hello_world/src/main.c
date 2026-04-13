@@ -3,6 +3,7 @@
 
 #include "app.h"
 #include "glfw.h"
+#include "input.h"
 #include "utils/time.h"
 #include "vk/camera.h"
 #include "vk/vk.h"
@@ -35,6 +36,7 @@ static void loop(App* app)
     {
         double frameTimeStart = glfwGetTime();
         glfwPollEvents();
+        input_poll(&app->inputState, app->window);
         do_stuff_vk(app);
         double frameTimeEnd = glfwGetTime();
         printf("FPS: %f\r", 1 / (frameTimeEnd - frameTimeStart));

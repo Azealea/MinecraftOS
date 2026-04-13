@@ -6,101 +6,75 @@
 
 #include "app.h"
 #include "camera_ubo.h"
+#include "input.h"
 #include "vk/buffer/buffer.h"
 
-void update_camera(App* app)
+static vec3 worldup = {0.0f, 0.0f, 1.0f};
+
+void update_camera_pos(Camera* camera, const Input* input)
 {
-    static vec3 worldup = {0.0f, 0.0f, 1.0f};
-    GLFWwindow* window = app->window;
+    if (input_key_pressed(input, KEY_TAB))
+        camera->fast = !camera->fast;
 
     float movescale = 0.0002f;
-    if (app->camera.fast)
+    if (camera->fast)
         movescale *= 10.0f;
-
-    static bool tabPressedLastFrame = false;
-    bool tabPressed = glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS;
-
-    if (tabPressed && !tabPressedLastFrame)
-        app->camera.fast = !app->camera.fast;
-
-    tabPressedLastFrame = tabPressed;
 
     vec3 delta = {0};
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    if (input_key_held(input, KEY_W))
     {
-        glm_vec3_scale(app->camera.basis.front, movescale, delta);
-        glm_vec3_add(app->camera.pos, delta, app->camera.pos);
+        glm_vec3_scale(camera->basis.front, movescale, delta);
+        glm_vec3_add(camera->pos, delta, camera->pos);
     }
-
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    if (input_key_held(input, KEY_S))
     {
-        glm_vec3_scale(app->camera.basis.front, -movescale, delta);
-        glm_vec3_add(app->camera.pos, delta, app->camera.pos);
+        glm_vec3_scale(camera->basis.front, -movescale, delta);
+        glm_vec3_add(camera->pos, delta, camera->pos);
     }
-
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    if (input_key_held(input, KEY_A))
     {
-        glm_vec3_scale(app->camera.basis.right, -movescale, delta);
-        glm_vec3_add(app->camera.pos, delta, app->camera.pos);
+        glm_vec3_scale(camera->basis.right, -movescale, delta);
+        glm_vec3_add(camera->pos, delta, camera->pos);
     }
-
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    if (input_key_held(input, KEY_D))
     {
-        glm_vec3_scale(app->camera.basis.right, movescale, delta);
-        glm_vec3_add(app->camera.pos, delta, app->camera.pos);
+        glm_vec3_scale(camera->basis.right, movescale, delta);
+        glm_vec3_add(camera->pos, delta, camera->pos);
     }
-
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    if (input_key_held(input, KEY_SPACE))
     {
         glm_vec3_scale(worldup, movescale, delta);
-        glm_vec3_add(app->camera.pos, delta, app->camera.pos);
+        glm_vec3_add(camera->pos, delta, camera->pos);
     }
-
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    if (input_key_held(input, KEY_LEFT_SHIFT))
     {
         glm_vec3_scale(worldup, -movescale, delta);
-        glm_vec3_add(app->camera.pos, delta, app->camera.pos);
+        glm_vec3_add(camera->pos, delta, camera->pos);
     }
 
-    double xpos, ypos;
-    glfwGetCursorPos(window, &xpos, &ypos);
-
-    if (app->camera.firstMouse)
+    if (camera->firstMouse)
     {
-        app->camera.lastX = xpos;
-        app->camera.lastY = ypos;
-        app->camera.firstMouse = false;
+        camera->firstMouse = false;
+        return;
     }
-
-    float xoffset = app->camera.lastX - xpos;
-    float yoffset = app->camera.lastY - ypos;
-
-    app->camera.lastX = xpos;
-    app->camera.lastY = ypos;
 
     float sensitivity = 0.01f;
-    app->camera.yaw += xoffset * sensitivity;
-    app->camera.pitch += yoffset * sensitivity;
+    camera->yaw -= (float)input->mouse_dx * sensitivity;
+    camera->pitch -= (float)input->mouse_dy * sensitivity;
 
-    if (app->camera.pitch > glm_rad(89.9f))
-        app->camera.pitch = glm_rad(89.9f);
+    if (camera->pitch > glm_rad(89.9f))
+        camera->pitch = glm_rad(89.9f);
+    if (camera->pitch < -glm_rad(89.9f))
+        camera->pitch = -glm_rad(89.9f);
 
-    if (app->camera.pitch < glm_rad(-89.9f))
-        app->camera.pitch = glm_rad(-89.9f);
-
-    vec3 front = {cosf(app->camera.yaw) * cosf(app->camera.pitch),
-                  sinf(app->camera.yaw) * cosf(app->camera.pitch),
-                  sinf(app->camera.pitch)};
-
+    vec3 front = {cosf(camera->yaw) * cosf(camera->pitch),
+                  sinf(camera->yaw) * cosf(camera->pitch), sinf(camera->pitch)};
     glm_normalize(front);
-    glm_vec3_copy(front, app->camera.basis.front);
-
-    glm_vec3_cross(app->camera.basis.front, worldup, app->camera.basis.right);
-    glm_normalize(app->camera.basis.right);
-
-    glm_vec3_cross(app->camera.basis.right, app->camera.basis.front,
-                   app->camera.basis.up);
+    glm_vec3_copy(front, camera->basis.front);
+    glm_vec3_cross(camera->basis.front, worldup, camera->basis.right);
+    glm_normalize(camera->basis.right);
+    glm_vec3_cross(camera->basis.right, camera->basis.front, camera->basis.up);
 }
 
 void create_uniform_buffers(App* app)
@@ -142,9 +116,6 @@ void destroy_uniform_buffers(App* app)
 
 void update_uniform_buffer(App* app, uint32_t currentImage)
 {
-    static vec3 worldup = {0.0f, 0.0f, 1.0f};
-    update_camera(app);
-
     struct UniformBufferObject ubo = {0};
 
     glm_mat4_identity(ubo.model);

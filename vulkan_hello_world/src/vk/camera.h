@@ -2,6 +2,8 @@
 
 #include <cglm/mat4.h>
 
+#include "input.h"
+
 typedef struct CameraBasis
 {
     vec3 front;
@@ -26,3 +28,5 @@ typedef struct Camera
 } Camera;
 
 Camera camera_init(void);
+
+void update_camera_pos(Camera* camera, const Input* input);

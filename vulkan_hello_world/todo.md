@@ -1,8 +1,17 @@
 - [X] check up&bot uv
 - [X] put uvs directly in shaders
 - [X] give to gpu faces instead of vertices
-- [ ] make basic system for texture variants : basic, activated, connected, variant
-- [ ] basic actor
+- [ ] make basic system for texture variants
+    - variants :
+        - [X] basic
+        - [ ] animated
+        - [X] activated
+        - [ ] connected
+        - [ ] variant
+    - [ ] refractor the builder to do an array of node, dont use pointer for AST, use id of node's array
+        - [ ] memoize the face_texture_build() function
+- [x] proper input interface
+- [ ] block state
 - [ ] multiple chunks
 - [ ] place block
 - [ ] blockStates -> rotate block
