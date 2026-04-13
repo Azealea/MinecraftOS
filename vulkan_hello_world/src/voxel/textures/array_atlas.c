@@ -1,8 +1,7 @@
 #include "array_atlas.h"
 
-#include <assert.h>
-
 #include "base_texture_enum.h"
+#include "utils/utils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -22,17 +21,17 @@ uint8_t* load_rgba(const char* path)
 {
     int iw, ih, ch;
     uint8_t* px = stbi_load(path, &iw, &ih, &ch, 4);
-    assert(px && "failed to load texture");
 
-    assert(iw == TEXTURE_WIDTH_HEIGHT && ih == TEXTURE_WIDTH_HEIGHT
-           && "all textures must be same size");
+    ASSERT(px, "failed to load texture");
+    ASSERT(iw == TEXTURE_WIDTH_HEIGHT && ih == TEXTURE_WIDTH_HEIGHT,
+           "all textures must be same size");
 
     return px;
 }
 
 static uint32_t atlas_push(ArrayAtlas* a, uint8_t* rgba)
 {
-    assert(a->count < MAX_TEXTURE);
+    ASSERT(a->count, "reached max cap in atlas");
     a->pixels[a->count++] = rgba;
     return a->count - 1;
 }

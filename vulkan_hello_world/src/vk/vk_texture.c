@@ -127,12 +127,9 @@ void copyBufferToImage(App* app, VkBuffer buffer, VkImage image, uint32_t width,
 
 void create_texture_image_from_atlas(App* app, ArrayAtlas* atlas)
 {
-    assert(atlas != NULL);
-    assert(atlas->count > 0);
     uint32_t layerCount = atlas->count;
     VkDeviceSize layerSize = TEXTURE_WIDTH_HEIGHT * TEXTURE_WIDTH_HEIGHT * 4;
     VkDeviceSize totalSize = layerSize * layerCount;
-    assert(totalSize > 0);
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
