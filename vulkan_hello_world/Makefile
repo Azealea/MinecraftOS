@@ -1,4 +1,4 @@
-CC := gcc
+CC := ccache gcc
 
 SRC_DIR := src
 SRC := $(shell find $(SRC_DIR) -type f -name '*.c')
