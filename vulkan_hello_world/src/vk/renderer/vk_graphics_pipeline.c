@@ -36,8 +36,7 @@ void create_renderpass(App* app)
     };
 
     VkAttachmentReference depthAttachmentRef = {
-        .attachment = 1,
-        .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
+        .attachment = 1, .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
 
     VkSubpassDescription subpass = {
         .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -79,12 +78,10 @@ void create_graphics_pipeline(App* app)
 {
     VkPipelineShaderStageCreateInfo shaderStages[] = {
         load_shader_module(app, src_shaders_shader_vert_spv,
-                           src_shaders_shader_vert_spv_len,
-                           VK_SHADER_STAGE_VERTEX_BIT),
+                           src_shaders_shader_vert_spv_len, VK_SHADER_STAGE_VERTEX_BIT),
 
         load_shader_module(app, src_shaders_shader_frag_spv,
-                           src_shaders_shader_frag_spv_len,
-                           VK_SHADER_STAGE_FRAGMENT_BIT),
+                           src_shaders_shader_frag_spv_len, VK_SHADER_STAGE_FRAGMENT_BIT),
     };
 
     VkViewport viewports[] = {{
@@ -124,22 +121,19 @@ void create_graphics_pipeline(App* app)
             .stageCount = COUNTOF(shaderStages),
             .pVertexInputState =
                 &(VkPipelineVertexInputStateCreateInfo){
-                    .sType =
-                        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
                     .vertexBindingDescriptionCount = 1,
                     .pVertexBindingDescriptions = &binding_descr,
                     .vertexAttributeDescriptionCount = attribute_descr_size,
                     .pVertexAttributeDescriptions = attribute_descr},
             .pInputAssemblyState =
                 &(VkPipelineInputAssemblyStateCreateInfo){
-                    .sType =
-                        VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
                     .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
                 },
             .pViewportState =
                 &(VkPipelineViewportStateCreateInfo){
-                    .sType =
-                        VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
                     .viewportCount = COUNTOF(viewports),
                     .pViewports = viewports,
                     .scissorCount = COUNTOF(scissors),
@@ -147,8 +141,7 @@ void create_graphics_pipeline(App* app)
                 },
             .pRasterizationState =
                 &(VkPipelineRasterizationStateCreateInfo){
-                    .sType =
-                        VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
                     .depthClampEnable = VK_FALSE,
                     .rasterizerDiscardEnable = VK_FALSE,
                     .polygonMode = VK_POLYGON_MODE_FILL,
@@ -160,14 +153,12 @@ void create_graphics_pipeline(App* app)
                 },
             .pMultisampleState =
                 &(VkPipelineMultisampleStateCreateInfo){
-                    .sType =
-                        VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
                     .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
                 },
             .pDepthStencilState =
                 &(VkPipelineDepthStencilStateCreateInfo){
-                    .sType =
-                        VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
                     .depthTestEnable = VK_TRUE,
                     .depthWriteEnable = VK_TRUE,
                     .depthCompareOp = VK_COMPARE_OP_LESS,
@@ -176,8 +167,7 @@ void create_graphics_pipeline(App* app)
                 },
             .pColorBlendState =
                 &(VkPipelineColorBlendStateCreateInfo){
-                    .sType =
-                        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
                     .attachmentCount = COUNTOF(colorBlendAttachmentStates),
                     .pAttachments = colorBlendAttachmentStates,
                 },
@@ -189,8 +179,8 @@ void create_graphics_pipeline(App* app)
 
     for (uint32_t i = 0; i < COUNTOF(shaderStages); i++)
     {
-        vkDestroyShaderModule(app->renderer.context.device,
-                              shaderStages[i].module, app->renderer.allocator);
+        vkDestroyShaderModule(app->renderer.context.device, shaderStages[i].module,
+                              app->renderer.allocator);
     }
 }
 
@@ -216,8 +206,8 @@ void create_framebuffers(App* app)
             .height = app->renderer.swapchain.extent.height,
             .layers = 1,
         };
-        ASSERTVK(vkCreateFramebuffer(app->renderer.context.device,
-                                     &framebufferInfo, app->renderer.allocator,
+        ASSERTVK(vkCreateFramebuffer(app->renderer.context.device, &framebufferInfo,
+                                     app->renderer.allocator,
                                      &app->renderer.pipeline.framebuffers[i]),
                  "Couldn't create framebuffer %i", i);
     }
@@ -230,10 +220,9 @@ void destroy_framebuffers(App* app)
     for (uint32_t framebuffer_index = 0; framebuffer_index < framebuffer_count;
          ++framebuffer_index)
     {
-        vkDestroyFramebuffer(
-            app->renderer.context.device,
-            app->renderer.pipeline.framebuffers[framebuffer_index],
-            app->renderer.allocator);
+        vkDestroyFramebuffer(app->renderer.context.device,
+                             app->renderer.pipeline.framebuffers[framebuffer_index],
+                             app->renderer.allocator);
     }
 
     free(app->renderer.pipeline.framebuffers);
@@ -241,16 +230,14 @@ void destroy_framebuffers(App* app)
 
 void destroy_graphics_pipeline(App* app)
 {
-    vkDestroyPipelineLayout(app->renderer.context.device,
-                            app->renderer.pipeline.layout,
+    vkDestroyPipelineLayout(app->renderer.context.device, app->renderer.pipeline.layout,
                             app->renderer.allocator);
-    vkDestroyPipeline(app->renderer.context.device,
-                      app->renderer.pipeline.graphics, app->renderer.allocator);
+    vkDestroyPipeline(app->renderer.context.device, app->renderer.pipeline.graphics,
+                      app->renderer.allocator);
 }
 
 void destroy_renderpass(App* app)
 {
-    vkDestroyRenderPass(app->renderer.context.device,
-                        app->renderer.pipeline.renderpass,
+    vkDestroyRenderPass(app->renderer.context.device, app->renderer.pipeline.renderpass,
                         app->renderer.allocator);
 }

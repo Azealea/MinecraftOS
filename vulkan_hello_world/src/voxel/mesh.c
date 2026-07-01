@@ -38,8 +38,8 @@ void generate_chunk_mesh(World* world, ChunkPos pos,
                                 .z = (i32)(pos.z * CHUNK_SIZE + z),
                             },
                         .face_id = f,
-                        .texture_id = face_texture_resolve(
-                            &block_faces[b->type][f], 0, 0, 0),
+                        .texture_id =
+                            face_texture_resolve(&block_faces[b->type][f], 0, 0, 0),
                     };
                 }
             }

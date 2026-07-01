@@ -3,17 +3,16 @@
 #include "block.h"
 #include "textures/face_texture.h"
 
-static void
-build_texture_look_up(const FaceTextureBuilder builders[][FACE_COUNT],
-                      FaceTexture destination[][FACE_COUNT], ArrayAtlas* atlas)
+static void build_texture_look_up(const FaceTextureBuilder builders[][FACE_COUNT],
+                                  FaceTexture destination[][FACE_COUNT],
+                                  ArrayAtlas* atlas)
 {
     for (int b = 0; b < BlockFaceBuildersCount; b++)
         for (int f = 0; f < FACE_COUNT; f++)
             destination[b][f] = face_texture_build(&builders[b][f], atlas);
 }
 
-void load_texture_into_atlas(ArrayAtlas* atlas,
-                             FaceTexture (*block_faces)[FACE_COUNT])
+void load_texture_into_atlas(ArrayAtlas* atlas, FaceTexture (*block_faces)[FACE_COUNT])
 {
     build_texture_look_up(BlockFaceBuilders, block_faces, atlas);
 }

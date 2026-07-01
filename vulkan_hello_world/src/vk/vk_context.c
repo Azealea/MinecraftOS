@@ -27,8 +27,8 @@ static void create_instance(App* app)
 
 static void create_surface(App* app)
 {
-    ASSERTVK(glfwCreateWindowSurface(app->renderer.context.instance,
-                                     app->window, app->renderer.allocator,
+    ASSERTVK(glfwCreateWindowSurface(app->renderer.context.instance, app->window,
+                                     app->renderer.allocator,
                                      &app->renderer.context.surface),
              "Couldn't create window surface");
 }
@@ -47,8 +47,8 @@ void create_vk_context(App* app)
 
 void destroy_vk_context(App* app)
 {
-    vkDestroySurfaceKHR(app->renderer.context.instance,
-                        app->renderer.context.surface, app->renderer.allocator);
+    vkDestroySurfaceKHR(app->renderer.context.instance, app->renderer.context.surface,
+                        app->renderer.allocator);
     vkDestroyDevice(app->renderer.context.device, app->renderer.allocator);
     vkDestroyInstance(app->renderer.context.instance, app->renderer.allocator);
 }

@@ -40,21 +40,21 @@ void end_single_time_commands(App* app, VkCommandBuffer commandBuffer)
     vkQueueSubmit(app->renderer.context.queue, 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(app->renderer.context.queue);
 
-    vkFreeCommandBuffers(app->renderer.context.device, app->renderer.sync.pool,
-                         1, &commandBuffer);
+    vkFreeCommandBuffers(app->renderer.context.device, app->renderer.sync.pool, 1,
+                         &commandBuffer);
 }
 
 void create_command_pool(App* app)
 {
-    ASSERTVK(vkCreateCommandPool(
-                 app->renderer.context.device,
-                 &(VkCommandPoolCreateInfo){
-                     .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-                     .queueFamilyIndex = app->renderer.context.queueFamily,
-                     .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-                 },
-                 app->renderer.allocator, &app->renderer.sync.pool),
-             "Couldn't create command pool")
+    ASSERTVK(
+        vkCreateCommandPool(app->renderer.context.device,
+                            &(VkCommandPoolCreateInfo){
+                                .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+                                .queueFamilyIndex = app->renderer.context.queueFamily,
+                                .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+                            },
+                            app->renderer.allocator, &app->renderer.sync.pool),
+        "Couldn't create command pool")
 }
 
 void destroy_command_pool(App* app)
@@ -65,8 +65,7 @@ void destroy_command_pool(App* app)
 
 void allocate_command_buffer(App* app)
 {
-    app->renderer.sync.buffers =
-        malloc(sizeof(VkCommandBuffer) * app->maxFramesInFlight);
+    app->renderer.sync.buffers = malloc(sizeof(VkCommandBuffer) * app->maxFramesInFlight);
     ASSERTVK(vkAllocateCommandBuffers(
                  app->renderer.context.device,
                  &(VkCommandBufferAllocateInfo){
@@ -121,15 +120,15 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(cmd, 0, 1, instanceBuffers, offsets);
 
-    vkCmdBindDescriptorSets(
-        cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, app->renderer.pipeline.layout, 0,
-        1, &app->renderer.descriptors.sets[frameIndex], 0, NULL);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            app->renderer.pipeline.layout, 0, 1,
+                            &app->renderer.descriptors.sets[frameIndex], 0, NULL);
 
     vkCmdDraw(cmd, 6, app->world.face_count, 0, 0);
 
     vkCmdEndRenderPass(cmd);
-    ASSERTVK(vkEndCommandBuffer(cmd),
-             "Failed to record command buffer for image %u", imageIndex);
+    ASSERTVK(vkEndCommandBuffer(cmd), "Failed to record command buffer for image %u",
+             imageIndex);
 }
 
 void submit_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
@@ -138,8 +137,7 @@ void submit_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
         .pNext = NULL,
         .waitSemaphoreCount = 1,
-        .pWaitSemaphores =
-            (VkSemaphore[]){app->renderer.sync.imageAvailable[frameIndex]},
+        .pWaitSemaphores = (VkSemaphore[]){app->renderer.sync.imageAvailable[frameIndex]},
         .pWaitDstStageMask =
             (VkPipelineStageFlags[]){
                 VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,

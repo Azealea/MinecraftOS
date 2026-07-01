@@ -5,16 +5,15 @@
 #include "vk/gpu_resources.h"
 #include "vk/vk_swapchain.h"
 
-VkFormat findSupportedFormat(App* app, const VkFormat* candidates,
-                             int candidates_size, VkImageTiling tiling,
-                             VkFormatFeatureFlags features)
+VkFormat findSupportedFormat(App* app, const VkFormat* candidates, int candidates_size,
+                             VkImageTiling tiling, VkFormatFeatureFlags features)
 {
     for (int i = 0; i < candidates_size; i++)
     {
         auto format = candidates[i];
         VkFormatProperties props;
-        vkGetPhysicalDeviceFormatProperties(
-            app->renderer.context.physicalDevice, format, &props);
+        vkGetPhysicalDeviceFormatProperties(app->renderer.context.physicalDevice, format,
+                                            &props);
 
         if (tiling == VK_IMAGE_TILING_LINEAR
             && (props.linearTilingFeatures & features) == features)
@@ -48,10 +47,9 @@ void create_depth_resources(App* app)
 
     gpu_image_create(app, app->renderer.swapchain.extent.width,
                      app->renderer.swapchain.extent.height, 1, depthFormat,
-                     VK_IMAGE_TILING_OPTIMAL,
-                     VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                     VK_IMAGE_ASPECT_DEPTH_BIT, &app->renderer.depth);
+                     VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_IMAGE_ASPECT_DEPTH_BIT,
+                     &app->renderer.depth);
 }
 
 void destroy_depth_resources(App* app)

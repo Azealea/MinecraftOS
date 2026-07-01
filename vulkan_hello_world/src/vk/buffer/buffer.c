@@ -2,8 +2,7 @@
 
 #include "vk/renderer/vk_command.h"
 
-void copyBuffer(App* app, VkBuffer srcBuffer, VkBuffer dstBuffer,
-                VkDeviceSize size)
+void copyBuffer(App* app, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
     VkCommandBuffer commandBuffer = begin_single_time_commands(app);
 

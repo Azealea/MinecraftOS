@@ -6,8 +6,7 @@
 
 static inline size_t chunkpos_hash(ChunkPos p)
 {
-    uint64_t h = (uint64_t)(uint32_t)p.x * 73856093u
-        ^ (uint64_t)(uint32_t)p.y * 19349663u
+    uint64_t h = (uint64_t)(uint32_t)p.x * 73856093u ^ (uint64_t)(uint32_t)p.y * 19349663u
         ^ (uint64_t)(uint32_t)p.z * 83492791u;
     return (size_t)h;
 }

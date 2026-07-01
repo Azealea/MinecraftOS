@@ -22,18 +22,16 @@ void create_descriptor_set_layout(App* app)
         .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
     };
 
-    VkDescriptorSetLayoutBinding bindings[2] = {uboLayoutBinding,
-                                                samplerLayoutBinding};
+    VkDescriptorSetLayoutBinding bindings[2] = {uboLayoutBinding, samplerLayoutBinding};
     VkDescriptorSetLayoutCreateInfo layoutInfo = {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         .bindingCount = COUNTOF(bindings),
         .pBindings = bindings,
     };
 
-    ASSERTVK(vkCreateDescriptorSetLayout(
-                 app->renderer.context.device, &layoutInfo,
-                 app->renderer.allocator,
-                 &app->renderer.pipeline.descriptorSetLayout),
+    ASSERTVK(vkCreateDescriptorSetLayout(app->renderer.context.device, &layoutInfo,
+                                         app->renderer.allocator,
+                                         &app->renderer.pipeline.descriptorSetLayout),
              "failed to create descriptor set layout!")
 }
 
@@ -66,15 +64,14 @@ void create_descriptor_pool(App* app)
         .pPoolSizes = poolSize,
         .maxSets = app->maxFramesInFlight,
     };
-    ASSERTVK(vkCreateDescriptorPool(app->renderer.context.device, &poolInfo,
-                                    nullptr, &app->renderer.descriptors.pool),
+    ASSERTVK(vkCreateDescriptorPool(app->renderer.context.device, &poolInfo, nullptr,
+                                    &app->renderer.descriptors.pool),
              "failed to create descriptor pool!");
 }
 
 void create_descriptor_sets(App* app)
 {
-    VkDescriptorSetLayout* layouts =
-        calloc(app->maxFramesInFlight, sizeof(*layouts));
+    VkDescriptorSetLayout* layouts = calloc(app->maxFramesInFlight, sizeof(*layouts));
     for (size_t i = 0; i < app->maxFramesInFlight; i++)
         layouts[i] = app->renderer.pipeline.descriptorSetLayout;
 
@@ -127,9 +124,8 @@ void create_descriptor_sets(App* app)
                     .pImageInfo = &imageInfo,
                 },
         };
-        vkUpdateDescriptorSets(app->renderer.context.device,
-                               COUNTOF(descriptorWrite), descriptorWrite, 0,
-                               nullptr);
+        vkUpdateDescriptorSets(app->renderer.context.device, COUNTOF(descriptorWrite),
+                               descriptorWrite, 0, nullptr);
     }
 
     // TODO maybe we dont deallocate now ?
@@ -138,7 +134,6 @@ void create_descriptor_sets(App* app)
 
 void destroy_descriptor_pool(App* app)
 {
-    vkDestroyDescriptorPool(app->renderer.context.device,
-                            app->renderer.descriptors.pool,
+    vkDestroyDescriptorPool(app->renderer.context.device, app->renderer.descriptors.pool,
                             app->renderer.allocator);
 }

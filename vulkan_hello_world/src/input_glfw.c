@@ -19,8 +19,7 @@ void input_poll(Input* state, void* backend_ctx)
         state->keys[i] = glfwGetKey(window, glfw_key_map[i]) == GLFW_PRESS;
     }
 
-    memcpy(state->mouse_buttons_prev, state->mouse_buttons,
-           sizeof(state->mouse_buttons));
+    memcpy(state->mouse_buttons_prev, state->mouse_buttons, sizeof(state->mouse_buttons));
     for (int i = 0; i < MOUSE_BUTTON_COUNT; i++)
     {
         state->mouse_buttons[i] = glfwGetMouseButton(window, i) == GLFW_PRESS;

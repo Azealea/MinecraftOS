@@ -3,53 +3,50 @@
 #include "textures/base_texture_enum.h"
 #include "textures/face_texture.h"
 
-#define BARREL(SIDE, TOPBOT)                                                   \
-    {(SIDE), (SIDE), (SIDE), (SIDE), (TOPBOT), (TOPBOT)}
+#define BARREL(SIDE, TOPBOT) {(SIDE), (SIDE), (SIDE), (SIDE), (TOPBOT), (TOPBOT)}
 
 #define DONUT(SIDE, TOP, BOT) {(SIDE), (SIDE), (SIDE), (SIDE), (TOP), (BOT)}
 
 #define UNIFO(TEXT) {(TEXT), (TEXT), (TEXT), (TEXT), (TEXT), (TEXT)}
 
-#define CROWN(SIDE, FRONT, BOT, TOP)                                           \
-    {(SIDE), (FRONT), (TOP), (BOT), (SIDE), (SIDE)}
+#define CROWN(SIDE, FRONT, BOT, TOP) {(SIDE), (FRONT), (TOP), (BOT), (SIDE), (SIDE)}
 
-#define LEAF(TID)                                                              \
-    (FaceTextureBuilder)                                                       \
-    {                                                                          \
-        .type = 0, .leaf = {.texture_id = (TID), .count = 1},                  \
+#define LEAF(TID)                                                                        \
+    (FaceTextureBuilder)                                                                 \
+    {                                                                                    \
+        .type = 0, .leaf = {.texture_id = (TID), .count = 1},                            \
     }
-#define LEAF_ANIM(TID, N)                                                      \
-    (FaceTextureBuilder)                                                       \
-    {                                                                          \
-        .type = 0, .leaf = {.texture_id = (TID), .count = (N)},                \
+#define LEAF_ANIM(TID, N)                                                                \
+    (FaceTextureBuilder)                                                                 \
+    {                                                                                    \
+        .type = 0, .leaf = {.texture_id = (TID), .count = (N)},                          \
     }
-#define CONNECTED4(INNER, EDGE, CORN)                                          \
-    (FaceTextureBuilder)                                                       \
-    {                                                                          \
-        .type = FACETXT_CONNECTED4_BIT,                                        \
-        .connected = {.inner = &(INNER), .edge = &(EDGE), .corner = &(CORN)},  \
+#define CONNECTED4(INNER, EDGE, CORN)                                                    \
+    (FaceTextureBuilder)                                                                 \
+    {                                                                                    \
+        .type = FACETXT_CONNECTED4_BIT,                                                  \
+        .connected = {.inner = &(INNER), .edge = &(EDGE), .corner = &(CORN)},            \
     }
-#define CONNECTED8(INNER, EDGE, CORN)                                          \
-    (FaceTextureBuilder)                                                       \
-    {                                                                          \
-        .type = FACETXT_CONNECTED8_BIT,                                        \
-        .connected = {.inner = &(INNER), .edge = &(EDGE), .corner = &(CORN)},  \
+#define CONNECTED8(INNER, EDGE, CORN)                                                    \
+    (FaceTextureBuilder)                                                                 \
+    {                                                                                    \
+        .type = FACETXT_CONNECTED8_BIT,                                                  \
+        .connected = {.inner = &(INNER), .edge = &(EDGE), .corner = &(CORN)},            \
     }
-#define ACTIVATED(OFF, ON)                                                     \
-    (FaceTextureBuilder)                                                       \
-    {                                                                          \
-        .type = FACETXT_ACTIVATED_BIT,                                         \
-        .activated = {.off = &(OFF), .on = &(ON)},                             \
+#define ACTIVATED(OFF, ON)                                                               \
+    (FaceTextureBuilder)                                                                 \
+    {                                                                                    \
+        .type = FACETXT_ACTIVATED_BIT, .activated = {.off = &(OFF), .on = &(ON)},        \
     }
-#define VARIANT(...)                                                           \
-    (FaceTextureBuilder)                                                       \
-    {                                                                          \
-        .type = FACETXT_VARIANT_BIT,                                           \
-        .variant = {                                                           \
-            .children = (FaceTextureBuilder*[]){__VA_ARGS__},                  \
-            .count = sizeof((FaceTextureBuilder[]){__VA_ARGS__})               \
-                / sizeof(FaceTextureBuilder),                                  \
-        },                                                                     \
+#define VARIANT(...)                                                                     \
+    (FaceTextureBuilder)                                                                 \
+    {                                                                                    \
+        .type = FACETXT_VARIANT_BIT,                                                     \
+        .variant = {                                                                     \
+            .children = (FaceTextureBuilder*[]){__VA_ARGS__},                            \
+            .count = sizeof((FaceTextureBuilder[]){__VA_ARGS__})                         \
+                / sizeof(FaceTextureBuilder),                                            \
+        },                                                                               \
     }
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"

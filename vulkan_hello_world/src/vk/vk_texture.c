@@ -53,8 +53,8 @@ void transition_image_layout(App* app, VkImage image, uint32_t layerCount,
         ASSERT(false, "Unsupported layout transition!");
     }
 
-    vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0,
-                         nullptr, 0, nullptr, 1, &barrier);
+    vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0,
+                         nullptr, 1, &barrier);
 
     end_single_time_commands(app, commandBuffer);
 }
@@ -72,9 +72,9 @@ void create_texture_image_from_atlas(App* app, ArrayAtlas* atlas)
                       &staging);
 
     void* data;
-    ASSERTVK(vkMapMemory(app->renderer.context.device, staging.mem, 0,
-                         totalSize, 0, &data),
-             "Failed to map staging buffer");
+    ASSERTVK(
+        vkMapMemory(app->renderer.context.device, staging.mem, 0, totalSize, 0, &data),
+        "Failed to map staging buffer");
 
     for (uint32_t i = 0; i < layerCount; i++)
     {
@@ -83,12 +83,11 @@ void create_texture_image_from_atlas(App* app, ArrayAtlas* atlas)
 
     vkUnmapMemory(app->renderer.context.device, staging.mem);
 
-    gpu_image_create(
-        app, TEXTURE_WIDTH_HEIGHT, TEXTURE_WIDTH_HEIGHT, layerCount,
-        VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
-        &app->renderer.texture.image);
+    gpu_image_create(app, TEXTURE_WIDTH_HEIGHT, TEXTURE_WIDTH_HEIGHT, layerCount,
+                     VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
+                     VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_IMAGE_ASPECT_COLOR_BIT,
+                     &app->renderer.texture.image);
 
     transition_image_layout(app, app->renderer.texture.image.img, layerCount,
                             VK_IMAGE_LAYOUT_UNDEFINED,
@@ -108,14 +107,12 @@ void create_texture_image_from_atlas(App* app, ArrayAtlas* atlas)
             .imageSubresource.baseArrayLayer = i,
             .imageSubresource.layerCount = 1,
             .imageOffset = (VkOffset3D){0, 0, 0},
-            .imageExtent =
-                (VkExtent3D){TEXTURE_WIDTH_HEIGHT, TEXTURE_WIDTH_HEIGHT, 1},
+            .imageExtent = (VkExtent3D){TEXTURE_WIDTH_HEIGHT, TEXTURE_WIDTH_HEIGHT, 1},
         };
     }
 
-    vkCmdCopyBufferToImage(
-        commandBuffer, staging.buf, app->renderer.texture.image.img,
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, layerCount, regions);
+    vkCmdCopyBufferToImage(commandBuffer, staging.buf, app->renderer.texture.image.img,
+                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, layerCount, regions);
 
     end_single_time_commands(app, commandBuffer);
     free(regions);
@@ -148,15 +145,14 @@ void create_texture_sampler(App* app)
     };
 
     ASSERTVK(vkCreateSampler(app->renderer.context.device, &samplerInfo,
-                             app->renderer.allocator,
-                             &app->renderer.texture.sampler),
+                             app->renderer.allocator, &app->renderer.texture.sampler),
              "failed to create texture sampler!");
 }
 
 void destroy_texture_sampler(App* app)
 {
-    vkDestroySampler(app->renderer.context.device,
-                     app->renderer.texture.sampler, app->renderer.allocator);
+    vkDestroySampler(app->renderer.context.device, app->renderer.texture.sampler,
+                     app->renderer.allocator);
 }
 
 void create_texture_stuff(App* app)

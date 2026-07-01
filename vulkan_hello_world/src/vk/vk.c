@@ -60,16 +60,14 @@ void drawFrame(App* app)
 
     VkDevice device = app->renderer.context.device;
 
-    ASSERTVK(vkWaitForFences(device, 1,
-                             &app->renderer.sync.inFlight[currentFrame],
+    ASSERTVK(vkWaitForFences(device, 1, &app->renderer.sync.inFlight[currentFrame],
                              VK_TRUE, UINT64_MAX),
              "Failed to wait for in-flight fence for frame %u", currentFrame);
 
     uint32_t imageIndex = acquire_swapchain_image(app, currentFrame);
 
-    ASSERTVK(
-        vkResetFences(device, 1, &app->renderer.sync.inFlight[currentFrame]),
-        "Failed to reset in-flight fence for frame %u", currentFrame);
+    ASSERTVK(vkResetFences(device, 1, &app->renderer.sync.inFlight[currentFrame]),
+             "Failed to reset in-flight fence for frame %u", currentFrame);
 
     update_uniform_buffer(app, currentFrame);
 

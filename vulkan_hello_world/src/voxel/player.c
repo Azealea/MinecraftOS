@@ -28,10 +28,9 @@ static void place_on_hit(World* world, RaycastHit hit, Block block)
     VEC3(u8) local = {px % CHUNK_SIZE, py % CHUNK_SIZE, pz % CHUNK_SIZE};
     if (!chunk_is_in_bound(local))
         return;
-    Chunk* e = world_get_or_add_chunk(world,
-                                      ((ChunkPos){.x = px / CHUNK_SIZE,
-                                                  .y = py / CHUNK_SIZE,
-                                                  .z = pz / CHUNK_SIZE}));
+    Chunk* e = world_get_or_add_chunk(
+        world,
+        ((ChunkPos){.x = px / CHUNK_SIZE, .y = py / CHUNK_SIZE, .z = pz / CHUNK_SIZE}));
     chunk_set(e, local, block);
 }
 

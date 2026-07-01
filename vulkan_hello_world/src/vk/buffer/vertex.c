@@ -59,16 +59,16 @@ void create_vertex_buffer(App* app, const Face* faces, uint32_t count)
                       &staging);
 
     void* data;
-    ASSERTVK(vkMapMemory(app->renderer.context.device, staging.mem, 0,
-                         bufferSize, 0, &data),
-             "Failed to map");
+    ASSERTVK(
+        vkMapMemory(app->renderer.context.device, staging.mem, 0, bufferSize, 0, &data),
+        "Failed to map");
     memcpy(data, faces, (size_t)dataSize);
     vkUnmapMemory(app->renderer.context.device, staging.mem);
 
-    gpu_buffer_create(
-        app, bufferSize,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &app->renderer.buffers.vertex);
+    gpu_buffer_create(app, bufferSize,
+                      VK_BUFFER_USAGE_TRANSFER_DST_BIT
+                          | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &app->renderer.buffers.vertex);
 
     copyBuffer(app, staging.buf, app->renderer.buffers.vertex.buf, bufferSize);
     gpu_buffer_destroy(app, &staging);

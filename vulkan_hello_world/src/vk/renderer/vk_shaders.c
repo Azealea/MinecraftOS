@@ -2,22 +2,21 @@
 #include "vk/renderer/vk_shaders.h"
 
 VkPipelineShaderStageCreateInfo load_shader_module(const App* app,
-                                                   const unsigned char* data,
-                                                   size_t size,
+                                                   const unsigned char* data, size_t size,
                                                    VkShaderStageFlagBits stage)
 {
     static const char* shaderEntryFunctionName = "main";
     VkShaderModule shader_module;
 
-    ASSERTVK(vkCreateShaderModule(
-                 app->renderer.context.device,
-                 &(VkShaderModuleCreateInfo){
-                     .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-                     .pCode = (const uint32_t*)data,
-                     .codeSize = size,
-                 },
-                 app->renderer.allocator, &shader_module),
-             "Couldn't create vertex shader module");
+    ASSERTVK(
+        vkCreateShaderModule(app->renderer.context.device,
+                             &(VkShaderModuleCreateInfo){
+                                 .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+                                 .pCode = (const uint32_t*)data,
+                                 .codeSize = size,
+                             },
+                             app->renderer.allocator, &shader_module),
+        "Couldn't create vertex shader module");
     return (VkPipelineShaderStageCreateInfo){
         .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
         .module = shader_module,

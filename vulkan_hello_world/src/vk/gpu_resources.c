@@ -18,8 +18,7 @@ void gpu_buffer_create(App* app, VkDeviceSize size, VkBufferUsageFlags usage,
              "Failed to create buffer");
 
     VkMemoryRequirements memReqs;
-    vkGetBufferMemoryRequirements(app->renderer.context.device, out->buf,
-                                  &memReqs);
+    vkGetBufferMemoryRequirements(app->renderer.context.device, out->buf, &memReqs);
 
     VkMemoryAllocateInfo allocInfo = {
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -36,16 +35,14 @@ void gpu_buffer_create(App* app, VkDeviceSize size, VkBufferUsageFlags usage,
 
 void gpu_buffer_destroy(App* app, GpuBuffer* buf)
 {
-    vkDestroyBuffer(app->renderer.context.device, buf->buf,
-                    app->renderer.allocator);
-    vkFreeMemory(app->renderer.context.device, buf->mem,
-                 app->renderer.allocator);
+    vkDestroyBuffer(app->renderer.context.device, buf->buf, app->renderer.allocator);
+    vkFreeMemory(app->renderer.context.device, buf->mem, app->renderer.allocator);
 }
 
-void gpu_image_create(App* app, uint32_t width, uint32_t height,
-                      uint32_t layers, VkFormat format, VkImageTiling tiling,
-                      VkImageUsageFlags usage, VkMemoryPropertyFlags props,
-                      VkImageAspectFlags aspect, GpuImage* out)
+void gpu_image_create(App* app, uint32_t width, uint32_t height, uint32_t layers,
+                      VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+                      VkMemoryPropertyFlags props, VkImageAspectFlags aspect,
+                      GpuImage* out)
 {
     VkImageCreateInfo imageInfo = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -68,8 +65,7 @@ void gpu_image_create(App* app, uint32_t width, uint32_t height,
              "Failed to create image");
 
     VkMemoryRequirements memReqs;
-    vkGetImageMemoryRequirements(app->renderer.context.device, out->img,
-                                 &memReqs);
+    vkGetImageMemoryRequirements(app->renderer.context.device, out->img, &memReqs);
 
     VkMemoryAllocateInfo allocInfo = {
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -88,10 +84,7 @@ void gpu_image_create(App* app, uint32_t width, uint32_t height,
 
 void gpu_image_destroy(App* app, GpuImage* img)
 {
-    vkDestroyImageView(app->renderer.context.device, img->view,
-                       app->renderer.allocator);
-    vkDestroyImage(app->renderer.context.device, img->img,
-                   app->renderer.allocator);
-    vkFreeMemory(app->renderer.context.device, img->mem,
-                 app->renderer.allocator);
+    vkDestroyImageView(app->renderer.context.device, img->view, app->renderer.allocator);
+    vkDestroyImage(app->renderer.context.device, img->img, app->renderer.allocator);
+    vkFreeMemory(app->renderer.context.device, img->mem, app->renderer.allocator);
 }

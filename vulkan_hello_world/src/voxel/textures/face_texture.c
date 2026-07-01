@@ -4,8 +4,8 @@
 
 #include "voxel/textures/array_atlas.h"
 
-uint16_t face_texture_resolve(const FaceTexture* f, uint8_t neighbor_mask,
-                              bool activated, uint8_t hash_pos)
+uint16_t face_texture_resolve(const FaceTexture* f, uint8_t neighbor_mask, bool activated,
+                              uint8_t hash_pos)
 {
     const uint8_t connected_size = (f->flags & FACETXT_CONNECTED8_BIT) ? 46
         : (f->flags & FACETXT_CONNECTED4_BIT)                          ? 16

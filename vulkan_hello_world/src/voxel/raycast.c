@@ -51,8 +51,7 @@ RaycastHit raycast(const Camera* cam, World* world, float max_dist)
 
             VEC3(u8) loc = pos_glob_to_rel(b);
 
-            const Block* blk =
-                chunk_get(world_get_or_add_chunk(world, cp), loc);
+            const Block* blk = chunk_get(world_get_or_add_chunk(world, cp), loc);
             if (blk->type != BLK_AIR)
             {
                 result.hit = true;
