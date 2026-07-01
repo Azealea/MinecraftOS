@@ -4,60 +4,7 @@
 
 #include "app.h"
 #include "vk/buffer/buffer.h"
-#include "voxel/chunk.h"
-#include "voxel/textures/face_texture.h"
-
-#define INSTANCE_MAX (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 6)
-
-Face face_instances[INSTANCE_MAX];
-size_t face_instance_count = 0;
-
-void recreate_vertices(const Chunk* chunk)
-{
-    face_instance_count = 0;
-
-    static const int neighbourDirs[6][3] = {
-        {1, 0, 0}, // +X
-        {-1, 0, 0}, // -X
-        {0, 1, 0}, // +Y
-        {0, -1, 0}, // -Y
-        {0, 0, 1}, // +Z
-        {0, 0, -1}, // -Z
-    };
-
-    for (size_t x = 0; x < CHUNK_SIZE; x++)
-        for (size_t y = 0; y < CHUNK_SIZE; y++)
-            for (size_t z = 0; z < CHUNK_SIZE; z++)
-            {
-                const Block* b = chunk_get(chunk, x, y, z);
-                if (b->type == BLK_AIR)
-                    continue;
-
-                for (int f = 0; f < 6; f++)
-                {
-                    int nx = x + neighbourDirs[f][0];
-                    int ny = y + neighbourDirs[f][1];
-                    int nz = z + neighbourDirs[f][2];
-
-                    if (chunk_is_in_bound(nx, ny, nz)
-                        && chunk_get(chunk, nx, ny, nz)->type != BLK_AIR)
-                        continue;
-
-                    face_instances[face_instance_count++] = (Face){
-                        .pos = {chunk->x + x, chunk->y + y, chunk->z + z},
-                        .face_id = f,
-
-                        .texture_id = face_texture_resolve(
-                            &BlockFaces[b->type][f], 0, 0, 0),
-                    };
-                }
-            }
-}
-
-uint32_t instance_count(void)
-{
-    return (uint32_t)face_instance_count;
-}
+#include "vk/gpu_resources.h"
 
 VkVertexInputBindingDescription get_binding_description()
 {
@@ -100,38 +47,34 @@ VkVertexInputAttributeDescription* get_attribute_descriptions(int* out_size)
     return attributeDescriptions;
 }
 
-void create_vertex_buffer(App* app)
+void create_vertex_buffer(App* app, const Face* faces, uint32_t count)
 {
-    VkDeviceSize bufferSize = sizeof(face_instances);
+    VkDeviceSize bufferSize = INSTANCE_MAX * sizeof(Face);
+    VkDeviceSize dataSize = count * sizeof(Face);
 
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    create_buffer(app, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-                      | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                  &stagingBuffer, &stagingBufferMemory);
+    GpuBuffer staging;
+    gpu_buffer_create(app, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+                          | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                      &staging);
 
     void* data;
-    ASSERTVK(vkMapMemory(app->context.device, stagingBufferMemory, 0,
+    ASSERTVK(vkMapMemory(app->renderer.context.device, staging.mem, 0,
                          bufferSize, 0, &data),
              "Failed to map");
-    memcpy(data, face_instances, (size_t)bufferSize);
-    vkUnmapMemory(app->context.device, stagingBufferMemory);
+    memcpy(data, faces, (size_t)dataSize);
+    vkUnmapMemory(app->renderer.context.device, staging.mem);
 
-    create_buffer(app, bufferSize,
-                  VK_BUFFER_USAGE_TRANSFER_DST_BIT
-                      | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &app->vertexBuffer,
-                  &app->vertexBufferMemory);
+    gpu_buffer_create(
+        app, bufferSize,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &app->renderer.buffers.vertex);
 
-    copyBuffer(app, stagingBuffer, app->vertexBuffer, bufferSize);
-
-    vkDestroyBuffer(app->context.device, stagingBuffer, app->allocator);
-    vkFreeMemory(app->context.device, stagingBufferMemory, app->allocator);
+    copyBuffer(app, staging.buf, app->renderer.buffers.vertex.buf, bufferSize);
+    gpu_buffer_destroy(app, &staging);
 }
 
 void destroy_vertex_buffer(App* app)
 {
-    vkDestroyBuffer(app->context.device, app->vertexBuffer, app->allocator);
-    vkFreeMemory(app->context.device, app->vertexBufferMemory, app->allocator);
+    gpu_buffer_destroy(app, &app->renderer.buffers.vertex);
 }

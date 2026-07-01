@@ -1,7 +1,7 @@
-#include "input.h"
-
 #include <GLFW/glfw3.h>
 #include <string.h>
+
+#include "input.h"
 
 void input_poll(Input* state, void* backend_ctx)
 {
@@ -17,6 +17,13 @@ void input_poll(Input* state, void* backend_ctx)
     for (int i = 0; i < KEY_COUNT; i++)
     {
         state->keys[i] = glfwGetKey(window, glfw_key_map[i]) == GLFW_PRESS;
+    }
+
+    memcpy(state->mouse_buttons_prev, state->mouse_buttons,
+           sizeof(state->mouse_buttons));
+    for (int i = 0; i < MOUSE_BUTTON_COUNT; i++)
+    {
+        state->mouse_buttons[i] = glfwGetMouseButton(window, i) == GLFW_PRESS;
     }
 
     double new_x, new_y;

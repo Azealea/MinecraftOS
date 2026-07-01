@@ -2,26 +2,27 @@
 
 #include <stdlib.h>
 
-#include "vk/buffer/vertex.h"
-
 VkCommandBuffer begin_single_time_commands(App* app)
 {
     VkCommandBufferAllocateInfo allocInfo = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
         .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-        .commandPool = app->renderer.commandPool,
+        .commandPool = app->renderer.sync.pool,
         .commandBufferCount = 1,
     };
 
     VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(app->context.device, &allocInfo, &commandBuffer);
+    ASSERTVK(vkAllocateCommandBuffers(app->renderer.context.device, &allocInfo,
+                                      &commandBuffer),
+             "Failed to allocate single-time command buffer");
 
     VkCommandBufferBeginInfo beginInfo = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
     };
 
-    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+    ASSERTVK(vkBeginCommandBuffer(commandBuffer, &beginInfo),
+             "Failed to begin single-time command buffer");
 
     return commandBuffer;
 }
@@ -36,63 +37,60 @@ void end_single_time_commands(App* app, VkCommandBuffer commandBuffer)
         .pCommandBuffers = &commandBuffer,
     };
 
-    vkQueueSubmit(app->context.queue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(app->context.queue);
+    vkQueueSubmit(app->renderer.context.queue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(app->renderer.context.queue);
 
-    vkFreeCommandBuffers(app->context.device, app->renderer.commandPool, 1,
-                         &commandBuffer);
+    vkFreeCommandBuffers(app->renderer.context.device, app->renderer.sync.pool,
+                         1, &commandBuffer);
 }
 
 void create_command_pool(App* app)
 {
     ASSERTVK(vkCreateCommandPool(
-                 app->context.device,
+                 app->renderer.context.device,
                  &(VkCommandPoolCreateInfo){
                      .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-                     .queueFamilyIndex = app->context.queueFamily,
+                     .queueFamilyIndex = app->renderer.context.queueFamily,
                      .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
                  },
-                 app->allocator, &app->renderer.commandPool),
+                 app->renderer.allocator, &app->renderer.sync.pool),
              "Couldn't create command pool")
 }
 
 void destroy_command_pool(App* app)
 {
-    vkDestroyCommandPool(app->context.device, app->renderer.commandPool,
-                         app->allocator);
+    vkDestroyCommandPool(app->renderer.context.device, app->renderer.sync.pool,
+                         app->renderer.allocator);
 }
 
 void allocate_command_buffer(App* app)
 {
-    app->renderer.commandBuffers =
+    app->renderer.sync.buffers =
         malloc(sizeof(VkCommandBuffer) * app->maxFramesInFlight);
     ASSERTVK(vkAllocateCommandBuffers(
-                 app->context.device,
+                 app->renderer.context.device,
                  &(VkCommandBufferAllocateInfo){
                      .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-                     .commandPool = app->renderer.commandPool,
+                     .commandPool = app->renderer.sync.pool,
                      .commandBufferCount = app->maxFramesInFlight,
                      .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
                  },
-                 app->renderer.commandBuffers),
+                 app->renderer.sync.buffers),
              "Couldn't allocate command buffer");
 }
 
 void destroy_command_buffer(App* app)
 {
-    free(app->renderer.commandBuffers);
+    free(app->renderer.sync.buffers);
 }
 
 void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
 {
-    VkCommandBuffer cmd = app->renderer.commandBuffers[frameIndex];
+    VkCommandBuffer cmd = app->renderer.sync.buffers[frameIndex];
     ASSERTVK(vkResetCommandBuffer(cmd, 0), "Failed to reset command buffer");
 
     VkCommandBufferBeginInfo beginInfo = {
         .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        .pNext = NULL,
-        .flags = 0,
-        .pInheritanceInfo = NULL,
     };
     ASSERTVK(vkBeginCommandBuffer(cmd, &beginInfo),
              "Failed to begin recording command buffer");
@@ -104,12 +102,12 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
     VkRenderPassBeginInfo renderPassInfo = {
         .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         .pNext = NULL,
-        .renderPass = app->renderer.renderpass,
-        .framebuffer = app->renderer.framebuffers[imageIndex],
+        .renderPass = app->renderer.pipeline.renderpass,
+        .framebuffer = app->renderer.pipeline.framebuffers[imageIndex],
         .renderArea =
             {
                 .offset = {0, 0},
-                .extent = app->swapchain.imageExtent,
+                .extent = app->renderer.swapchain.extent,
             },
         .clearValueCount = COUNTOF(clearValues),
         .pClearValues = clearValues,
@@ -117,17 +115,17 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
 
     vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                      app->renderer.graphicsPipeline);
+                      app->renderer.pipeline.graphics);
 
-    VkBuffer instanceBuffers[] = {app->vertexBuffer};
+    VkBuffer instanceBuffers[] = {app->renderer.buffers.vertex.buf};
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(cmd, 0, 1, instanceBuffers, offsets);
 
-    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            app->renderer.pipelineLayout, 0, 1,
-                            &app->descriptorSets[frameIndex], 0, NULL);
+    vkCmdBindDescriptorSets(
+        cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, app->renderer.pipeline.layout, 0,
+        1, &app->renderer.descriptors.sets[frameIndex], 0, NULL);
 
-    vkCmdDraw(cmd, 6, instance_count(), 0, 0);
+    vkCmdDraw(cmd, 6, app->world.face_count, 0, 0);
 
     vkCmdEndRenderPass(cmd);
     ASSERTVK(vkEndCommandBuffer(cmd),
@@ -141,19 +139,19 @@ void submit_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
         .pNext = NULL,
         .waitSemaphoreCount = 1,
         .pWaitSemaphores =
-            (VkSemaphore[]){app->renderer.imageAvailableSemaphores[frameIndex]},
+            (VkSemaphore[]){app->renderer.sync.imageAvailable[frameIndex]},
         .pWaitDstStageMask =
             (VkPipelineStageFlags[]){
                 VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
             },
         .commandBufferCount = 1,
-        .pCommandBuffers = &app->renderer.commandBuffers[frameIndex],
+        .pCommandBuffers = &app->renderer.sync.buffers[frameIndex],
         .signalSemaphoreCount = 1,
         .pSignalSemaphores =
-            (VkSemaphore[]){app->renderer.renderFinishedSemaphores[imageIndex]},
+            (VkSemaphore[]){app->renderer.sync.renderFinished[imageIndex]},
     };
 
-    ASSERTVK(vkQueueSubmit(app->context.queue, 1, &submitInfo,
-                           app->renderer.inFlightFences[frameIndex]),
+    ASSERTVK(vkQueueSubmit(app->renderer.context.queue, 1, &submitInfo,
+                           app->renderer.sync.inFlight[frameIndex]),
              "Failed to submit draw command buffer for frame %u", frameIndex);
 }

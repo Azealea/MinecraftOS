@@ -2,12 +2,9 @@
 
 #include <stdlib.h>
 
-Chunk* chunk_constr(int xpos, int ypos)
+Chunk* chunk_constr(void)
 {
-    Chunk* c = calloc(1, sizeof(Chunk));
-    c->x = xpos;
-    c->y = ypos;
-    return c;
+    return calloc(1, sizeof(Chunk));
 }
 
 void chunk_deconstr(Chunk* c)
@@ -15,22 +12,22 @@ void chunk_deconstr(Chunk* c)
     free(c);
 }
 
-bool chunk_is_in_bound(uint8_t x, uint8_t y, uint8_t z)
+bool chunk_is_in_bound(VEC3(u8) pos)
 {
-    return x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE;
+    return pos.x < CHUNK_SIZE && pos.y < CHUNK_SIZE && pos.z < CHUNK_SIZE;
 }
 
-inline int chunk_index(uint8_t x, uint8_t y, uint8_t z)
+inline int chunk_index(VEC3(u8) pos)
 {
-    return x + z * CHUNK_SIZE + y * CHUNK_SIZE * CHUNK_SIZE;
+    return pos.x + pos.z * CHUNK_SIZE + pos.y * CHUNK_SIZE * CHUNK_SIZE;
 }
 
-const Block* chunk_get(const Chunk* chunk, uint8_t x, uint8_t y, uint8_t z)
+const Block* chunk_get(const Chunk* chunk, VEC3(u8) pos)
 {
-    return &chunk->blocks[chunk_index(x, y, z)];
+    return &chunk->blocks[chunk_index(pos)];
 }
 
-void chunk_set(Chunk* chunk, uint8_t x, uint8_t y, uint8_t z, Block block)
+void chunk_set(Chunk* chunk, VEC3(u8) pos, Block block)
 {
-    chunk->blocks[chunk_index(x, y, z)] = block;
+    chunk->blocks[chunk_index(pos)] = block;
 }

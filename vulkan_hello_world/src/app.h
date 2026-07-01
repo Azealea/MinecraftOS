@@ -3,10 +3,10 @@
 #include "input.h"
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include <vulkan/vulkan.h>
 
 #include "utils/utils.h"
 #include "vk/camera.h"
+#include "vk/vk_renderer.h"
 #include "voxel/world.h"
 
 typedef struct
@@ -21,7 +21,6 @@ typedef struct
     // extent of the configurable field
 
     Input inputState;
-    VkAllocationCallbacks* allocator;
     double start_time;
 
     // GLFW
@@ -30,69 +29,8 @@ typedef struct
 
     Camera camera;
 
-    // Vulkan
-    struct context
-    {
-        VkInstance instance;
-        VkSurfaceKHR surface;
+    Renderer renderer;
 
-        VkPhysicalDevice physicalDevice;
-        uint32_t queueFamily;
-        VkDevice device;
-        VkQueue queue;
-    } context;
-
-    struct swapchain
-    {
-        VkSwapchainKHR swapchain;
-
-        uint32_t imageCount;
-        VkImage* images;
-        VkImageView* imageViews;
-
-        VkFormat format;
-        VkColorSpaceKHR colorSpace;
-        VkExtent2D imageExtent;
-    } swapchain;
-
-    struct renderer
-    {
-        VkDescriptorSetLayout descriptorSetLayout;
-        VkPipelineLayout pipelineLayout;
-
-        VkPipeline graphicsPipeline;
-        VkRenderPass renderpass;
-        VkFramebuffer* framebuffers;
-
-        VkCommandPool commandPool;
-        // arrays of size maxFramesInFlight
-        VkCommandBuffer* commandBuffers;
-        VkSemaphore* imageAvailableSemaphores;
-        VkSemaphore* renderFinishedSemaphores;
-        VkFence* inFlightFences;
-    } renderer;
-
-    VkBuffer vertexBuffer;
-    VkDeviceMemory vertexBufferMemory;
-    VkBuffer indexBuffer;
-    VkDeviceMemory indexBufferMemory;
-
-    // arrays of size maxFramesInFlight
-    VkBuffer* uniformBuffers;
-    VkDeviceMemory* uniformBuffersMemory;
-    void** uniformBuffersMapped;
-
-    VkDescriptorPool descriptorPool;
-    VkDescriptorSet* descriptorSets;
-
-    VkImage textureImage;
-    VkDeviceMemory textureImageMemory;
-    VkImageView textureImageView;
-    VkSampler textureSampler;
-
-    VkImage depthImage;
-    VkDeviceMemory depthImageMemory;
-    VkImageView depthImageView;
-
+    FaceTexture block_faces[BLOCK_COUNT][FACE_COUNT];
     World world;
 } App;

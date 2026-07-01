@@ -13,7 +13,11 @@
 - [x] proper input interface
 - [ ] block state
 - [ ] multiple chunks
-- [ ] place block
+    - [ ] decide hashmap or simple 3d table of chunks
+    - [ ] provide 1 big buffer for all chunk's meshes
+- [ ] interact with world : place and remove blocks
+    - [X] raytrace in voxel space
+    - [ ] provide a way to select block : a BSM block selection menu
 - [ ] blockStates -> rotate block
 - [ ] cube overlay cursor
 - [ ] save world

@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "type.h"
+
 #define ERROR(Format, ...)                                                     \
     do                                                                         \
     {                                                                          \

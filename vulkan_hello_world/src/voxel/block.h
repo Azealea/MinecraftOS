@@ -28,5 +28,3 @@ typedef struct Block
 
 extern const FaceTextureBuilder BlockFaceBuilders[][FACE_COUNT];
 extern const int BlockFaceBuildersCount;
-
-extern FaceTexture BlockFaces[][FACE_COUNT];

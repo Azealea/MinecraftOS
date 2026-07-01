@@ -21,14 +21,15 @@ static void create_instance(App* app)
                      .enabledExtensionCount = requiredExtensionsCount,
                      .ppEnabledExtensionNames = requiredExtensions,
                  },
-                 app->allocator, &app->context.instance),
+                 app->renderer.allocator, &app->renderer.context.instance),
              "Couldn't create instance")
 }
 
 static void create_surface(App* app)
 {
-    ASSERTVK(glfwCreateWindowSurface(app->context.instance, app->window,
-                                     app->allocator, &app->context.surface),
+    ASSERTVK(glfwCreateWindowSurface(app->renderer.context.instance,
+                                     app->window, app->renderer.allocator,
+                                     &app->renderer.context.surface),
              "Couldn't create window surface");
 }
 
@@ -46,8 +47,8 @@ void create_vk_context(App* app)
 
 void destroy_vk_context(App* app)
 {
-    vkDestroySurfaceKHR(app->context.instance, app->context.surface,
-                        app->allocator);
-    vkDestroyDevice(app->context.device, app->allocator);
-    vkDestroyInstance(app->context.instance, app->allocator);
+    vkDestroySurfaceKHR(app->renderer.context.instance,
+                        app->renderer.context.surface, app->renderer.allocator);
+    vkDestroyDevice(app->renderer.context.device, app->renderer.allocator);
+    vkDestroyInstance(app->renderer.context.instance, app->renderer.allocator);
 }

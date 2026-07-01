@@ -1,7 +1,7 @@
-// auto-generated from ../../assets/block_textures the 2026-04-11
+// auto-generated from ../../../assets/block_textures the 2026-06-17
 #pragma once
 
-typedef enum
+typedef enum BaseTextureEnum
 {
     TEX_APP_CONTROLER_SIDE,
     TEX_APP_CONTROLLER,

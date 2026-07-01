@@ -20,8 +20,6 @@ typedef struct Camera
 
     bool fast;
 
-    double lastX;
-    double lastY;
     bool firstMouse;
 
     CameraBasis basis;

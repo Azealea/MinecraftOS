@@ -4,41 +4,41 @@
 
 void create_sync_objects(App* app)
 {
-    app->renderer.imageAvailableSemaphores =
-        malloc(sizeof(VkSemaphore) * app->swapchain.imageCount);
-    app->renderer.renderFinishedSemaphores =
-        malloc(sizeof(VkSemaphore) * app->swapchain.imageCount);
-    app->renderer.inFlightFences =
+    app->renderer.sync.imageAvailable =
+        malloc(sizeof(VkSemaphore) * app->maxFramesInFlight);
+    app->renderer.sync.renderFinished =
+        malloc(sizeof(VkSemaphore) * app->renderer.swapchain.imageCount);
+    app->renderer.sync.inFlight =
         malloc(sizeof(VkFence) * app->maxFramesInFlight);
 
     for (uint32_t i = 0; i < app->maxFramesInFlight; i++)
     {
-        ASSERTVK(vkCreateFence(app->context.device,
+        ASSERTVK(vkCreateFence(app->renderer.context.device,
                                &(VkFenceCreateInfo){
                                    .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
                                    .flags = VK_FENCE_CREATE_SIGNALED_BIT},
-                               app->allocator,
-                               &app->renderer.inFlightFences[i]),
+                               app->renderer.allocator,
+                               &app->renderer.sync.inFlight[i]),
                  "Couldn't create in-flight fence");
         ASSERTVK(vkCreateSemaphore(
-                     app->context.device,
+                     app->renderer.context.device,
                      &(VkSemaphoreCreateInfo){
                          .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
                      },
-                     app->allocator,
-                     &app->renderer.imageAvailableSemaphores[i]),
+                     app->renderer.allocator,
+                     &app->renderer.sync.imageAvailable[i]),
                  "Couldn't create image acquired semaphore");
     }
 
-    for (uint32_t i = 0; i < app->swapchain.imageCount; i++)
+    for (uint32_t i = 0; i < app->renderer.swapchain.imageCount; i++)
     {
         ASSERTVK(vkCreateSemaphore(
-                     app->context.device,
+                     app->renderer.context.device,
                      &(VkSemaphoreCreateInfo){
                          .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
                      },
-                     app->allocator,
-                     &app->renderer.renderFinishedSemaphores[i]),
+                     app->renderer.allocator,
+                     &app->renderer.sync.renderFinished[i]),
                  "Couldn't create render finished semaphore");
     }
 }
@@ -46,19 +46,19 @@ void destroy_sync_objects(App* app)
 {
     for (uint32_t i = 0; i < app->maxFramesInFlight; i++)
     {
-        vkDestroyFence(app->context.device, app->renderer.inFlightFences[i],
-                       app->allocator);
-        vkDestroySemaphore(app->context.device,
-                           app->renderer.imageAvailableSemaphores[i],
-                           app->allocator);
+        vkDestroyFence(app->renderer.context.device,
+                       app->renderer.sync.inFlight[i], app->renderer.allocator);
+        vkDestroySemaphore(app->renderer.context.device,
+                           app->renderer.sync.imageAvailable[i],
+                           app->renderer.allocator);
     }
-    for (uint32_t i = 0; i < app->swapchain.imageCount; i++)
+    for (uint32_t i = 0; i < app->renderer.swapchain.imageCount; i++)
     {
-        vkDestroySemaphore(app->context.device,
-                           app->renderer.renderFinishedSemaphores[i],
-                           app->allocator);
+        vkDestroySemaphore(app->renderer.context.device,
+                           app->renderer.sync.renderFinished[i],
+                           app->renderer.allocator);
     }
-    free(app->renderer.inFlightFences);
-    free(app->renderer.imageAvailableSemaphores);
-    free(app->renderer.renderFinishedSemaphores);
+    free(app->renderer.sync.inFlight);
+    free(app->renderer.sync.imageAvailable);
+    free(app->renderer.sync.renderFinished);
 }

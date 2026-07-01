@@ -12,19 +12,20 @@ build_texture_look_up(const FaceTextureBuilder builders[][FACE_COUNT],
             destination[b][f] = face_texture_build(&builders[b][f], atlas);
 }
 
-void load_texture_into_atlas(ArrayAtlas* atlas)
+void load_texture_into_atlas(ArrayAtlas* atlas,
+                             FaceTexture (*block_faces)[FACE_COUNT])
 {
-    build_texture_look_up(BlockFaceBuilders, BlockFaces, atlas);
+    build_texture_look_up(BlockFaceBuilders, block_faces, atlas);
 }
 
-void debug_print_block_faces(void)
+void debug_print_block_faces(const FaceTexture (*block_faces)[FACE_COUNT])
 {
     for (int blk = 0; blk < BLOCK_COUNT; blk++)
     {
         printf("Block %d:\n", blk);
         for (int face = 0; face < FACE_COUNT; face++)
         {
-            const FaceTexture* f = &BlockFaces[blk][face];
+            const FaceTexture* f = &block_faces[blk][face];
             printf("  face %d: base_id=%-4u flags=0x%02x variant_count=%-3u "
                    "frame_count=%-3u | "
                    "connected=%s activated=%s variant=%s\n",

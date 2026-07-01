@@ -91,5 +91,3 @@ const int BlockFaceBuildersCount =
 #undef LEAF_ANIM
 #undef CONNECTED4
 #undef CONNECTED8
-
-FaceTexture BlockFaces[BLOCK_COUNT][FACE_COUNT];

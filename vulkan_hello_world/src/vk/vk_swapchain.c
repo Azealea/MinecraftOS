@@ -5,10 +5,10 @@
 static VkSurfaceCapabilitiesKHR get_surface_capabilities(const App* app)
 {
     VkSurfaceCapabilitiesKHR capabilities;
-    ASSERTVK(
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-            app->context.physicalDevice, app->context.surface, &capabilities),
-        "Failed to get surface capabilities");
+    ASSERTVK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+                 app->renderer.context.physicalDevice,
+                 app->renderer.context.surface, &capabilities),
+             "Failed to get surface capabilities");
 
     return capabilities;
 }
@@ -16,18 +16,18 @@ static VkSurfaceCapabilitiesKHR get_surface_capabilities(const App* app)
 static VkSurfaceFormatKHR get_surface_format(App* app)
 {
     uint32_t formatCount;
-    ASSERTVK(vkGetPhysicalDeviceSurfaceFormatsKHR(app->context.physicalDevice,
-                                                  app->context.surface,
-                                                  &formatCount, NULL),
+    ASSERTVK(vkGetPhysicalDeviceSurfaceFormatsKHR(
+                 app->renderer.context.physicalDevice,
+                 app->renderer.context.surface, &formatCount, NULL),
              "Couldn't get surface formats");
 
     VkSurfaceFormatKHR* formats =
         malloc(formatCount * sizeof(VkSurfaceFormatKHR));
     ASSERT(formats != nullptr, "Couldn't allocate formats memory");
 
-    ASSERTVK(vkGetPhysicalDeviceSurfaceFormatsKHR(app->context.physicalDevice,
-                                                  app->context.surface,
-                                                  &formatCount, formats),
+    ASSERTVK(vkGetPhysicalDeviceSurfaceFormatsKHR(
+                 app->renderer.context.physicalDevice,
+                 app->renderer.context.surface, &formatCount, formats),
              "Couldn't get surface formats");
 
     VkSurfaceFormatKHR surface_format = formats[0];
@@ -49,8 +49,8 @@ static VkPresentModeKHR get_present_mode(App* app)
 {
     uint32_t presentModeCount;
     ASSERTVK(vkGetPhysicalDeviceSurfacePresentModesKHR(
-                 app->context.physicalDevice, app->context.surface,
-                 &presentModeCount, NULL),
+                 app->renderer.context.physicalDevice,
+                 app->renderer.context.surface, &presentModeCount, NULL),
              "Couldn't get surface present modes count");
 
     VkPresentModeKHR* presentModes =
@@ -59,8 +59,9 @@ static VkPresentModeKHR get_present_mode(App* app)
     ASSERT(presentModes != nullptr, "Couldn't allocate present modes memory");
 
     ASSERTVK(vkGetPhysicalDeviceSurfacePresentModesKHR(
-                 app->context.physicalDevice, app->context.surface,
-                 &presentModeCount, presentModes),
+                 app->renderer.context.physicalDevice,
+                 app->renderer.context.surface, &presentModeCount,
+                 presentModes),
              "Couldn't get surface present modes");
 
     VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
@@ -96,39 +97,42 @@ get_extent_from_capabilities(const App* app,
 
 static void get_swapchain_images(App* app)
 {
-    ASSERTVK(vkGetSwapchainImagesKHR(app->context.device,
-                                     app->swapchain.swapchain,
-                                     &app->swapchain.imageCount, NULL),
+    ASSERTVK(vkGetSwapchainImagesKHR(app->renderer.context.device,
+                                     app->renderer.swapchain.handle,
+                                     &app->renderer.swapchain.imageCount, NULL),
              "Couldn't get swapchain images count");
 
-    app->swapchain.images = malloc(app->swapchain.imageCount * sizeof(VkImage));
-    ASSERT(app->swapchain.images != nullptr,
+    app->renderer.swapchain.images =
+        malloc(app->renderer.swapchain.imageCount * sizeof(VkImage));
+    ASSERT(app->renderer.swapchain.images != nullptr,
            "Couldn't allocate memory for swapchain images");
 
-    ASSERTVK(vkGetSwapchainImagesKHR(
-                 app->context.device, app->swapchain.swapchain,
-                 &app->swapchain.imageCount, app->swapchain.images),
+    ASSERTVK(vkGetSwapchainImagesKHR(app->renderer.context.device,
+                                     app->renderer.swapchain.handle,
+                                     &app->renderer.swapchain.imageCount,
+                                     app->renderer.swapchain.images),
              "Couldn't get swapchain images");
 }
 
 VkImageView create_image_view(App* app, VkImage image, VkFormat format,
-                              VkImageAspectFlags aspectFlags)
+                              VkImageAspectFlags aspectFlags, uint32_t layers)
 {
     VkImageViewCreateInfo viewInfo = {
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         .image = image,
-        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .viewType =
+            layers > 1 ? VK_IMAGE_VIEW_TYPE_2D_ARRAY : VK_IMAGE_VIEW_TYPE_2D,
         .format = format,
         .subresourceRange.aspectMask = aspectFlags,
         .subresourceRange.baseMipLevel = 0,
         .subresourceRange.levelCount = 1,
         .subresourceRange.baseArrayLayer = 0,
-        .subresourceRange.layerCount = 1,
+        .subresourceRange.layerCount = layers,
     };
 
     VkImageView imageView;
-    ASSERTVK(vkCreateImageView(app->context.device, &viewInfo, app->allocator,
-                               &imageView),
+    ASSERTVK(vkCreateImageView(app->renderer.context.device, &viewInfo,
+                               app->renderer.allocator, &imageView),
              "failed to create image view!")
 
     return imageView;
@@ -136,16 +140,16 @@ VkImageView create_image_view(App* app, VkImage image, VkFormat format,
 
 static void create_swapchain_image_views(App* app)
 {
-    app->swapchain.imageViews =
-        malloc(app->swapchain.imageCount * sizeof(VkImageView));
-    ASSERT(app->swapchain.imageViews != nullptr,
+    app->renderer.swapchain.imageViews =
+        malloc(app->renderer.swapchain.imageCount * sizeof(VkImageView));
+    ASSERT(app->renderer.swapchain.imageViews != nullptr,
            "Couldn't allocate memory for swapchain image views");
 
-    for (uint32_t i = 0; i < app->swapchain.imageCount; ++i)
+    for (uint32_t i = 0; i < app->renderer.swapchain.imageCount; ++i)
     {
-        app->swapchain.imageViews[i] =
-            create_image_view(app, app->swapchain.images[i],
-                              app->swapchain.format, VK_IMAGE_ASPECT_COLOR_BIT);
+        app->renderer.swapchain.imageViews[i] = create_image_view(
+            app, app->renderer.swapchain.images[i],
+            app->renderer.swapchain.format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
     }
 }
 
@@ -153,35 +157,35 @@ void create_swapchain(App* app)
 {
     VkSurfaceCapabilitiesKHR capabilities = get_surface_capabilities(app);
 
-    app->swapchain.imageExtent =
+    app->renderer.swapchain.extent =
         get_extent_from_capabilities(app, &capabilities);
 
     VkSurfaceFormatKHR surface_format = get_surface_format(app);
-    app->swapchain.colorSpace = surface_format.colorSpace;
-    app->swapchain.format = surface_format.format;
+    app->renderer.swapchain.colorSpace = surface_format.colorSpace;
+    app->renderer.swapchain.format = surface_format.format;
 
     ASSERTVK(vkCreateSwapchainKHR(
-                 app->context.device,
+                 app->renderer.context.device,
                  &(VkSwapchainCreateInfoKHR){
                      .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-                     .surface = app->context.surface,
+                     .surface = app->renderer.context.surface,
                      .queueFamilyIndexCount = 1,
-                     .pQueueFamilyIndices = &app->context.queueFamily,
+                     .pQueueFamilyIndices = &app->renderer.context.queueFamily,
                      .clipped = true,
                      .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
                      .imageArrayLayers = 1,
                      .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
                      .preTransform = capabilities.currentTransform,
-                     .imageExtent = app->swapchain.imageExtent,
-                     .imageFormat = app->swapchain.format,
-                     .imageColorSpace = app->swapchain.colorSpace,
+                     .imageExtent = app->renderer.swapchain.extent,
+                     .imageFormat = app->renderer.swapchain.format,
+                     .imageColorSpace = app->renderer.swapchain.colorSpace,
                      .presentMode = get_present_mode(app),
                      .minImageCount = clamp(3, capabilities.minImageCount,
                                             capabilities.maxImageCount
                                                 ? capabilities.maxImageCount
                                                 : UINT32_MAX),
                  },
-                 app->allocator, &app->swapchain.swapchain),
+                 app->renderer.allocator, &app->renderer.swapchain.handle),
              "Couldn't create swapchain");
 
     get_swapchain_images(app);
@@ -190,16 +194,18 @@ void create_swapchain(App* app)
 
 void destroy_swapchain(App* app)
 {
-    for (uint32_t i = 0; i < app->swapchain.imageCount; ++i)
+    for (uint32_t i = 0; i < app->renderer.swapchain.imageCount; ++i)
     {
-        vkDestroyImageView(app->context.device, app->swapchain.imageViews[i],
-                           app->allocator);
+        vkDestroyImageView(app->renderer.context.device,
+                           app->renderer.swapchain.imageViews[i],
+                           app->renderer.allocator);
     }
-    free(app->swapchain.imageViews);
-    free(app->swapchain.images);
+    free(app->renderer.swapchain.imageViews);
+    free(app->renderer.swapchain.images);
 
-    vkDestroySwapchainKHR(app->context.device, app->swapchain.swapchain,
-                          app->allocator);
+    vkDestroySwapchainKHR(app->renderer.context.device,
+                          app->renderer.swapchain.handle,
+                          app->renderer.allocator);
 }
 
 uint32_t acquire_swapchain_image(App* app, uint32_t frameIndex)
@@ -207,9 +213,9 @@ uint32_t acquire_swapchain_image(App* app, uint32_t frameIndex)
     uint32_t acquired_index;
 
     VkResult result = vkAcquireNextImageKHR(
-        app->context.device, app->swapchain.swapchain, UINT64_MAX,
-        app->renderer.imageAvailableSemaphores[frameIndex], VK_NULL_HANDLE,
-        &acquired_index);
+        app->renderer.context.device, app->renderer.swapchain.handle,
+        UINT64_MAX, app->renderer.sync.imageAvailable[frameIndex],
+        VK_NULL_HANDLE, &acquired_index);
 
     ASSERTVK(result, "Failed to acquire swapchain image (result = %d)", result);
     return acquired_index;
@@ -217,20 +223,19 @@ uint32_t acquire_swapchain_image(App* app, uint32_t frameIndex)
 
 void present_swapchain_image(App* app, uint32_t imageIndex)
 {
-    VkSwapchainKHR swapchains[] = {app->swapchain.swapchain};
-
     VkPresentInfoKHR presentInfo = {
         .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
         .pNext = NULL,
         .waitSemaphoreCount = 1,
         .pWaitSemaphores =
-            (VkSemaphore[]){app->renderer.renderFinishedSemaphores[imageIndex]},
+            (VkSemaphore[]){app->renderer.sync.renderFinished[imageIndex]},
         .swapchainCount = 1,
-        .pSwapchains = swapchains,
+        .pSwapchains = &app->renderer.swapchain.handle,
         .pImageIndices = &imageIndex,
         .pResults = NULL,
     };
 
-    VkResult result = vkQueuePresentKHR(app->context.queue, &presentInfo);
+    VkResult result =
+        vkQueuePresentKHR(app->renderer.context.queue, &presentInfo);
     ASSERTVK(result, "Failed to present swapchain image (result = %d)", result);
 }

@@ -7,6 +7,7 @@
 #include "utils/time.h"
 #include "vk/camera.h"
 #include "vk/vk.h"
+#include "voxel/player_movement.h"
 
 static void display_info()
 {
@@ -38,6 +39,7 @@ static void loop(App* app)
         glfwPollEvents();
         input_poll(&app->inputState, app->window);
         do_stuff_vk(app);
+        player_consume_input(app);
         double frameTimeEnd = glfwGetTime();
         printf("FPS: %f\r", 1 / (frameTimeEnd - frameTimeStart));
     }

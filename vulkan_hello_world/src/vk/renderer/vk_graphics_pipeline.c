@@ -9,7 +9,7 @@
 void create_renderpass(App* app)
 {
     VkAttachmentDescription colorAttachment = {
-        .format = app->swapchain.format,
+        .format = app->renderer.swapchain.format,
         .samples = VK_SAMPLE_COUNT_1_BIT,
         .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
         .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
@@ -69,8 +69,9 @@ void create_renderpass(App* app)
         .pDependencies = &dependency,
     };
 
-    ASSERTVK(vkCreateRenderPass(app->context.device, &renderPassInfo,
-                                app->allocator, &app->renderer.renderpass),
+    ASSERTVK(vkCreateRenderPass(app->renderer.context.device, &renderPassInfo,
+                                app->renderer.allocator,
+                                &app->renderer.pipeline.renderpass),
              "failed to create render pass!");
 }
 
@@ -87,13 +88,13 @@ void create_graphics_pipeline(App* app)
     };
 
     VkViewport viewports[] = {{
-        .width = (float)app->swapchain.imageExtent.width,
-        .height = (float)app->swapchain.imageExtent.height,
+        .width = (float)app->renderer.swapchain.extent.width,
+        .height = (float)app->renderer.swapchain.extent.height,
         .maxDepth = 1.0f,
     }};
 
     VkRect2D scissors[] = {{
-        .extent = app->swapchain.imageExtent,
+        .extent = app->renderer.swapchain.extent,
     }};
 
     VkPipelineColorBlendAttachmentState colorBlendAttachmentStates[] = {{
@@ -102,13 +103,13 @@ void create_graphics_pipeline(App* app)
     }};
 
     ASSERTVK(vkCreatePipelineLayout(
-                 app->context.device,
+                 app->renderer.context.device,
                  &(VkPipelineLayoutCreateInfo){
                      .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
                      .setLayoutCount = 1,
-                     .pSetLayouts = &app->renderer.descriptorSetLayout,
+                     .pSetLayouts = &app->renderer.pipeline.descriptorSetLayout,
                  },
-                 app->allocator, &app->renderer.pipelineLayout),
+                 app->renderer.allocator, &app->renderer.pipeline.layout),
              "Couldn't create pipeline layout");
 
     auto binding_descr = get_binding_description();
@@ -116,7 +117,7 @@ void create_graphics_pipeline(App* app)
     auto attribute_descr = get_attribute_descriptions(&attribute_descr_size);
 
     VkResult res = vkCreateGraphicsPipelines(
-        app->context.device, NULL, 1,
+        app->renderer.context.device, NULL, 1,
         &(VkGraphicsPipelineCreateInfo){
             .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
             .pStages = (const VkPipelineShaderStageCreateInfo*)&shaderStages,
@@ -180,73 +181,76 @@ void create_graphics_pipeline(App* app)
                     .attachmentCount = COUNTOF(colorBlendAttachmentStates),
                     .pAttachments = colorBlendAttachmentStates,
                 },
-            .layout = app->renderer.pipelineLayout,
-            .renderPass = app->renderer.renderpass,
+            .layout = app->renderer.pipeline.layout,
+            .renderPass = app->renderer.pipeline.renderpass,
         },
-        app->allocator, &app->renderer.graphicsPipeline);
+        app->renderer.allocator, &app->renderer.pipeline.graphics);
     ASSERTVK(res, "Couldn't create graphics pipeline");
 
     for (uint32_t i = 0; i < COUNTOF(shaderStages); i++)
     {
-        vkDestroyShaderModule(app->context.device, shaderStages[i].module,
-                              app->allocator);
+        vkDestroyShaderModule(app->renderer.context.device,
+                              shaderStages[i].module, app->renderer.allocator);
     }
 }
 
 void create_framebuffers(App* app)
 {
-    uint32_t framebufferCount = app->swapchain.imageCount;
-    app->renderer.framebuffers =
+    uint32_t framebufferCount = app->renderer.swapchain.imageCount;
+    app->renderer.pipeline.framebuffers =
         malloc(framebufferCount * sizeof(VkFramebuffer));
-    ASSERT(app->renderer.framebuffers != nullptr,
+    ASSERT(app->renderer.pipeline.framebuffers != nullptr,
            "Couldn't allocate memory for framebuffers array");
 
     for (uint32_t i = 0; i < framebufferCount; ++i)
     {
-        VkImageView attachments[] = {app->swapchain.imageViews[i],
-                                     app->depthImageView};
+        VkImageView attachments[] = {app->renderer.swapchain.imageViews[i],
+                                     app->renderer.depth.view};
 
         VkFramebufferCreateInfo framebufferInfo = {
             .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-            .renderPass = app->renderer.renderpass,
+            .renderPass = app->renderer.pipeline.renderpass,
             .attachmentCount = COUNTOF(attachments),
             .pAttachments = attachments,
-            .width = app->swapchain.imageExtent.width,
-            .height = app->swapchain.imageExtent.height,
+            .width = app->renderer.swapchain.extent.width,
+            .height = app->renderer.swapchain.extent.height,
             .layers = 1,
         };
-        ASSERTVK(vkCreateFramebuffer(app->context.device, &framebufferInfo,
-                                     app->allocator,
-                                     &app->renderer.framebuffers[i]),
+        ASSERTVK(vkCreateFramebuffer(app->renderer.context.device,
+                                     &framebufferInfo, app->renderer.allocator,
+                                     &app->renderer.pipeline.framebuffers[i]),
                  "Couldn't create framebuffer %i", i);
     }
 }
 
 void destroy_framebuffers(App* app)
 {
-    uint32_t framebuffer_count = app->swapchain.imageCount;
+    uint32_t framebuffer_count = app->renderer.swapchain.imageCount;
 
     for (uint32_t framebuffer_index = 0; framebuffer_index < framebuffer_count;
          ++framebuffer_index)
     {
-        vkDestroyFramebuffer(app->context.device,
-                             app->renderer.framebuffers[framebuffer_index],
-                             app->allocator);
+        vkDestroyFramebuffer(
+            app->renderer.context.device,
+            app->renderer.pipeline.framebuffers[framebuffer_index],
+            app->renderer.allocator);
     }
 
-    free(app->renderer.framebuffers);
+    free(app->renderer.pipeline.framebuffers);
 }
 
 void destroy_graphics_pipeline(App* app)
 {
-    vkDestroyPipelineLayout(app->context.device, app->renderer.pipelineLayout,
-                            app->allocator);
-    vkDestroyPipeline(app->context.device, app->renderer.graphicsPipeline,
-                      app->allocator);
+    vkDestroyPipelineLayout(app->renderer.context.device,
+                            app->renderer.pipeline.layout,
+                            app->renderer.allocator);
+    vkDestroyPipeline(app->renderer.context.device,
+                      app->renderer.pipeline.graphics, app->renderer.allocator);
 }
 
 void destroy_renderpass(App* app)
 {
-    vkDestroyRenderPass(app->context.device, app->renderer.renderpass,
-                        app->allocator);
+    vkDestroyRenderPass(app->renderer.context.device,
+                        app->renderer.pipeline.renderpass,
+                        app->renderer.allocator);
 }

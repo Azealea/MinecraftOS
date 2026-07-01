@@ -22,7 +22,7 @@ uint8_t* load_rgba(const char* path)
     int iw, ih, ch;
     uint8_t* px = stbi_load(path, &iw, &ih, &ch, 4);
 
-    ASSERT(px, "failed to load texture");
+    ASSERT(px, "failed to load texture %s", path);
     ASSERT(iw == TEXTURE_WIDTH_HEIGHT && ih == TEXTURE_WIDTH_HEIGHT,
            "all textures must be same size");
 
@@ -31,7 +31,7 @@ uint8_t* load_rgba(const char* path)
 
 static uint32_t atlas_push(ArrayAtlas* a, uint8_t* rgba)
 {
-    ASSERT(a->count, "reached max cap in atlas");
+    ASSERT(a->count < MAX_TEXTURE, "reached max cap in atlas");
     a->pixels[a->count++] = rgba;
     return a->count - 1;
 }

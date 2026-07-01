@@ -13,7 +13,6 @@
     devShells.${system}.default = pkgs.mkShell {
       buildInputs = [
         pkgs.wayland
-        pkgs.wayland
         pkgs.wayland-protocols
         pkgs.wayland-scanner
         pkgs.wlroots_0_19
@@ -36,6 +35,7 @@
         pkgs.mesa
 
         pkgs.gcc
+        pkgs.ccache
         pkgs.pkg-config
 
         # math helper
