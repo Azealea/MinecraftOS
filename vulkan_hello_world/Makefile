@@ -12,7 +12,7 @@ SRC += $(SHADERS_C)
 OBJ := $(SRC:.c=.o)
 
 CSTD := -std=c23
-CFLAGS := $(CSTD) -Wall -Wextra -Wpedantic -I$(SRC_DIR) $(shell pkg-config --cflags glfw3 vulkan cglm) -Ilibraries
+CFLAGS := $(CSTD) -Wall -Wextra -Wpedantic -I$(SRC_DIR) $(shell pkg-config --cflags glfw3 vulkan cglm) -Ilibraries $(DEFS)
 # CFLAGS += -g -fsanitize=address,undefined
 LDFLAGS := $(shell pkg-config --libs glfw3 vulkan cglm) -lm
 

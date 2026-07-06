@@ -18,9 +18,9 @@ static void display_info()
     uint32_t apiVersionMajor = VK_API_VERSION_MAJOR(instanceApiVersion);
     uint32_t apiVersionMinor = VK_API_VERSION_MINOR(instanceApiVersion);
     uint32_t apiVersionPatch = VK_API_VERSION_PATCH(instanceApiVersion);
-    printf("Vulkan API %i.%i.%i.%i\n", apiVersionVariant, apiVersionMajor,
-           apiVersionMinor, apiVersionPatch);
-    printf("GLFW %s\n", glfwGetVersionString());
+    INFO("Vulkan API %i.%i.%i.%i\n", apiVersionVariant, apiVersionMajor, apiVersionMinor,
+         apiVersionPatch);
+    INFO("GLFW %s\n", glfwGetVersionString());
 }
 
 static void init(App* app)
@@ -41,7 +41,7 @@ static void loop(App* app)
         do_stuff_vk(app);
         player_consume_input(app);
         double frameTimeEnd = glfwGetTime();
-        printf("FPS: %f\r", 1 / (frameTimeEnd - frameTimeStart));
+        //  printf("FPS: %f\r", 1 / (frameTimeEnd - frameTimeStart));
     }
 }
 

@@ -5,8 +5,9 @@
 #include <stdio.h>
 
 #include "type.h"
+#include "utils/log.h"
 
-#define ERROR(Format, ...)                                                               \
+#define ERROR_EXIT(Format, ...)                                                               \
     do                                                                                   \
     {                                                                                    \
         fprintf(stderr, "%s:%d -> %s :\n\t" Format "\n", __FILE_NAME__, __LINE__,        \
@@ -19,7 +20,7 @@
     {                                                                                    \
         if (!(Condition))                                                                \
         {                                                                                \
-            ERROR(Format, ##__VA_ARGS__)                                                 \
+            ERROR_EXIT(Format, ##__VA_ARGS__)                                                 \
         }                                                                                \
     } while (0);
 
@@ -28,7 +29,7 @@
     {                                                                                    \
         if ((Condition) != VK_SUCCESS)                                                   \
         {                                                                                \
-            ERROR(Format, ##__VA_ARGS__)                                                 \
+            ERROR_EXIT(Format, ##__VA_ARGS__)                                                 \
         }                                                                                \
     } while (0);
 
