@@ -13,6 +13,9 @@ void input_poll(Input* state, void* backend_ctx)
     };
     GLFWwindow* window = (GLFWwindow*)backend_ctx;
 
+    state->meta = glfwGetKey(window, GLFW_KEY_LEFT_SUPER) == GLFW_PRESS ||
+                  glfwGetKey(window, GLFW_KEY_RIGHT_SUPER) == GLFW_PRESS;
+
     memcpy(state->keys_prev, state->keys, sizeof(state->keys));
     for (int i = 0; i < KEY_COUNT; i++)
     {

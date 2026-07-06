@@ -37,6 +37,9 @@ static void place_on_hit(World* w, RaycastHit hit, Block block)
 
 void player_consume_input(App* app)
 {
+    if (app->inputState.meta)
+        return;
+
     if (input_mouse_pressed(&app->inputState, 0))
     {
         RaycastHit hit = raycast(&app->camera, &app->world, 8.0f);

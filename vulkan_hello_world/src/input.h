@@ -30,6 +30,8 @@ typedef struct
 
     bool mouse_buttons[MOUSE_BUTTON_COUNT];
     bool mouse_buttons_prev[MOUSE_BUTTON_COUNT];
+
+    bool meta;
 } Input;
 
 void input_poll(Input* state, void* backend_ctx);

@@ -14,6 +14,9 @@ static vec3 worldup = {0.0f, 0.0f, 1.0f};
 
 void update_camera_pos(Camera* camera, const Input* input)
 {
+    if (input->meta)
+        return;
+
     if (input_key_pressed(input, KEY_TAB))
         camera->fast = !camera->fast;
 
