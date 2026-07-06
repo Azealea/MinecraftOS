@@ -2,36 +2,37 @@
 
 #include "app.h"
 #include "raycast.h"
+#include "utils/log.h"
 #include "utils/vec.h"
 #include "voxel/block.h"
 #include "voxel/chunk.h"
 #include "voxel/world.h"
 
-static void break_on_hit(World* world, RaycastHit hit)
+static void trigger_mesh_rebuild(World* w, Chunk* c)
+{}
+
+static void break_on_hit(World* w, RaycastHit hit)
 {
-    VEC3(u8)
-    local = {hit.b.x % CHUNK_SIZE, hit.b.y % CHUNK_SIZE, hit.b.z % CHUNK_SIZE};
-    if (!chunk_is_in_bound(local))
-        return;
-    Chunk* e = world_get_or_add_chunk(world,
-                                      ((ChunkPos){.x = hit.b.x / CHUNK_SIZE,
-                                                  .y = hit.b.y / CHUNK_SIZE,
-                                                  .z = hit.b.z / CHUNK_SIZE}));
-    chunk_set(e, local, ((Block){.type = BLK_AIR}));
+    Chunk* c = world_get_or_add_chunk(w, pos_glob_to_chunk(hit.block));
+
+    VEC3(u8) local = pos_glob_to_rel(hit.block);
+    chunk_set(c, local, ((Block){.type = BLK_AIR}));
+
+    TRACE("breaking " VEC3_FMT, VEC3_ARGS(local));
+    trigger_mesh_rebuild(w, c);
 }
 
-static void place_on_hit(World* world, RaycastHit hit, Block block)
+static void place_on_hit(World* w, RaycastHit hit, Block block)
 {
-    u32 px = hit.b.x + hit.n.x;
-    u32 py = hit.b.y + hit.n.y;
-    u32 pz = hit.b.z + hit.n.z;
-    VEC3(u8) local = {px % CHUNK_SIZE, py % CHUNK_SIZE, pz % CHUNK_SIZE};
-    if (!chunk_is_in_bound(local))
-        return;
-    Chunk* e = world_get_or_add_chunk(
-        world,
-        ((ChunkPos){.x = px / CHUNK_SIZE, .y = py / CHUNK_SIZE, .z = pz / CHUNK_SIZE}));
-    chunk_set(e, local, block);
+    VEC3(i32) blockPlace = VEC3_ADD(hit.block, hit.normal);
+
+    Chunk* c = world_get_or_add_chunk(w, pos_glob_to_chunk(blockPlace));
+
+    VEC3(u8) local = pos_glob_to_rel(blockPlace);
+    chunk_set(c, local, block);
+
+    TRACE("placing " VEC3_FMT, VEC3_ARGS(local));
+    trigger_mesh_rebuild(w, c);
 }
 
 void player_consume_input(App* app)

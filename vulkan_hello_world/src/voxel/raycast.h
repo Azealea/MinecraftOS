@@ -6,8 +6,8 @@
 typedef struct RaycastHit
 {
     bool hit;
-    VEC3(u32) b;
-    VEC3(u32) n;
+    VEC3(i32) block;
+    VEC3(i32) normal;
 } RaycastHit;
 
 RaycastHit raycast(const Camera* cam, World* world, float max_dist);

@@ -73,14 +73,13 @@
         .z = (A).z % (K),                                                                \
     })
 
+#define VEC3_FMT "(%d, %d, %d)"
+#define VEC3F_FMT "(%g, %g, %g)"
+#define VEC3_ARGS(v) (v).x, (v).y, (v).z
+
 #define VEC3_CAST(T, V)                                                                  \
     ((VEC3(T)){                                                                          \
         (T)((V).x),                                                                      \
         (T)((V).y),                                                                      \
         (T)((V).z),                                                                      \
     })
-
-#define VEC3_FOREACH(vec, elem)                                                          \
-    for (int _i = 0; _i < 3; _i++)                                                       \
-        for (typeof((vec).data[0]) elem = (vec).data[_i], *_p = &(vec).data[_i]; _p;     \
-             *_p = elem, _p = nullptr)

@@ -55,8 +55,8 @@ RaycastHit raycast(const Camera* cam, World* world, float max_dist)
             if (blk->type != BLK_AIR)
             {
                 result.hit = true;
-                result.b = VEC3_CAST(u32, b);
-                result.n = VEC3_CAST(u32, n);
+                result.block = VEC3_CAST(i32, b);
+                result.normal = VEC3_CAST(i32, n);
                 return result;
             }
         }

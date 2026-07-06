@@ -29,3 +29,8 @@ static inline VEC3(u8) pos_glob_to_rel(VEC3(i32) g)
 {
     return VEC3_CAST(u8, VEC3_MOD(g, CHUNK_SIZE));
 }
+
+static inline VEC3(i32) pos_glob_to_chunk(VEC3(i32) g)
+{
+    return VEC3_DIV(g, CHUNK_SIZE);
+}
