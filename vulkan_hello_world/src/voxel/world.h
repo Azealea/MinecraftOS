@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utils/container.h"
+#include "voxel/bucket_alloc.h"
 #include "voxel/chunk.h"
 #include "voxel/face.h"
 
@@ -23,10 +24,16 @@ MAP_DECLARE(ChunkPos, Chunk_ptr, chunkpos_hash, chunkpos_eq)
 typedef struct World
 {
     MAP(ChunkPos, Chunk_ptr) chunks;
-    Face* faces;
-    uint32_t face_count;
+    BucketAlloc mesh;
 } World;
 
 World world_constr(void);
 void world_free(World* w);
+
+Chunk* world_get_chunk(World* w, ChunkPos pos);
 Chunk* world_get_or_add_chunk(World* w, ChunkPos pos);
+
+void generate_chunk_terrain(World* w, ChunkPos pos);
+
+void world_queue_mesh_3by3by3(World* w, ChunkPos pos,
+                              const FaceTexture (*block_faces)[FACE_COUNT]);

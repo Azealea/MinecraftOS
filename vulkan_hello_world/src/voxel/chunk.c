@@ -4,7 +4,9 @@
 
 Chunk* chunk_constr(void)
 {
-    return calloc(1, sizeof(Chunk));
+    Chunk* c = calloc(1, sizeof(Chunk));
+    c->bucket_index = UINT32_MAX;
+    return c;
 }
 
 void chunk_deconstr(Chunk* c)

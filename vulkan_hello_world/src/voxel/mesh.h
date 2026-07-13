@@ -1,7 +1,8 @@
 #pragma once
 
-#include "voxel/block.h"
-#include "voxel/world.h"
+#include "voxel/chunk.h"
+#include "voxel/face.h"
+#include "voxel/textures/face_texture.h"
 
-void generate_chunk_mesh(World* world, ChunkPos pos,
-                         const FaceTexture (*block_faces)[FACE_COUNT]);
+uint32_t generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, Face* dst,
+                             const FaceTexture (*block_faces)[FACE_COUNT]);

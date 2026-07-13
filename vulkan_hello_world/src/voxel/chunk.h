@@ -4,7 +4,7 @@
 #include "utils/vec.h"
 #include "voxel/block.h"
 
-#define CHUNK_SIZE 32
+#define CHUNK_SIZE 16
 
 #define CHUNK_NB_BLOCKS CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE
 
@@ -13,6 +13,8 @@ typedef VEC3(i32) ChunkPos;
 typedef struct Chunk
 {
     Block blocks[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+    uint32_t bucket_index;
+    uint32_t face_count;
 } Chunk;
 
 Chunk* chunk_constr(void);

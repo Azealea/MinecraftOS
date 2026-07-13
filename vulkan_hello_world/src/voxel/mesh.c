@@ -2,10 +2,9 @@
 
 #include "voxel/textures/face_texture.h"
 
-void generate_chunk_mesh(World* world, ChunkPos pos,
-                         const FaceTexture (*block_faces)[FACE_COUNT])
+uint32_t generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, Face* dst,
+                             const FaceTexture (*block_faces)[FACE_COUNT])
 {
-    const Chunk* chunk = world_get_or_add_chunk(world, pos);
     uint32_t count = 0;
 
     static const VEC3(i8) dirs[6] = {
@@ -30,7 +29,7 @@ void generate_chunk_mesh(World* world, ChunkPos pos,
                         && chunk_get(chunk, npos)->type != BLK_AIR)
                         continue;
 
-                    world->faces[count++] = (Face){
+                    dst[count++] = (Face){
                         .pos =
                             {
                                 .x = (i32)(pos.x * CHUNK_SIZE + x),
@@ -44,5 +43,5 @@ void generate_chunk_mesh(World* world, ChunkPos pos,
                 }
             }
 
-    world->face_count = count;
+    return count;
 }
