@@ -5,12 +5,17 @@
 void copyBuffer(App* app, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
     VkCommandBuffer commandBuffer = begin_single_time_commands(app);
+    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1,
+                    &(VkBufferCopy){.size = size});
+    end_single_time_commands(app, commandBuffer);
+}
 
-    VkBufferCopy copyRegion = {
-        .size = size,
-    };
-
-    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-
+void copyBufferAt(App* app, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size,
+                  VkDeviceSize dstOffset)
+{
+    VkCommandBuffer commandBuffer = begin_single_time_commands(app);
+    vkCmdCopyBuffer(
+        commandBuffer, srcBuffer, dstBuffer, 1,
+        &(VkBufferCopy){.srcOffset = 0, .dstOffset = dstOffset, .size = size});
     end_single_time_commands(app, commandBuffer);
 }

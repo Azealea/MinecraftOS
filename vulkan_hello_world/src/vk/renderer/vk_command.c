@@ -124,7 +124,13 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
                             app->renderer.pipeline.layout, 0, 1,
                             &app->renderer.descriptors.sets[frameIndex], 0, NULL);
 
-    vkCmdDraw(cmd, 6, app->world.face_count, 0, 0);
+    MAP_FOR_EACH(app->world.chunks, entry)
+    {
+        Chunk* c = entry->value;
+        if (c->bucket_index == NO_BUCKET || c->face_count == 0)
+            continue;
+        vkCmdDraw(cmd, 6, c->face_count, 0, c->bucket_index * BUCKET_FACE_CAP);
+    }
 
     vkCmdEndRenderPass(cmd);
     ASSERTVK(vkEndCommandBuffer(cmd), "Failed to record command buffer for image %u",

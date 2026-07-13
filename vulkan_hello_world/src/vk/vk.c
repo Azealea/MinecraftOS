@@ -10,8 +10,6 @@
 #include "vk/vk_depth.h"
 #include "vk/vk_swapchain.h"
 #include "vk/vk_texture.h"
-#include "voxel/mesh.h"
-#include "voxel/world.h"
 
 void init_vk(App* app)
 {
@@ -25,15 +23,14 @@ void init_vk(App* app)
     create_framebuffers(app);
     create_texture_stuff(app);
 
-    generate_chunk_mesh(&app->world, (ChunkPos){0, 0, 0},
-                        (const FaceTexture(*)[FACE_COUNT])app->block_faces);
-
-    create_vertex_buffer(app, app->world.faces, app->world.face_count);
+    create_vertex_buffer(app);
     create_uniform_buffers(app);
     create_descriptor_pool(app);
     create_descriptor_sets(app);
     allocate_command_buffer(app);
     create_sync_objects(app);
+
+    vk_rebuild_mesh(app, (ChunkPos){0, 0, 0});
 }
 
 void clean_vk(App* app)
