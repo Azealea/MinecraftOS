@@ -1,4 +1,4 @@
-#include "voxel/mesh.h"
+#include "mesh.h"
 
 #include "voxel/textures/face_texture.h"
 

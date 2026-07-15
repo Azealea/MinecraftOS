@@ -2,9 +2,9 @@
 
 #include <stdlib.h>
 
-#include "block.h"
 #include "chunk.h"
 #include "utils/container.h"
+#include "voxel/block.h"
 
 Chunk* world_get_chunk(World* w, ChunkPos p)
 {

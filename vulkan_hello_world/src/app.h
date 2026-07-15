@@ -1,6 +1,6 @@
 #pragma once
 
-#include "input.h"
+#include "input/input.h"
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -8,7 +8,7 @@
 #include "vk/camera.h"
 #include "vk/vk_renderer.h"
 #include "voxel/textures/face_texture.h"
-#include "voxel/world.h"
+#include "voxel/world/world.h"
 
 typedef struct
 {

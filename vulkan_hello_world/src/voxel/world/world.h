@@ -1,9 +1,9 @@
 #pragma once
 
+#include "bucket_alloc.h"
+#include "chunk.h"
 #include "utils/container.h"
-#include "voxel/bucket_alloc.h"
-#include "voxel/chunk.h"
-#include "voxel/face.h"
+#include "voxel/mesh/face.h"
 
 static inline size_t chunkpos_hash(ChunkPos p)
 {

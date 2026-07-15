@@ -4,8 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "voxel/chunk.h"
-#include "voxel/face.h"
+#include "chunk.h"
+#include "voxel/mesh/face.h"
 
 #define BUCKET_COUNT (8 * 8 * 8)
 #define BUCKET_FACE_CAP (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 6)

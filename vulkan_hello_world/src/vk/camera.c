@@ -6,7 +6,7 @@
 
 #include "app.h"
 #include "camera_ubo.h"
-#include "input.h"
+#include "input/input.h"
 #include "vk/buffer/buffer.h"
 #include "vk/gpu_resources.h"
 

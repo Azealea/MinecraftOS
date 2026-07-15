@@ -5,9 +5,9 @@
 #include "app.h"
 #include "vk/buffer/buffer.h"
 #include "vk/gpu_resources.h"
-#include "voxel/bucket_alloc.h"
-#include "voxel/mesh.h"
-#include "voxel/world.h"
+#include "voxel/mesh/mesh.h"
+#include "voxel/world/bucket_alloc.h"
+#include "voxel/world/world.h"
 
 VkVertexInputBindingDescription get_binding_description()
 {

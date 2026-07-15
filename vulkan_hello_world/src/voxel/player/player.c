@@ -6,8 +6,8 @@
 #include "utils/vec.h"
 #include "vk/buffer/vertex.h"
 #include "voxel/block.h"
-#include "voxel/chunk.h"
-#include "voxel/world.h"
+#include "voxel/world/chunk.h"
+#include "voxel/world/world.h"
 
 static void break_on_hit(App* app, RaycastHit hit)
 {

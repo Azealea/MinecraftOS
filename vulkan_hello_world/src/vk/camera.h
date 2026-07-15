@@ -2,7 +2,7 @@
 
 #include <cglm/mat4.h>
 
-#include "input.h"
+#include "input/input.h"
 
 typedef struct CameraBasis
 {

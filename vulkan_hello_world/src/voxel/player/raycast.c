@@ -5,8 +5,8 @@
 
 #include "utils/vec.h"
 #include "voxel/block.h"
-#include "voxel/chunk.h"
-#include "voxel/world.h"
+#include "voxel/world/chunk.h"
+#include "voxel/world/world.h"
 
 RaycastHit raycast(const Camera* cam, World* world, float max_dist)
 {

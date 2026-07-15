@@ -3,11 +3,11 @@
 
 #include "app.h"
 #include "glfw.h"
-#include "input.h"
+#include "input/input.h"
 #include "utils/time.h"
 #include "vk/camera.h"
 #include "vk/vk.h"
-#include "voxel/player_movement.h"
+#include "voxel/player/player_movement.h"
 
 static void display_info()
 {
