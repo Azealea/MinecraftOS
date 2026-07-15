@@ -10,6 +10,7 @@
 #include "vk/vk_depth.h"
 #include "vk/vk_swapchain.h"
 #include "vk/vk_texture.h"
+#include "voxel/mesh/mesh.h"
 
 void init_vk(App* app)
 {
@@ -78,8 +79,11 @@ static void rebuild_dirty_meshes(App* app)
     World* w = &app->world;
     VECTOR_FOR_EACH(w->dirty, pos)
     {
-        vk_rebuild_mesh(app, *pos);
-        world_get_chunk(w, *pos)->dirty = false;
+        world_remesh_chunk(w, *pos, app->block_faces);
+        Chunk* c = world_get_chunk(w, *pos);
+        upload_chunk_mesh(app, bucket_ptr(&w->mesh, c->bucket_index), c->face_count,
+                          c->bucket_index);
+        c->dirty = false;
     }
     VECTOR_CLEAR(w->dirty);
 }

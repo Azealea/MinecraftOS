@@ -1,5 +1,6 @@
 #include "mesh.h"
 
+#include "utils/utils.h"
 #include "voxel/textures/face_texture.h"
 
 uint32_t generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, Face* dst,
@@ -44,4 +45,16 @@ uint32_t generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, Face* dst,
             }
 
     return count;
+}
+
+void world_remesh_chunk(World* w, ChunkPos pos,
+                        const FaceTexture (*block_faces)[BLOCK_FACE_COUNT])
+{
+    Chunk* c = world_get_chunk(w, pos);
+    ASSERT(c != NULL, "world_remesh_chunk: chunk " VEC3_FMT " does not exist",
+           VEC3_ARGS(pos));
+    if (c->bucket_index == NO_BUCKET)
+        c->bucket_index = bucket_alloc_acquire(&w->mesh);
+    c->face_count =
+        generate_chunk_mesh(c, pos, bucket_ptr(&w->mesh, c->bucket_index), block_faces);
 }

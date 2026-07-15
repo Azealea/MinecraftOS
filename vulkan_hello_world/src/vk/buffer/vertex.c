@@ -5,9 +5,6 @@
 #include "app.h"
 #include "vk/buffer/buffer.h"
 #include "vk/gpu_resources.h"
-#include "voxel/mesh/mesh.h"
-#include "voxel/world/bucket_alloc.h"
-#include "voxel/world/world.h"
 
 VkVertexInputBindingDescription get_binding_description()
 {
@@ -59,10 +56,13 @@ void create_vertex_buffer(App* app)
                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &app->renderer.buffers.vertex);
 }
 
-void update_vertex_buffer(App* app, uint32_t bucket_index, uint32_t face_count)
+void upload_chunk_mesh(App* app, const Face* faces, uint32_t face_count,
+                       uint32_t bucket_index)
 {
+    if (face_count == 0)
+        return;
+
     vkDeviceWaitIdle(app->renderer.context.device);
-    const Face* faces = bucket_ptr(&app->world.mesh, bucket_index);
     VkDeviceSize dataSize = (VkDeviceSize)face_count * sizeof(Face);
     VkDeviceSize dstOffset = (VkDeviceSize)bucket_index * BUCKET_FACE_CAP * sizeof(Face);
 
@@ -86,17 +86,4 @@ void update_vertex_buffer(App* app, uint32_t bucket_index, uint32_t face_count)
 void destroy_vertex_buffer(App* app)
 {
     gpu_buffer_destroy(app, &app->renderer.buffers.vertex);
-}
-
-void vk_rebuild_mesh(App* app, ChunkPos pos)
-{
-    Chunk* c = world_get_chunk(&app->world, pos);
-    ASSERT(c != NULL, "vk_rebuild_mesh: chunk " VEC3_FMT " does not exist",
-           VEC3_ARGS(pos));
-    if (c->bucket_index == NO_BUCKET)
-        c->bucket_index = bucket_alloc_acquire(&app->world.mesh);
-    c->face_count =
-        generate_chunk_mesh(c, pos, bucket_ptr(&app->world.mesh, c->bucket_index),
-                            (const FaceTexture(*)[BLOCK_FACE_COUNT])app->block_faces);
-    update_vertex_buffer(app, c->bucket_index, c->face_count);
 }
