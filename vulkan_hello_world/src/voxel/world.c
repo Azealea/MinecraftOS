@@ -5,7 +5,6 @@
 #include "block.h"
 #include "chunk.h"
 #include "utils/container.h"
-#include "voxel/mesh.h"
 
 Chunk* world_get_chunk(World* w, ChunkPos p)
 {
@@ -34,22 +33,6 @@ void generate_chunk_terrain(World* w, ChunkPos pos)
                 BlockType t =
                     rand() % 2 ? BLK_AIR : (BlockType)(1 + rand() % (BLOCK_COUNT - 1));
                 chunk_set(c, (VEC3(u8)){x, y, z}, (Block){.type = t});
-            }
-}
-
-void world_queue_mesh_3by3by3(World* w, ChunkPos pos,
-                              const FaceTexture (*block_faces)[FACE_COUNT])
-{
-    for (int dx = -1; dx <= 1; dx++)
-        for (int dy = -1; dy <= 1; dy++)
-            for (int dz = -1; dz <= 1; dz++)
-            {
-                ChunkPos p = {pos.x + dx, pos.y + dy, pos.z + dz};
-                Chunk* c = world_get_or_add_chunk(w, p);
-                if (c->bucket_index == NO_BUCKET)
-                    c->bucket_index = bucket_alloc_acquire(&w->mesh);
-                c->face_count = generate_chunk_mesh(
-                    c, p, bucket_ptr(&w->mesh, c->bucket_index), block_faces);
             }
 }
 

@@ -5,8 +5,8 @@
 #include "utils/utils.h"
 #include "vk/gpu_resources.h"
 #include "vk/renderer/vk_command.h"
-#include "voxel/assets.h"
 #include "voxel/textures/array_atlas.h"
+#include "voxel/textures/block_face_textures.h"
 
 void transition_image_layout(App* app, VkImage image, uint32_t layerCount,
                              VkImageLayout oldLayout, VkImageLayout newLayout)
@@ -160,7 +160,7 @@ void create_texture_stuff(App* app)
     ArrayAtlas atlas = {0};
     atlas_init(&atlas);
     load_texture_into_atlas(&atlas, app->block_faces);
-    //    debug_print_block_faces();
+    //    debug_print_block_faces(app->block_faces);
     create_texture_image_from_atlas(app, &atlas);
     create_texture_sampler(app);
     atlas_free(&atlas);

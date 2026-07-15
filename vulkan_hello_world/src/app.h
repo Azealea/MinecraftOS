@@ -7,6 +7,7 @@
 #include "utils/utils.h"
 #include "vk/camera.h"
 #include "vk/vk_renderer.h"
+#include "voxel/textures/face_texture.h"
 #include "voxel/world.h"
 
 typedef struct
@@ -31,6 +32,6 @@ typedef struct
 
     Renderer renderer;
 
-    FaceTexture block_faces[BLOCK_COUNT][FACE_COUNT];
+    FaceTexture block_faces[BLOCK_COUNT][BLOCK_FACE_COUNT];
     World world;
 } App;

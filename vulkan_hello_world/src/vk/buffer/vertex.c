@@ -97,6 +97,6 @@ void vk_rebuild_mesh(App* app, ChunkPos pos)
         c->bucket_index = bucket_alloc_acquire(&app->world.mesh);
     c->face_count =
         generate_chunk_mesh(c, pos, bucket_ptr(&app->world.mesh, c->bucket_index),
-                            (const FaceTexture(*)[FACE_COUNT])app->block_faces);
+                            (const FaceTexture(*)[BLOCK_FACE_COUNT])app->block_faces);
     update_vertex_buffer(app, c->bucket_index, c->face_count);
 }

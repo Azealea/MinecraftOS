@@ -34,6 +34,3 @@ Chunk* world_get_chunk(World* w, ChunkPos pos);
 Chunk* world_get_or_add_chunk(World* w, ChunkPos pos);
 
 void generate_chunk_terrain(World* w, ChunkPos pos);
-
-void world_queue_mesh_3by3by3(World* w, ChunkPos pos,
-                              const FaceTexture (*block_faces)[FACE_COUNT]);

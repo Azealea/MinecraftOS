@@ -2,8 +2,6 @@
 
 #include <stdint.h>
 
-#include "voxel/textures/face_texture.h"
-
 typedef enum BlockType : uint16_t
 {
     BLK_AIR = 0,
@@ -17,14 +15,9 @@ typedef enum BlockType : uint16_t
     BLOCK_COUNT
 } BlockType;
 
-#define FACE_COUNT 6
-
 typedef struct Block
 {
     BlockType type;
     uint16_t state;
     uint16_t entity_id;
 } Block;
-
-extern const FaceTextureBuilder BlockFaceBuilders[][FACE_COUNT];
-extern const int BlockFaceBuildersCount;

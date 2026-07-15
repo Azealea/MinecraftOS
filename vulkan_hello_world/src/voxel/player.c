@@ -4,7 +4,7 @@
 #include "raycast.h"
 #include "utils/log.h"
 #include "utils/vec.h"
-#include "vk/vk.h"
+#include "vk/buffer/vertex.h"
 #include "voxel/block.h"
 #include "voxel/chunk.h"
 #include "voxel/world.h"

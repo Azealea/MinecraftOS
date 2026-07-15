@@ -1,7 +1,6 @@
 #include "face_texture.h"
 
-#include <assert.h>
-
+#include "utils/utils.h"
 #include "voxel/textures/array_atlas.h"
 
 uint16_t face_texture_resolve(const FaceTexture* f, uint8_t neighbor_mask, bool activated,
@@ -28,77 +27,85 @@ uint16_t face_texture_resolve(const FaceTexture* f, uint8_t neighbor_mask, bool 
     return res;
 }
 
-static void consume_leaf(const FaceTextureBuilder* fb, FaceTexture* res,
+static void consume_leaf(NodeId id, const FaceTextureNode* nodes, FaceTexture* res,
                          ArrayAtlas* atlas)
 {
+    const FaceTextureNode* n = &nodes[id];
     if (res->frame_count == 0)
-        res->frame_count = fb->leaf.count;
-    assert(res->frame_count == fb->leaf.count);
+        res->frame_count = n->leaf.count;
+    ASSERT(res->frame_count == n->leaf.count,
+           "mismatched animation frame counts within one face-texture composite "
+           "(node %u)",
+           id);
 
-    atlas_push_from_base_texture(atlas, fb->leaf.texture_id, fb->leaf.count);
+    atlas_push_from_base_texture(atlas, n->leaf.texture_id, n->leaf.count);
 }
 
-static void consume_connected(const FaceTextureBuilder* fb, FaceTexture* res,
+static void consume_connected(NodeId id, const FaceTextureNode* nodes, FaceTexture* res,
                               ArrayAtlas* atlas)
 {
-    if (!(fb->type & (FACETXT_CONNECTED4_BIT | FACETXT_CONNECTED8_BIT)))
+    const FaceTextureNode* n = &nodes[id];
+    if (!(n->type & (FACETXT_CONNECTED4_BIT | FACETXT_CONNECTED8_BIT)))
     {
-        consume_leaf(fb, res, atlas);
+        consume_leaf(id, nodes, res, atlas);
         return;
     }
 
-    res->flags |= (fb->type & FACETXT_CONNECTED4_BIT) ? FACETXT_CONNECTED4_BIT
-                                                      : FACETXT_CONNECTED8_BIT;
+    res->flags |= n->type;
 
-    uint8_t cases = (fb->type & FACETXT_CONNECTED8_BIT) ? 46 : 16;
+    uint8_t cases = (n->type & FACETXT_CONNECTED8_BIT) ? 46 : 16;
 
     for (uint8_t c = 0; c < cases; c++)
     {
-        const FaceTextureBuilder* src;
-        switch (0) // connected_offset_to_part[c])
+        NodeId src;
+        // TODO: connected_offset_to_part[c] dispatch
+        switch (0)
         {
         case 0:
-            src = fb->connected.inner;
+            src = n->connected.inner;
             break;
         case 1:
-            src = fb->connected.edge;
+            src = n->connected.edge;
             break;
         default:
-            src = fb->connected.corner;
+            src = n->connected.corner;
             break;
         }
-        consume_leaf(src, res, atlas);
+        consume_leaf(src, nodes, res, atlas);
     }
 }
 
-static void consume_activated(const FaceTextureBuilder* fb, FaceTexture* res,
+static void consume_activated(NodeId id, const FaceTextureNode* nodes, FaceTexture* res,
                               ArrayAtlas* atlas)
 {
-    if (!(fb->type & FACETXT_ACTIVATED_BIT))
+    const FaceTextureNode* n = &nodes[id];
+    if (!(n->type & FACETXT_ACTIVATED_BIT))
     {
-        consume_connected(fb, res, atlas);
+        consume_connected(id, nodes, res, atlas);
         return;
     }
     res->flags |= FACETXT_ACTIVATED_BIT;
-    consume_connected(fb->activated.off, res, atlas);
-    consume_connected(fb->activated.on, res, atlas);
+    consume_connected(n->activated.off, nodes, res, atlas);
+    consume_connected(n->activated.on, nodes, res, atlas);
 }
 
-static void consume_variant(const FaceTextureBuilder* fb, FaceTexture* res,
+static void consume_variant(NodeId id, const FaceTextureNode* nodes, FaceTexture* res,
                             ArrayAtlas* atlas)
 {
-    if (!(fb->type & FACETXT_VARIANT_BIT))
+    const FaceTextureNode* n = &nodes[id];
+    if (!(n->type & FACETXT_VARIANT_BIT))
     {
-        consume_activated(fb, res, atlas);
+        consume_activated(id, nodes, res, atlas);
         return;
     }
     res->flags |= FACETXT_VARIANT_BIT;
-    res->variant_count = fb->variant.count;
-    for (uint8_t i = 0; i < fb->variant.count; i++)
-        consume_activated(fb->variant.children[i], res, atlas);
+    res->variant_count = n->variant.count;
+    for (uint8_t i = 0; i < n->variant.count; i++)
+        consume_activated(n->variant.children[i], nodes, res, atlas);
 }
 
-FaceTexture face_texture_build(const FaceTextureBuilder* fb, ArrayAtlas* atlas)
+FaceTexture face_texture_build(const FaceTextureNode* nodes, NodeId root,
+                               ArrayAtlas* atlas)
 {
     FaceTexture res = {
         .base_id = atlas_get_current_slot(atlas),
@@ -107,7 +114,7 @@ FaceTexture face_texture_build(const FaceTextureBuilder* fb, ArrayAtlas* atlas)
         .frame_count = 0,
     };
 
-    consume_variant(fb, &res, atlas);
+    consume_variant(root, nodes, &res, atlas);
 
     return res;
 }
