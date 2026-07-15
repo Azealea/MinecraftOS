@@ -4,34 +4,20 @@
 #include "raycast.h"
 #include "utils/log.h"
 #include "utils/vec.h"
-#include "vk/buffer/vertex.h"
 #include "voxel/block.h"
-#include "voxel/world/chunk.h"
 #include "voxel/world/world.h"
 
 static void break_on_hit(App* app, RaycastHit hit)
 {
-    ChunkPos cpos = pos_glob_to_chunk(hit.block);
-    Chunk* c = world_get_chunk(&app->world, cpos);
-
-    VEC3(u8) local = pos_glob_to_rel(hit.block);
-    chunk_set(c, local, ((Block){.type = BLK_AIR}));
-
-    TRACE("breaking " VEC3_FMT, VEC3_ARGS(local));
-    vk_rebuild_mesh(app, cpos);
+    world_set_block(&app->world, hit.block, (Block){.type = BLK_AIR});
+    TRACE("breaking " VEC3_FMT, VEC3_ARGS(hit.block));
 }
 
 static void place_on_hit(App* app, RaycastHit hit, Block block)
 {
     VEC3(i32) blockPlace = VEC3_ADD(hit.block, hit.normal);
-    ChunkPos cpos = pos_glob_to_chunk(blockPlace);
-    Chunk* c = world_get_or_add_chunk(&app->world, cpos);
-
-    VEC3(u8) local = pos_glob_to_rel(blockPlace);
-    chunk_set(c, local, block);
-
-    TRACE("placing " VEC3_FMT, VEC3_ARGS(local));
-    vk_rebuild_mesh(app, cpos);
+    world_set_block(&app->world, blockPlace, block);
+    TRACE("placing " VEC3_FMT, VEC3_ARGS(blockPlace));
 }
 
 void player_consume_input(App* app)

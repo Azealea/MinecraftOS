@@ -15,6 +15,7 @@ typedef struct Chunk
     Block blocks[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
     uint32_t bucket_index;
     uint32_t face_count;
+    bool dirty; // needs meshing
 } Chunk;
 
 Chunk* chunk_constr(void);

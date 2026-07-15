@@ -24,6 +24,7 @@
 
 #define VECTOR_EMPTY(VEC) (VEC).size == 0
 #define VECTOR_INIT(VEC) (VEC) = (typeof(VEC)){0}
+#define VECTOR_CLEAR(VEC) (VEC).size = 0
 #define VECTOR_BEGIN(VEC) (VEC).data
 #define VECTOR_END(VEC) (VEC).data + (VEC).size
 #define VECTOR_NEXT(ITR) (ITR) + 1

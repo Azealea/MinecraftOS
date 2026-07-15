@@ -29,8 +29,6 @@ void init_vk(App* app)
     create_descriptor_sets(app);
     allocate_command_buffer(app);
     create_sync_objects(app);
-
-    vk_rebuild_mesh(app, (ChunkPos){0, 0, 0});
 }
 
 void clean_vk(App* app)
@@ -75,8 +73,20 @@ void drawFrame(App* app)
     currentFrame = (currentFrame + 1) % app->maxFramesInFlight;
 }
 
+static void rebuild_dirty_meshes(App* app)
+{
+    World* w = &app->world;
+    VECTOR_FOR_EACH(w->dirty, pos)
+    {
+        vk_rebuild_mesh(app, *pos);
+        world_get_chunk(w, *pos)->dirty = false;
+    }
+    VECTOR_CLEAR(w->dirty);
+}
+
 void do_stuff_vk(App* app)
 {
     update_camera_pos(&app->camera, &app->inputState);
+    rebuild_dirty_meshes(app);
     drawFrame(app);
 }

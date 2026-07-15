@@ -1,4 +1,3 @@
-
 #include "raycast.h"
 
 #include <math.h>
@@ -10,8 +9,6 @@
 
 RaycastHit raycast(const Camera* cam, World* world, float max_dist)
 {
-    RaycastHit result = {0};
-
     VEC3(f32)
     o = {
         cam->pos[0],
@@ -49,15 +46,16 @@ RaycastHit raycast(const Camera* cam, World* world, float max_dist)
         {
             ChunkPos cp = VEC3_DIV(b, CHUNK_SIZE);
 
+            const Chunk* chunk = world_get_chunk(world, cp);
+            if (!chunk)
+                break;
+
             VEC3(u8) loc = pos_glob_to_rel(b);
 
-            const Block* blk = chunk_get(world_get_or_add_chunk(world, cp), loc);
+            const Block* blk = chunk_get(chunk, loc);
             if (blk->type != BLK_AIR)
             {
-                result.hit = true;
-                result.block = VEC3_CAST(i32, b);
-                result.normal = VEC3_CAST(i32, n);
-                return result;
+                return ((RaycastHit){.hit = true, .block = b, .normal = n});
             }
         }
 
@@ -84,5 +82,5 @@ RaycastHit raycast(const Camera* cam, World* world, float max_dist)
             break;
     }
 
-    return result;
+    return ((RaycastHit){.hit = false});
 }

@@ -23,6 +23,23 @@ Chunk* world_get_or_add_chunk(World* w, ChunkPos p)
     return c;
 }
 
+void world_mark_chunk_dirty(World* w, ChunkPos pos)
+{
+    Chunk* c = world_get_chunk(w, pos);
+    if (!c || c->dirty)
+        return;
+    c->dirty = true;
+    VECTOR_PUSH_BACK(w->dirty, pos);
+}
+
+void world_set_block(World* w, VEC3(i32) global_pos, Block block)
+{
+    ChunkPos cpos = pos_glob_to_chunk(global_pos);
+    Chunk* c = world_get_or_add_chunk(w, cpos);
+    chunk_set(c, pos_glob_to_rel(global_pos), block);
+    world_mark_chunk_dirty(w, cpos);
+}
+
 void generate_chunk_terrain(World* w, ChunkPos pos)
 {
     Chunk* c = world_get_or_add_chunk(w, pos);
@@ -34,6 +51,7 @@ void generate_chunk_terrain(World* w, ChunkPos pos)
                     rand() % 2 ? BLK_AIR : (BlockType)(1 + rand() % (BLOCK_COUNT - 1));
                 chunk_set(c, (VEC3(u8)){x, y, z}, (Block){.type = t});
             }
+    world_mark_chunk_dirty(w, pos);
 }
 
 World world_constr(void)
@@ -41,6 +59,7 @@ World world_constr(void)
     World w = {
         .chunks = {0},
         .mesh = bucket_alloc_init(),
+        .dirty = {0},
     };
     generate_chunk_terrain(&w, (ChunkPos){0, 0, 0});
     return w;
@@ -54,4 +73,5 @@ void world_free(World* w)
     }
     MAP_FREE(w->chunks);
     bucket_alloc_free(&w->mesh);
+    VECTOR_FREE(w->dirty);
 }
