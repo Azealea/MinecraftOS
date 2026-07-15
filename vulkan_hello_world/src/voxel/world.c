@@ -31,8 +31,8 @@ void generate_chunk_terrain(World* w, ChunkPos pos)
         for (u8 y = 0; y < CHUNK_SIZE; y++)
             for (u8 z = 0; z < CHUNK_SIZE; z++)
             {
-                BlockType t = rand() % 2 ? BLK_AIR
-                                         : (BlockType)(1 + rand() % (BLOCK_COUNT - 1));
+                BlockType t =
+                    rand() % 2 ? BLK_AIR : (BlockType)(1 + rand() % (BLOCK_COUNT - 1));
                 chunk_set(c, (VEC3(u8)){x, y, z}, (Block){.type = t});
             }
 }
