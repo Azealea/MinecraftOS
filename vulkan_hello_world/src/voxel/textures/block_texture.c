@@ -1,4 +1,4 @@
-#include "block_face_textures.h"
+#include "block_texture.h"
 
 #include <stdio.h>
 
@@ -12,21 +12,21 @@
     }
 #define CONNECTED4(INNER, EDGE, CORN)                                                    \
     {                                                                                    \
-        .type = FACETXT_CONNECTED4_BIT,                                                  \
+        .type = BLKTXT_CONNECTED4_BIT,                                                   \
         .connected = {.inner = (INNER), .edge = (EDGE), .corner = (CORN)},               \
     }
 #define CONNECTED8(INNER, EDGE, CORN)                                                    \
     {                                                                                    \
-        .type = FACETXT_CONNECTED8_BIT,                                                  \
+        .type = BLKTXT_CONNECTED8_BIT,                                                   \
         .connected = {.inner = (INNER), .edge = (EDGE), .corner = (CORN)},               \
     }
 #define ACTIVATED(OFF, ON)                                                               \
     {                                                                                    \
-        .type = FACETXT_ACTIVATED_BIT, .activated = {.off = (OFF), .on = (ON) }          \
+        .type = BLKTXT_ACTIVATED_BIT, .activated = {.off = (OFF), .on = (ON) }           \
     }
 #define VARIANT(...)                                                                     \
     {                                                                                    \
-        .type = FACETXT_VARIANT_BIT,                                                     \
+        .type = BLKTXT_VARIANT_BIT,                                                      \
         .variant = {.children = {__VA_ARGS__},                                           \
                     .count = COUNTOF(((NodeId[]){__VA_ARGS__}))},                        \
     }
@@ -55,7 +55,7 @@ enum
         NODE_COUNT,
 };
 
-const FaceTextureNode FaceTextureNodes[NODE_COUNT] = {
+const TextureNode BlockTextureNodes[NODE_COUNT] = {
 #define X(NAME, VALUE) [NAME] = VALUE,
     NODE_LIST(X)
 #undef X
@@ -63,7 +63,7 @@ const FaceTextureNode FaceTextureNodes[NODE_COUNT] = {
 
 #undef NODE_LIST
 
-const NodeId BlockFaceRoots[BLOCK_COUNT][BLOCK_FACE_COUNT] = {
+const NodeId BlockTextures[BLOCK_COUNT][BLOCK_FACE_COUNT] = {
     [BLK_AIR] = UNIFO(NODE_DIRT), // never actually used
     [BLK_DIRT] = UNIFO(NODE_DIRT),
     [BLK_GRASS] = DONUT(NODE_GRASS_SIDE, NODE_GRASS_TOP, NODE_DIRT),
@@ -82,17 +82,17 @@ const NodeId BlockFaceRoots[BLOCK_COUNT][BLOCK_FACE_COUNT] = {
 #undef DONUT
 #undef UNIFO
 
-void validate_block_face_roots(void)
+void validate_block_textures(void)
 {
     for (int b = 0; b < BLOCK_COUNT; b++)
         for (int f = 0; f < BLOCK_FACE_COUNT; f++)
-            ASSERT(BlockFaceRoots[b][f] != NODE_NONE,
+            ASSERT(BlockTextures[b][f] != NODE_NONE,
                    "block %d has no face-texture description for face %d "
-                   "(forgot to add it to BlockFaceRoots?)",
+                   "(forgot to add it to BlockTextures?)",
                    b, f);
 }
 
-static void build_texture_look_up(const FaceTextureNode* nodes,
+static void build_texture_look_up(const TextureNode* nodes,
                                   const NodeId roots[][BLOCK_FACE_COUNT],
                                   FaceTexture destination[][BLOCK_FACE_COUNT],
                                   ArrayAtlas* atlas)
@@ -105,11 +105,11 @@ static void build_texture_look_up(const FaceTextureNode* nodes,
 void load_texture_into_atlas(ArrayAtlas* atlas,
                              FaceTexture (*block_faces)[BLOCK_FACE_COUNT])
 {
-    validate_block_face_roots();
-    build_texture_look_up(FaceTextureNodes, BlockFaceRoots, block_faces, atlas);
+    validate_block_textures();
+    build_texture_look_up(BlockTextureNodes, BlockTextures, block_faces, atlas);
 }
 
-void debug_print_block_faces(const FaceTexture (*block_faces)[BLOCK_FACE_COUNT])
+void debug_print_block_textures(const FaceTexture (*block_faces)[BLOCK_FACE_COUNT])
 {
     for (int blk = 0; blk < BLOCK_COUNT; blk++)
     {
@@ -121,11 +121,11 @@ void debug_print_block_faces(const FaceTexture (*block_faces)[BLOCK_FACE_COUNT])
                    "frame_count=%-3u | "
                    "connected=%s activated=%s variant=%s\n",
                    face, f->base_id, f->flags, f->variant_count, f->frame_count,
-                   (f->flags & FACETXT_CONNECTED8_BIT)       ? "8"
-                       : (f->flags & FACETXT_CONNECTED4_BIT) ? "4"
-                                                             : "-",
-                   (f->flags & FACETXT_ACTIVATED_BIT) ? "yes" : "no",
-                   (f->flags & FACETXT_VARIANT_BIT) ? "yes" : "no");
+                   (f->flags & BLKTXT_CONNECTED8_BIT)       ? "8"
+                       : (f->flags & BLKTXT_CONNECTED4_BIT) ? "4"
+                                                            : "-",
+                   (f->flags & BLKTXT_ACTIVATED_BIT) ? "yes" : "no",
+                   (f->flags & BLKTXT_VARIANT_BIT) ? "yes" : "no");
         }
     }
 }

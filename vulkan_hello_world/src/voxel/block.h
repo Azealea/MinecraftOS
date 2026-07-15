@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#define BLOCK_FACE_COUNT 6
+
 typedef enum BlockType : uint16_t
 {
     BLK_AIR = 0,

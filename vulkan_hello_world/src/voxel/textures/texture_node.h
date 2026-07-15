@@ -2,22 +2,20 @@
 
 #include <stdint.h>
 
-#define BLOCK_FACE_COUNT 6
-
 typedef uint16_t NodeId;
-#define FTN_VARIANT_MAX_CHILDREN 8
+#define TEXTURE_NODE_VARIANT_MAX_CHILDREN 8
 
 typedef enum : uint8_t
 {
-    FACETXT_CONNECTED4_BIT = 1 << 0,
-    FACETXT_CONNECTED8_BIT = 1 << 1,
-    FACETXT_ACTIVATED_BIT = 1 << 2,
-    FACETXT_VARIANT_BIT = 1 << 3,
-} FaceTextureFlags;
+    BLKTXT_CONNECTED4_BIT = 1 << 0,
+    BLKTXT_CONNECTED8_BIT = 1 << 1,
+    BLKTXT_ACTIVATED_BIT = 1 << 2,
+    BLKTXT_VARIANT_BIT = 1 << 3,
+} TextureFlags;
 
-typedef struct FaceTextureNode
+typedef struct TextureNode
 {
-    FaceTextureFlags type; // 0 = leaf
+    TextureFlags type; // 0 = leaf
     union
     {
         struct
@@ -35,8 +33,8 @@ typedef struct FaceTextureNode
         } activated;
         struct
         {
-            NodeId children[FTN_VARIANT_MAX_CHILDREN];
+            NodeId children[TEXTURE_NODE_VARIANT_MAX_CHILDREN];
             uint8_t count;
         } variant;
     };
-} FaceTextureNode;
+} TextureNode;
