@@ -40,6 +40,9 @@
     X(NODE_GRASS_SIDE, LEAF(TEX_GRASS_SIDE))                                             \
     X(NODE_GRASS_TOP, LEAF(TEX_GRASS))                                                   \
     X(NODE_STONE, LEAF(TEX_STONE))                                                       \
+    X(NODE_DARKSTONE, LEAF(TEX_DARKSTONE))                                               \
+    X(NODE_SAND, LEAF(TEX_SAND))                                                         \
+    X(NODE_RED_SAND, LEAF(TEX_RED_SAND))                                                 \
     X(NODE_OAK, LEAF(TEX_OAK))                                                           \
     X(NODE_OAK_INNER, LEAF(TEX_OAK_INNER))                                               \
     X(NODE_LAMP_ON, LEAF(TEX_LAMP_ON))                                                   \
@@ -68,6 +71,9 @@ const NodeId BlockTextures[BLOCK_COUNT][BLOCK_FACE_COUNT] = {
     [BLK_DIRT] = UNIFO(NODE_DIRT),
     [BLK_GRASS] = DONUT(NODE_GRASS_SIDE, NODE_GRASS_TOP, NODE_DIRT),
     [BLK_STONE] = UNIFO(NODE_STONE),
+    [BLK_DARKSTONE] = UNIFO(NODE_DARKSTONE),
+    [BLK_SAND] = UNIFO(NODE_SAND),
+    [BLK_RED_SAND] = UNIFO(NODE_RED_SAND),
     [BLK_OAK] = BARREL(NODE_OAK, NODE_OAK_INNER),
     [BLK_LAMP] = UNIFO(NODE_LAMP_ACTIVATED),
 };
