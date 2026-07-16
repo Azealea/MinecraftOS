@@ -64,7 +64,7 @@ const TextureNode BlockTextureNodes[NODE_COUNT] = {
 #undef NODE_LIST
 
 const NodeId BlockTextures[BLOCK_COUNT][BLOCK_FACE_COUNT] = {
-    [BLK_AIR] = UNIFO(NODE_DIRT), // never actually used
+    [BLK_AIR] = UNIFO(NODE_NONE),
     [BLK_DIRT] = UNIFO(NODE_DIRT),
     [BLK_GRASS] = DONUT(NODE_GRASS_SIDE, NODE_GRASS_TOP, NODE_DIRT),
     [BLK_STONE] = UNIFO(NODE_STONE),
@@ -85,11 +85,15 @@ const NodeId BlockTextures[BLOCK_COUNT][BLOCK_FACE_COUNT] = {
 void validate_block_textures(void)
 {
     for (int b = 0; b < BLOCK_COUNT; b++)
+    {
+        if (b == BLK_AIR)
+            continue;
         for (int f = 0; f < BLOCK_FACE_COUNT; f++)
             ASSERT(BlockTextures[b][f] != NODE_NONE,
                    "block %d has no face-texture description for face %d "
                    "(forgot to add it to BlockTextures?)",
                    b, f);
+    }
 }
 
 static void build_texture_look_up(const TextureNode* nodes,
@@ -97,9 +101,22 @@ static void build_texture_look_up(const TextureNode* nodes,
                                   FaceTexture destination[][BLOCK_FACE_COUNT],
                                   ArrayAtlas* atlas)
 {
+    FaceTexture cache[NODE_COUNT];
+    bool built[NODE_COUNT] = {0};
+
     for (int b = 0; b < BLOCK_COUNT; b++)
         for (int f = 0; f < BLOCK_FACE_COUNT; f++)
-            destination[b][f] = face_texture_build(nodes, roots[b][f], atlas);
+        {
+            NodeId root = roots[b][f];
+            if (root == NODE_NONE) // air-like block
+                continue;
+            if (!built[root])
+            {
+                cache[root] = face_texture_build(nodes, root, atlas);
+                built[root] = true;
+            }
+            destination[b][f] = cache[root];
+        }
 }
 
 void load_texture_into_atlas(ArrayAtlas* atlas,
