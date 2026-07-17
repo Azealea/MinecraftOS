@@ -42,14 +42,11 @@ RaycastHit raycast(const Camera* cam, World* world, float max_dist)
 
     for (int i = 0; i < (int)(max_dist / 0.01f); i++)
     {
-        if (b.x >= 0 && b.y >= 0 && b.z >= 0)
+        ChunkPos cp = pos_glob_to_chunk(b);
+
+        const Chunk* chunk = world_get_chunk(world, cp);
+        if (chunk)
         {
-            ChunkPos cp = VEC3_DIV(b, CHUNK_SIZE);
-
-            const Chunk* chunk = world_get_chunk(world, cp);
-            if (!chunk)
-                break;
-
             VEC3(u8) loc = pos_glob_to_rel(b);
 
             const Block* blk = chunk_get(chunk, loc);

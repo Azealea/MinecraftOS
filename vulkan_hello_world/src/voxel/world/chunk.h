@@ -28,12 +28,25 @@ void chunk_set(Chunk* chunk, VEC3(u8) pos, Block block);
 
 bool chunk_is_in_bound(VEC3(u8) relative_pos_chunk);
 
+static inline i32 floor_div_chunk(i32 v)
+{
+    i32 q = v / CHUNK_SIZE;
+    i32 r = v % CHUNK_SIZE;
+    return r < 0 ? q - 1 : q;
+}
+
+static inline u8 floor_mod_chunk(i32 v)
+{
+    i32 r = v % CHUNK_SIZE;
+    return (u8)(r < 0 ? r + CHUNK_SIZE : r);
+}
+
 static inline VEC3(u8) pos_glob_to_rel(VEC3(i32) g)
 {
-    return VEC3_CAST(u8, VEC3_MOD(g, CHUNK_SIZE));
+    return VEC3_APPLY(u8, floor_mod_chunk, g);
 }
 
 static inline VEC3(i32) pos_glob_to_chunk(VEC3(i32) g)
 {
-    return VEC3_DIV(g, CHUNK_SIZE);
+    return VEC3_APPLY(i32, floor_div_chunk, g);
 }
