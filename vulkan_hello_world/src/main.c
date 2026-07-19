@@ -5,7 +5,6 @@
 #include "glfw.h"
 #include "input/input.h"
 #include "utils/time.h"
-#include "vk/camera.h"
 #include "vk/vk.h"
 #include "voxel/player/player_movement.h"
 
@@ -42,8 +41,8 @@ static void loop(App* app)
         double frameTimeStart = glfwGetTime();
         glfwPollEvents();
         input_poll(&app->inputState, app->window);
-        do_stuff_vk(app);
         player_consume_input(app);
+        do_stuff_vk(app);
         double frameTimeEnd = glfwGetTime();
         //  printf("FPS: %f\r", 1 / (frameTimeEnd - frameTimeStart));
 
@@ -67,7 +66,7 @@ int main()
         .backgroundColor = {{{0.01f, 0.1f, 0.1f, 0.01f}}},
         .maxFramesInFlight = 3,
         .start_time = current_time(),
-        .camera = camera_init(),
+        .player = player_init(),
         .world = world_constr(),
     };
 

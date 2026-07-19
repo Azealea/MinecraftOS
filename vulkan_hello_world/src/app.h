@@ -5,8 +5,8 @@
 #include <GLFW/glfw3.h>
 
 #include "utils/utils.h"
-#include "vk/camera.h"
 #include "vk/vk_renderer.h"
+#include "voxel/player/player.h"
 #include "voxel/textures/face_texture.h"
 #include "voxel/world/world.h"
 
@@ -28,7 +28,7 @@ typedef struct
     GLFWmonitor* windowMonitor;
     GLFWwindow* window;
 
-    Camera camera;
+    Player player;
 
     Renderer renderer;
 

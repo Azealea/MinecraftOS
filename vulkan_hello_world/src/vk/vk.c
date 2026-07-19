@@ -90,7 +90,6 @@ static void rebuild_dirty_meshes(App* app)
 
 void do_stuff_vk(App* app)
 {
-    update_camera_pos(&app->camera, &app->inputState);
     rebuild_dirty_meshes(app);
     drawFrame(app);
 }

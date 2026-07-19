@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vk/camera.h"
+#include "camera.h"
 #include "voxel/world/world.h"
 
 typedef struct RaycastHit
