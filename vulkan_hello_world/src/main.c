@@ -33,6 +33,10 @@ static void init(App* app)
 
 static void loop(App* app)
 {
+    const GLFWvidmode* mode = glfwGetVideoMode(app->windowMonitor);
+    const double targetFrameTime = 1.0 / mode->refreshRate;
+    // const double targetFrameTime = 1.0 / 60.0;
+
     while (!glfwWindowShouldClose(app->window))
     {
         double frameTimeStart = glfwGetTime();
@@ -42,6 +46,8 @@ static void loop(App* app)
         player_consume_input(app);
         double frameTimeEnd = glfwGetTime();
         //  printf("FPS: %f\r", 1 / (frameTimeEnd - frameTimeStart));
+
+        sleep_seconds(targetFrameTime - (frameTimeEnd - frameTimeStart));
     }
 }
 

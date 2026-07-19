@@ -62,7 +62,7 @@ static VkPresentModeKHR get_present_mode(App* app)
              "Couldn't get surface present modes");
 
     VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
-    // here by default i think
+    // here by default
 
     for (uint32_t i = 0; i < presentModeCount; ++i)
     {

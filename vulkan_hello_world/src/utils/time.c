@@ -13,3 +13,15 @@ double time_since(double start)
 {
     return current_time() - start;
 }
+
+void sleep_seconds(double seconds)
+{
+    if (seconds <= 0.0)
+        return;
+
+    struct timespec ts = {
+        .tv_sec = (time_t)seconds,
+        .tv_nsec = (long)((seconds - (time_t)seconds) * 1e9),
+    };
+    nanosleep(&ts, nullptr);
+}

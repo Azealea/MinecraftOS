@@ -20,7 +20,7 @@ void update_camera_pos(Camera* camera, const Input* input)
     if (input_key_pressed(input, KEY_TAB))
         camera->fast = !camera->fast;
 
-    float movescale = 0.0002f;
+    float movescale = 0.02f;
     if (camera->fast)
         movescale *= 10.0f;
 

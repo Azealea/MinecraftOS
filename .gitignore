@@ -1,6 +1,7 @@
 *
 !/**/
 !*.*
+
 !makefile
 !Makefile
 
@@ -9,6 +10,7 @@
 **/compile_commands.json
 **/*.o
 **/*.d
+*.log
 
 # shader
 **/*.spv
