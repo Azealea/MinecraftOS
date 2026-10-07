@@ -25,7 +25,7 @@ typedef struct TextureNode
         } leaf;
         struct
         {
-            NodeId inner, edge, corner;
+            NodeId inner, border;
         } connected;
         struct
         {

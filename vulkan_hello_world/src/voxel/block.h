@@ -15,7 +15,7 @@ typedef enum BlockType : uint16_t
     BLK_DARKSTONE,
     BLK_OAK,
     BLK_LAMP,
-    // BLK_APP_CONTROLLER,
+    BLK_APP_CONTROLLER,
     // BLK_SCREEN,
     BLOCK_COUNT
 } BlockType;

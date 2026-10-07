@@ -43,6 +43,6 @@ void player_consume_input(App* app)
     {
         RaycastHit hit = raycast(&app->player.cam, &app->world, 8.0f);
         if (hit.hit)
-            place_on_hit(app, hit, (Block){.type = BLK_DIRT});
+            place_on_hit(app, hit, (Block){.type = BLK_APP_CONTROLLER});
     }
 }

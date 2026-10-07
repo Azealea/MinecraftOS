@@ -12,5 +12,4 @@ VkVertexInputAttributeDescription* get_attribute_descriptions(int* out_size);
 void create_vertex_buffer(App* app);
 void destroy_vertex_buffer(App* app);
 
-void upload_chunk_mesh(App* app, const Face* faces, uint32_t face_count,
-                       uint32_t bucket_index);
+void upload_chunk_mesh(App* app, const Face* faces, uint32_t face_count);

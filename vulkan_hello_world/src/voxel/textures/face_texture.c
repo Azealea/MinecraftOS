@@ -1,119 +1,28 @@
 #include "face_texture.h"
 
-#include "utils/utils.h"
-#include "voxel/textures/array_atlas.h"
+#include "utils/type.h"
+#include "voxel/textures/connected_texture.h"
+#include "voxel/textures/texture_node.h"
 
-uint16_t face_texture_resolve(const FaceTexture* f, uint8_t neighbor_mask, bool activated,
-                              uint8_t hash_pos)
+u16 face_texture_resolve(const FaceTexture* f, u8 neighbor_mask, bool activated,
+                         u8 hash_pos)
 {
-    const uint8_t connected_size = (f->flags & BLKTXT_CONNECTED8_BIT) ? 46
-        : (f->flags & BLKTXT_CONNECTED4_BIT)                          ? 16
-                                                                      : 1;
-    const uint8_t activated_size = (f->flags & BLKTXT_ACTIVATED_BIT) ? 2 : 1;
+    const u16 connected_size = (f->flags & BLKTXT_CONNECTED8_BIT) ? CONNECTED8_CASE_COUNT
+        : (f->flags & BLKTXT_CONNECTED4_BIT)                      ? CONNECTED4_CASE_COUNT
+                                                                  : 1;
+    const u8 activated_size = (f->flags & BLKTXT_ACTIVATED_BIT) ? 2 : 1;
 
-    const uint8_t variant_pos =
+    const u8 variant_pos =
         (f->flags & BLKTXT_VARIANT_BIT) ? hash_pos % f->variant_count : 0;
-    const uint8_t activated_pos =
-        (f->flags & BLKTXT_ACTIVATED_BIT) ? (activated ? 1 : 0) : 0;
-    const uint8_t connected_pos = 0;
-    // (connected_size > 1) ? connected_mask_to_offset[neighbor_mask] :
-    // 0;
+    const u8 activated_pos = (f->flags & BLKTXT_ACTIVATED_BIT) ? (activated ? 1 : 0) : 0;
+    const u16 connected_pos = (f->flags & BLKTXT_CONNECTED8_BIT)
+        ? connected8_case_index(neighbor_mask)
+        : (f->flags & BLKTXT_CONNECTED4_BIT) ? (neighbor_mask & 0xF)
+                                             : 0;
 
     int res = f->base_id
-        + ((uint32_t)variant_pos * activated_size * connected_size
-           + (uint32_t)activated_pos * connected_size + (uint32_t)connected_pos)
+        + ((u32)variant_pos * activated_size * connected_size
+           + (u32)activated_pos * connected_size + (u32)connected_pos)
             * f->frame_count;
-    //    printf("resolved :%d\n", res);
-    return res;
-}
-
-static void consume_leaf(NodeId id, const TextureNode* nodes, FaceTexture* res,
-                         ArrayAtlas* atlas)
-{
-    const TextureNode* n = &nodes[id];
-    if (res->frame_count == 0)
-        res->frame_count = n->leaf.count;
-    ASSERT(res->frame_count == n->leaf.count,
-           "mismatched animation frame counts within one face-texture composite "
-           "(node %u)",
-           id);
-
-    atlas_push_from_base_texture(atlas, n->leaf.texture_id, n->leaf.count);
-}
-
-static void consume_connected(NodeId id, const TextureNode* nodes, FaceTexture* res,
-                              ArrayAtlas* atlas)
-{
-    const TextureNode* n = &nodes[id];
-    if (!(n->type & (BLKTXT_CONNECTED4_BIT | BLKTXT_CONNECTED8_BIT)))
-    {
-        consume_leaf(id, nodes, res, atlas);
-        return;
-    }
-
-    res->flags |= n->type;
-
-    uint8_t cases = (n->type & BLKTXT_CONNECTED8_BIT) ? 46 : 16;
-
-    for (uint8_t c = 0; c < cases; c++)
-    {
-        NodeId src;
-        // TODO: connected_offset_to_part[c] dispatch
-        switch (0)
-        {
-        case 0:
-            src = n->connected.inner;
-            break;
-        case 1:
-            src = n->connected.edge;
-            break;
-        default:
-            src = n->connected.corner;
-            break;
-        }
-        consume_leaf(src, nodes, res, atlas);
-    }
-}
-
-static void consume_activated(NodeId id, const TextureNode* nodes, FaceTexture* res,
-                              ArrayAtlas* atlas)
-{
-    const TextureNode* n = &nodes[id];
-    if (!(n->type & BLKTXT_ACTIVATED_BIT))
-    {
-        consume_connected(id, nodes, res, atlas);
-        return;
-    }
-    res->flags |= BLKTXT_ACTIVATED_BIT;
-    consume_connected(n->activated.off, nodes, res, atlas);
-    consume_connected(n->activated.on, nodes, res, atlas);
-}
-
-static void consume_variant(NodeId id, const TextureNode* nodes, FaceTexture* res,
-                            ArrayAtlas* atlas)
-{
-    const TextureNode* n = &nodes[id];
-    if (!(n->type & BLKTXT_VARIANT_BIT))
-    {
-        consume_activated(id, nodes, res, atlas);
-        return;
-    }
-    res->flags |= BLKTXT_VARIANT_BIT;
-    res->variant_count = n->variant.count;
-    for (uint8_t i = 0; i < n->variant.count; i++)
-        consume_activated(n->variant.children[i], nodes, res, atlas);
-}
-
-FaceTexture face_texture_build(const TextureNode* nodes, NodeId root, ArrayAtlas* atlas)
-{
-    FaceTexture res = {
-        .base_id = atlas_get_current_slot(atlas),
-        .flags = 0,
-        .variant_count = 1,
-        .frame_count = 0,
-    };
-
-    consume_variant(root, nodes, &res, atlas);
-
     return res;
 }

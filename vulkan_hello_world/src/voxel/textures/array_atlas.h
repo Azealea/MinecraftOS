@@ -19,5 +19,6 @@ void atlas_free(ArrayAtlas* a);
 uint16_t atlas_get_current_slot(ArrayAtlas* a);
 void atlas_push_from_base_texture(ArrayAtlas* a, BaseTextureEnum bid,
                                   uint16_t frame_count);
+void atlas_push_pixels(ArrayAtlas* a, uint8_t* rgba); // takes ownership
 
 uint8_t* load_rgba(const char* path);

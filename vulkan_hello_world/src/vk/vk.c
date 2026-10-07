@@ -81,8 +81,7 @@ static void rebuild_dirty_meshes(App* app)
     {
         world_remesh_chunk(w, *pos, app->block_faces);
         Chunk* c = world_get_chunk(w, *pos);
-        upload_chunk_mesh(app, bucket_ptr(&w->mesh, c->bucket_index), c->face_count,
-                          c->bucket_index);
+        upload_chunk_mesh(app, c->bucket_ptr, c->face_count);
         c->dirty = false;
     }
     VECTOR_CLEAR(w->dirty);

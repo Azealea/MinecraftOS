@@ -5,7 +5,6 @@
 Chunk* chunk_constr(void)
 {
     Chunk* c = calloc(1, sizeof(Chunk));
-    c->bucket_index = UINT32_MAX;
     return c;
 }
 

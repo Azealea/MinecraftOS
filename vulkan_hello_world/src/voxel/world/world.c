@@ -54,6 +54,20 @@ void generate_chunk_terrain(World* w, ChunkPos pos)
     world_mark_chunk_dirty(w, pos);
 }
 
+// update connected texture
+void world_dirty_existing_neighbors(World* w, ChunkPos pos)
+{
+    static const ChunkPos ADJ[6] = {
+        {1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1},
+    };
+    for (int i = 0; i < 6; i++)
+    {
+        ChunkPos npos = VEC3_ADD(pos, ADJ[i]);
+        if (world_get_chunk(w, npos))
+            world_mark_chunk_dirty(w, npos);
+    }
+}
+
 World world_constr(void)
 {
     World w = {
@@ -61,7 +75,9 @@ World world_constr(void)
         .mesh = bucket_alloc_init(),
         .dirty = {0},
     };
-    generate_chunk_terrain(&w, (ChunkPos){0, 0, 0});
+    ChunkPos origin = {0, 0, 0};
+    generate_chunk_terrain(&w, origin);
+    world_dirty_existing_neighbors(&w, origin);
     return w;
 }
 

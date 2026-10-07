@@ -19,21 +19,23 @@ void bucket_alloc_free(BucketAlloc* ba)
     free(ba->faces);
 }
 
-uint32_t bucket_alloc_acquire(BucketAlloc* ba)
+Face* bucket_alloc_acquire(BucketAlloc* ba)
 {
-    for (uint32_t i = 0; i < BUCKET_COUNT; i++)
+    for (u32 i = 0; i < BUCKET_COUNT; i++)
     {
         if (ba->free[i])
         {
             ba->free[i] = false;
-            return i;
+            return ba->faces + i * BUCKET_FACE_CAP;
         }
     }
     ERROR("BucketAlloc exhausted (%d buckets)", BUCKET_COUNT);
-    return NO_BUCKET;
+    return NULL;
 }
 
-void bucket_alloc_release(BucketAlloc* ba, uint32_t slot)
+void bucket_alloc_release(BucketAlloc* ba, Face* slot)
 {
-    ba->free[slot] = true;
+    u32 index = (slot - ba->faces) / BUCKET_FACE_CAP;
+
+    ba->free[index] = true;
 }

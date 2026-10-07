@@ -1,12 +1,70 @@
 #include "mesh.h"
 
 #include "utils/utils.h"
+#include "voxel/textures/connected_texture.h"
 #include "voxel/textures/face_texture.h"
+#include "voxel/textures/texture_node.h"
 
-uint32_t generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, Face* dst,
-                             const FaceTexture (*block_faces)[BLOCK_FACE_COUNT])
+// offset for uvs passed down to vertex
+typedef struct
 {
-    uint32_t count = 0;
+    VEC3(i8) u0, u1, v0, v1;
+} FaceEdgeDirs;
+
+static const Block* block_at_offset(const Chunk* chunk, ChunkPos chunk_pos, World* world,
+                                    VEC3(i32) local, VEC3(i8) dir)
+{
+    VEC3(i32) npos = VEC3_ADD(local, dir);
+    if (npos.x >= 0 && npos.x < CHUNK_SIZE && npos.y >= 0 && npos.y < CHUNK_SIZE
+        && npos.z >= 0 && npos.z < CHUNK_SIZE)
+        return chunk_get(chunk, VEC3_CAST(u8, npos));
+
+    VEC3(i32) global = VEC3_ADD(VEC3_SCALE(chunk_pos, CHUNK_SIZE), npos);
+    Chunk* nc = world_get_chunk(world, pos_glob_to_chunk(global));
+    return nc ? chunk_get(nc, pos_glob_to_rel(global)) : NULL;
+}
+
+static bool same_type_at_offset(const Chunk* chunk, ChunkPos pos, World* world,
+                                VEC3(i32) local, VEC3(i8) dir, BlockType type)
+{
+    const Block* nb = block_at_offset(chunk, pos, world, local, dir);
+    return nb && nb->type == type;
+}
+
+static u8 connected_neighbor_mask(const Chunk* chunk, ChunkPos pos, World* world,
+                                  VEC3(i32) local, int face, BlockType type, u8 flags)
+{
+    static const FaceEdgeDirs face_edge_dirs[6] = {
+        {.u0 = {0, -1, 0}, .u1 = {0, 1, 0}, .v0 = {0, 0, 1}, .v1 = {0, 0, -1}}, // +X
+        {.u0 = {0, 1, 0}, .u1 = {0, -1, 0}, .v0 = {0, 0, 1}, .v1 = {0, 0, -1}}, // -X
+        {.u0 = {1, 0, 0}, .u1 = {-1, 0, 0}, .v0 = {0, 0, 1}, .v1 = {0, 0, -1}}, // +Y
+        {.u0 = {-1, 0, 0}, .u1 = {1, 0, 0}, .v0 = {0, 0, 1}, .v1 = {0, 0, -1}}, // -Y
+        {.u0 = {0, 1, 0}, .u1 = {0, -1, 0}, .v0 = {1, 0, 0}, .v1 = {-1, 0, 0}}, // +Z
+        {.u0 = {0, -1, 0}, .u1 = {0, 1, 0}, .v0 = {1, 0, 0}, .v1 = {-1, 0, 0}}, // -Z
+    };
+    if (!(flags & (BLKTXT_CONNECTED4_BIT | BLKTXT_CONNECTED8_BIT)))
+        return 0;
+
+    const FaceEdgeDirs* d = &face_edge_dirs[face];
+    bool u0 = same_type_at_offset(chunk, pos, world, local, d->u0, type);
+    bool u1 = same_type_at_offset(chunk, pos, world, local, d->u1, type);
+    bool v0 = same_type_at_offset(chunk, pos, world, local, d->v0, type);
+    bool v1 = same_type_at_offset(chunk, pos, world, local, d->v1, type);
+
+    if (!(flags & BLKTXT_CONNECTED8_BIT))
+        return connected_mask_pack(u0, u1, v0, v1, false, false, false, false);
+
+    bool nw = same_type_at_offset(chunk, pos, world, local, VEC3_ADD(d->u0, d->v0), type);
+    bool ne = same_type_at_offset(chunk, pos, world, local, VEC3_ADD(d->u1, d->v0), type);
+    bool sw = same_type_at_offset(chunk, pos, world, local, VEC3_ADD(d->u0, d->v1), type);
+    bool se = same_type_at_offset(chunk, pos, world, local, VEC3_ADD(d->u1, d->v1), type);
+    return connected_mask_pack(u0, u1, v0, v1, nw, ne, sw, se);
+}
+
+static u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
+                               const FaceTexture (*block_faces)[BLOCK_FACE_COUNT])
+{
+    u32 count = 0;
 
     static const VEC3(i8) dirs[6] = {
         {1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1},
@@ -30,16 +88,15 @@ uint32_t generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, Face* dst,
                         && chunk_get(chunk, npos)->type != BLK_AIR)
                         continue;
 
-                    dst[count++] = (Face){
-                        .pos =
-                            {
-                                .x = (i32)(pos.x * CHUNK_SIZE + x),
-                                .y = (i32)(pos.y * CHUNK_SIZE + y),
-                                .z = (i32)(pos.z * CHUNK_SIZE + z),
-                            },
+                    const FaceTexture* ft = &block_faces[b->type][f];
+                    VEC3(i32) local = {x, y, z};
+                    u8 neighbor_mask = connected_neighbor_mask(chunk, pos, world, local,
+                                                               f, b->type, ft->flags);
+
+                    chunk->bucket_ptr[count++] = (Face){
+                        .pos = VEC3_ADD(VEC3_SCALE(pos, CHUNK_SIZE), local),
                         .face_id = f,
-                        .texture_id =
-                            face_texture_resolve(&block_faces[b->type][f], 0, 0, 0),
+                        .texture_id = face_texture_resolve(ft, neighbor_mask, false, 0),
                     };
                 }
             }
@@ -53,8 +110,7 @@ void world_remesh_chunk(World* w, ChunkPos pos,
     Chunk* c = world_get_chunk(w, pos);
     ASSERT(c != NULL, "world_remesh_chunk: chunk " VEC3_FMT " does not exist",
            VEC3_ARGS(pos));
-    if (c->bucket_index == NO_BUCKET)
-        c->bucket_index = bucket_alloc_acquire(&w->mesh);
-    c->face_count =
-        generate_chunk_mesh(c, pos, bucket_ptr(&w->mesh, c->bucket_index), block_faces);
+    if (c->bucket_ptr == NULL)
+        c->bucket_ptr = bucket_alloc_acquire(&w->mesh);
+    c->face_count = generate_chunk_mesh(c, pos, w, block_faces);
 }

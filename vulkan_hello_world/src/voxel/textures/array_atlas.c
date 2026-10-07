@@ -43,6 +43,11 @@ void atlas_push_from_base_texture(ArrayAtlas* a, BaseTextureEnum bid,
         atlas_push(a, load_rgba(TexturePaths[bid + i]));
 }
 
+void atlas_push_pixels(ArrayAtlas* a, uint8_t* rgba)
+{
+    atlas_push(a, rgba);
+}
+
 void atlas_free(ArrayAtlas* a)
 {
     for (uint32_t i = 0; i < a->count; i++)

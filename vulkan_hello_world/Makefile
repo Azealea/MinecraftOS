@@ -12,7 +12,7 @@ SRC += $(SHADERS_C)
 OBJ := $(SRC:.c=.o)
 
 CSTD := -std=c23
-CFLAGS := $(CSTD) -Wall -Wextra -Wpedantic -I$(SRC_DIR) $(shell pkg-config --cflags glfw3 vulkan cglm) -Ilibraries $(DEFS)
+CFLAGS := $(CSTD) -Wall -Wextra -Wpedantic -Werror -I$(SRC_DIR) -Ilibraries $(shell pkg-config --cflags glfw3 vulkan cglm) $(DEFS)
 # CFLAGS += -g -fsanitize=address,undefined
 LDFLAGS := $(shell pkg-config --libs glfw3 vulkan cglm) -lm
 
@@ -21,10 +21,7 @@ TARGET := vulkan_hello_world
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(SHADER_DIR)/%.spv: $(SHADER_DIR)/%
 	glslc $< -o $@
@@ -34,5 +31,8 @@ $(SHADER_DIR)/%.spv.c: $(SHADER_DIR)/%.spv
 
 clean:
 	rm -f $(SRC:.c=.o) $(SHADERS_SPV) $(SHADERS_C) $(TARGET)
+
+fix:
+	find src/ \( -name "*.h" -o -name "*.c" \) -exec clang-format -i {} \+
 
 .PHONY: all clean

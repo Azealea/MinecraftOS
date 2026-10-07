@@ -1,7 +1,9 @@
 #pragma once
 
 #include "voxel/block.h"
+#include "voxel/textures/array_atlas.h"
 #include "voxel/textures/face_texture.h"
+#include "voxel/textures/texture_node.h"
 
 extern const TextureNode BlockTextureNodes[];
 extern const NodeId BlockTextures[BLOCK_COUNT][BLOCK_FACE_COUNT];

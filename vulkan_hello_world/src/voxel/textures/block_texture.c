@@ -4,21 +4,22 @@
 
 #include "base_texture_enum.h"
 #include "utils/utils.h"
+#include "voxel/textures/face_texture_build.h"
 
 #define LEAF(TID) {.type = 0, .leaf = {.texture_id = (TID), .count = 1}}
 #define LEAF_ANIM(TID, N)                                                                \
     {                                                                                    \
         .type = 0, .leaf = {.texture_id = (TID), .count = (N) }                          \
     }
-#define CONNECTED4(INNER, EDGE, CORN)                                                    \
+#define CONNECTED4(INNER, BORDER)                                                        \
     {                                                                                    \
         .type = BLKTXT_CONNECTED4_BIT,                                                   \
-        .connected = {.inner = (INNER), .edge = (EDGE), .corner = (CORN)},               \
+        .connected = {.inner = (INNER), .border = (BORDER)},                             \
     }
-#define CONNECTED8(INNER, EDGE, CORN)                                                    \
+#define CONNECTED8(INNER, BORDER)                                                        \
     {                                                                                    \
         .type = BLKTXT_CONNECTED8_BIT,                                                   \
-        .connected = {.inner = (INNER), .edge = (EDGE), .corner = (CORN)},               \
+        .connected = {.inner = (INNER), .border = (BORDER)},                             \
     }
 #define ACTIVATED(OFF, ON)                                                               \
     {                                                                                    \
@@ -30,10 +31,6 @@
         .variant = {.children = {__VA_ARGS__},                                           \
                     .count = COUNTOF(((NodeId[]){__VA_ARGS__}))},                        \
     }
-
-#define BARREL(SIDE, TOPBOT) {(SIDE), (SIDE), (SIDE), (SIDE), (TOPBOT), (TOPBOT)}
-#define DONUT(SIDE, TOP, BOT) {(SIDE), (SIDE), (SIDE), (SIDE), (TOP), (BOT)}
-#define UNIFO(TEXT) {(TEXT), (TEXT), (TEXT), (TEXT), (TEXT), (TEXT)}
 
 #define NODE_LIST(X)                                                                     \
     X(NODE_DIRT, LEAF(TEX_DIRT))                                                         \
@@ -47,7 +44,10 @@
     X(NODE_OAK_INNER, LEAF(TEX_OAK_INNER))                                               \
     X(NODE_LAMP_ON, LEAF(TEX_LAMP_ON))                                                   \
     X(NODE_LAMP_OFF, LEAF(TEX_LAMP_OFF))                                                 \
-    X(NODE_LAMP_ACTIVATED, ACTIVATED(NODE_LAMP_ON, NODE_LAMP_OFF))
+    X(NODE_LAMP_ACTIVATED, ACTIVATED(NODE_LAMP_ON, NODE_LAMP_OFF))                       \
+    X(NODE_APP_CONTROLLER_INNER, LEAF(TEX_APP_CONTROLER_SIDE))                           \
+    X(NODE_BORDER_ACTIVE, LEAF(TEX_BORDER_ACTIVE))                                       \
+    X(NODE_APP_CONTROLLER_SIDE, CONNECTED8(NODE_APP_CONTROLLER_INNER, NODE_BORDER_ACTIVE))
 
 enum
 {
@@ -66,6 +66,17 @@ const TextureNode BlockTextureNodes[NODE_COUNT] = {
 
 #undef NODE_LIST
 
+#undef LEAF
+#undef LEAF_ANIM
+#undef CONNECTED4
+#undef CONNECTED8
+#undef ACTIVATED
+#undef VARIANT
+
+#define BARREL(SIDE, TOPBOT) {(SIDE), (SIDE), (SIDE), (SIDE), (TOPBOT), (TOPBOT)}
+#define DONUT(SIDE, TOP, BOT) {(SIDE), (SIDE), (SIDE), (SIDE), (TOP), (BOT)}
+#define UNIFO(TEXT) {(TEXT), (TEXT), (TEXT), (TEXT), (TEXT), (TEXT)}
+
 const NodeId BlockTextures[BLOCK_COUNT][BLOCK_FACE_COUNT] = {
     [BLK_AIR] = UNIFO(NODE_NONE),
     [BLK_DIRT] = UNIFO(NODE_DIRT),
@@ -76,14 +87,9 @@ const NodeId BlockTextures[BLOCK_COUNT][BLOCK_FACE_COUNT] = {
     [BLK_RED_SAND] = UNIFO(NODE_RED_SAND),
     [BLK_OAK] = BARREL(NODE_OAK, NODE_OAK_INNER),
     [BLK_LAMP] = UNIFO(NODE_LAMP_ACTIVATED),
+    [BLK_APP_CONTROLLER] = UNIFO(NODE_APP_CONTROLLER_SIDE),
 };
 
-#undef LEAF
-#undef LEAF_ANIM
-#undef CONNECTED4
-#undef CONNECTED8
-#undef ACTIVATED
-#undef VARIANT
 #undef BARREL
 #undef DONUT
 #undef UNIFO

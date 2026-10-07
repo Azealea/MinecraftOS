@@ -13,7 +13,7 @@ static inline size_t chunkpos_hash(ChunkPos p)
 
 static inline bool chunkpos_eq(ChunkPos a, ChunkPos b)
 {
-    return a.x == b.x && a.y == b.y && a.z == b.z;
+    return VEC3_EQ(a, b);
 }
 
 typedef Chunk* Chunk_ptr;
@@ -38,3 +38,4 @@ void world_set_block(World* w, VEC3(i32) global_pos, Block block);
 void world_mark_chunk_dirty(World* w, ChunkPos pos);
 
 void generate_chunk_terrain(World* w, ChunkPos pos);
+void world_dirty_existing_neighbors(World* w, ChunkPos pos);
