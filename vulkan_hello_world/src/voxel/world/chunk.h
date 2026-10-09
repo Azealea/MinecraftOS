@@ -1,6 +1,5 @@
 #pragma once
 
-#include "utils/type.h"
 #include "utils/vec.h"
 #include "voxel/block.h"
 #include "voxel/mesh/face.h"

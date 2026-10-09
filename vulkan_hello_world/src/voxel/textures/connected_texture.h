@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "utils/utils.h"
 
 enum
 {
@@ -18,13 +18,7 @@ enum
     CONNECTED8_SE = 1 << 7,
 };
 
-enum
-{
-    CONNECTED4_CASE_COUNT = 16,
-    CONNECTED8_CASE_COUNT = 47,
-};
+#define CONNECTED4_CASE_COUNT 16
+#define CONNECTED8_CASE_COUNT 47
 
-uint8_t connected_mask_pack(bool u0, bool u1, bool v0, bool v1, bool nw, bool ne, bool sw,
-                            bool se);
-
-uint8_t connected8_case_index(uint8_t mask);
+u8 connected8_case_index(u8 mask);

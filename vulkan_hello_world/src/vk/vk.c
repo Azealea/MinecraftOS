@@ -1,4 +1,4 @@
-#include "vk/vk.h"
+#include "vk.h"
 
 #include "vk/buffer/vertex.h"
 #include "vk/camera_ubo.h"
@@ -10,7 +10,7 @@
 #include "vk/vk_depth.h"
 #include "vk/vk_swapchain.h"
 #include "vk/vk_texture.h"
-#include "voxel/mesh/mesh.h"
+#include "voxel/textures/init.h"
 
 void init_vk(App* app)
 {
@@ -35,6 +35,7 @@ void init_vk(App* app)
 void clean_vk(App* app)
 {
     vkDeviceWaitIdle(app->renderer.context.device);
+    destroy_command_buffer(app);
     destroy_depth_resources(app);
     destroy_framebuffers(app);
     destroy_swapchain(app);
@@ -72,23 +73,4 @@ void drawFrame(App* app)
     present_swapchain_image(app, imageIndex);
 
     currentFrame = (currentFrame + 1) % app->maxFramesInFlight;
-}
-
-static void rebuild_dirty_meshes(App* app)
-{
-    World* w = &app->world;
-    VECTOR_FOR_EACH(w->dirty, pos)
-    {
-        world_remesh_chunk(w, *pos, app->block_faces);
-        Chunk* c = world_get_chunk(w, *pos);
-        upload_chunk_mesh(app, c->bucket_ptr, c->face_count);
-        c->dirty = false;
-    }
-    VECTOR_CLEAR(w->dirty);
-}
-
-void do_stuff_vk(App* app)
-{
-    rebuild_dirty_meshes(app);
-    drawFrame(app);
 }

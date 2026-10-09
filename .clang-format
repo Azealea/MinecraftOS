@@ -44,6 +44,7 @@ Cpp11BracedListStyle: true
 DerivePointerAlignment: false
 FixNamespaceComments: true
 ForEachMacros: ['ILIST_FOREACH', 'ILIST_FOREACH_ENTRY']
+TypenameMacros: ['VECTOR', 'SET', 'MAP']
 IncludeBlocks: Regroup
 IncludeCategories:
     - Regex: '<.*>'

@@ -82,8 +82,9 @@ void create_descriptor_sets(App* app)
         .pSetLayouts = layouts,
     };
 
-    app->renderer.descriptors.sets =
-        calloc(app->maxFramesInFlight, sizeof(*app->renderer.descriptors.sets));
+    app->renderer.descriptors.sets = calloc(
+        app->maxFramesInFlight,
+        sizeof(*app->renderer.descriptors.sets)); // TODO FREE THAT AT THE END OF PROGRAM
 
     ASSERTVK(vkAllocateDescriptorSets(app->renderer.context.device, &allocInfo,
                                       app->renderer.descriptors.sets),

@@ -1,10 +1,8 @@
 #pragma once
 
-#include <stdint.h>
+#include "utils/utils.h"
 
-#define BLOCK_FACE_COUNT 6
-
-typedef enum BlockType : uint16_t
+typedef enum BlockType : u16
 {
     BLK_AIR = 0,
     BLK_GRASS,
@@ -23,6 +21,6 @@ typedef enum BlockType : uint16_t
 typedef struct Block
 {
     BlockType type;
-    uint16_t state;
-    uint16_t entity_id;
+    u16 state;
+    u16 entity_id;
 } Block;

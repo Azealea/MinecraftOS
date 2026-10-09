@@ -1,11 +1,10 @@
 #include "face_texture.h"
 
-#include "utils/type.h"
 #include "voxel/textures/connected_texture.h"
-#include "voxel/textures/texture_node.h"
+#include "voxel/textures/texture_flags.h"
 
-u16 face_texture_resolve(const FaceTexture* f, u8 neighbor_mask, bool activated,
-                         u8 hash_pos)
+u16 face_texture_to_index(const FaceTexture* f, u8 neighbor_mask, bool activated,
+                          u8 hash_pos)
 {
     const u16 connected_size = (f->flags & BLKTXT_CONNECTED8_BIT) ? CONNECTED8_CASE_COUNT
         : (f->flags & BLKTXT_CONNECTED4_BIT)                      ? CONNECTED4_CASE_COUNT

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ASSET_DIR="../../../assets/block_textures"
+ASSET_DIR="../../../../assets/block_textures"
 ASS_DIR="assets/block_textures/"
 NAME="base_texture_enum"
 HEADER="$NAME.h"
@@ -10,7 +10,7 @@ echo "// auto-generated from $ASSET_DIR the $(date +%Y-%m-%d)" > $HEADER
 echo "#pragma once" >> $HEADER
 echo "" >> $HEADER
 
-echo -e "typedef enum BaseTextureEnum\n{" >> $HEADER
+echo -e "enum BaseTexture\n{" >> $HEADER
 
 COUNT=0
 for file in "$ASSET_DIR"/*.PNG; do
@@ -20,7 +20,7 @@ for file in "$ASSET_DIR"/*.PNG; do
     COUNT=$((COUNT + 1))
 done
 
-echo "} BaseTextureEnum;" >> $HEADER
+echo "};" >> $HEADER
 echo "" >> $HEADER
 echo "#define TEXTURE_COUNT $COUNT" >> $HEADER
 echo "" >> $HEADER

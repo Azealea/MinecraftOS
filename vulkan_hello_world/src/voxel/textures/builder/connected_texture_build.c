@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "voxel/textures/builder/array_atlas.h"
 #include "voxel/textures/connected_texture.h"
 
 #define QUAD_SIZE (TEXTURE_WIDTH_HEIGHT / 2)
@@ -15,9 +16,8 @@ enum
     QUAD_NULL = 3,
 };
 
-static void blit_quadrant(uint8_t* out, const uint8_t* border, int quad, int dst_x,
-                          int dst_y, bool target_flip_x, bool target_flip_y,
-                          bool transpose)
+static void blit_quadrant(texture_t out, texture_t border, int quad, int dst_x, int dst_y,
+                          bool target_flip_x, bool target_flip_y, bool transpose)
 {
     int qx = (quad % 2) * QUAD_SIZE;
     int qy = (quad / 2) * QUAD_SIZE;
@@ -51,11 +51,10 @@ static void blit_quadrant(uint8_t* out, const uint8_t* border, int quad, int dst
         }
 }
 
-static void composite_connected_tile(ArrayAtlas* atlas, const uint8_t* inner,
-                                     const uint8_t* border, uint16_t mask,
-                                     bool has_diagonal)
+static void composite_connected_tile(VECTOR(texture_t)* atlas, texture_t inner,
+                                     texture_t border, uint16_t mask, bool has_diagonal)
 {
-    uint8_t* out = malloc((size_t)TEXTURE_WIDTH_HEIGHT * TEXTURE_WIDTH_HEIGHT * 4);
+    texture_t out = malloc((size_t)TEXTURE_WIDTH_HEIGHT * TEXTURE_WIDTH_HEIGHT * 4);
     memcpy(out, inner, (size_t)TEXTURE_WIDTH_HEIGHT * TEXTURE_WIDTH_HEIGHT * 4);
 
     bool u0 = mask & CONNECTED4_U0, u1 = mask & CONNECTED4_U1;
@@ -99,13 +98,13 @@ static void composite_connected_tile(ArrayAtlas* atlas, const uint8_t* inner,
     atlas_push_pixels(atlas, out);
 }
 
-void bake_connected4(ArrayAtlas* atlas, const uint8_t* inner_px, const uint8_t* border_px)
+void bake_connected4(VECTOR(texture_t)* atlas, texture_t inner_px, texture_t border_px)
 {
     for (uint16_t mask = 0; mask < CONNECTED4_CASE_COUNT; mask++)
         composite_connected_tile(atlas, inner_px, border_px, mask, false);
 }
 
-void bake_connected8(ArrayAtlas* atlas, const uint8_t* inner_px, const uint8_t* border_px)
+void bake_connected8(VECTOR(texture_t)* atlas, texture_t inner_px, texture_t border_px)
 {
     uint16_t representative[CONNECTED8_CASE_COUNT];
     bool seen[CONNECTED8_CASE_COUNT] = {false};

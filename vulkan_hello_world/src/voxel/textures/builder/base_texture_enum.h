@@ -1,7 +1,7 @@
-// auto-generated from ../../../assets/block_textures the 2026-07-16
+// auto-generated from ../../../assets/block_textures the 2026-10-08
 #pragma once
 
-typedef enum BaseTextureEnum
+enum BaseTexture
 {
     TEX_APP_CONTROLER_SIDE,
     TEX_APP_CONTROLLER,
@@ -24,7 +24,7 @@ typedef enum BaseTextureEnum
     TEX_SCREEN,
     TEX_SNOW,
     TEX_STONE,
-} BaseTextureEnum;
+};
 
 #define TEXTURE_COUNT 21
 

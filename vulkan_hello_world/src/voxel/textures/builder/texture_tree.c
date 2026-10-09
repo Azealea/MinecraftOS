@@ -1,15 +1,15 @@
-#include "block_texture.h"
-
-#include <stdio.h>
+#include "texture_tree.h"
 
 #include "base_texture_enum.h"
-#include "utils/utils.h"
-#include "voxel/textures/face_texture_build.h"
+#include "connected_texture_build.h"
+#include "voxel/block.h"
+
+// VVVV description of the "dynamic" textures
 
 #define LEAF(TID) {.type = 0, .leaf = {.texture_id = (TID), .count = 1}}
 #define LEAF_ANIM(TID, N)                                                                \
     {                                                                                    \
-        .type = 0, .leaf = {.texture_id = (TID), .count = (N) }                          \
+        .type = 0, .leaf = {.texture_id = (TID), .count = (N)}                           \
     }
 #define CONNECTED4(INNER, BORDER)                                                        \
     {                                                                                    \
@@ -23,13 +23,13 @@
     }
 #define ACTIVATED(OFF, ON)                                                               \
     {                                                                                    \
-        .type = BLKTXT_ACTIVATED_BIT, .activated = {.off = (OFF), .on = (ON) }           \
+        .type = BLKTXT_ACTIVATED_BIT, .activated = {.off = (OFF), .on = (ON)}            \
     }
 #define VARIANT(...)                                                                     \
     {                                                                                    \
         .type = BLKTXT_VARIANT_BIT,                                                      \
         .variant = {.children = {__VA_ARGS__},                                           \
-                    .count = COUNTOF(((NodeId[]){__VA_ARGS__}))},                        \
+                    .count = COUNTOF(((txtNodeId[]){__VA_ARGS__}))},                     \
     }
 
 #define NODE_LIST(X)                                                                     \
@@ -55,10 +55,10 @@ enum
 #define X(NAME, VALUE) NAME,
     NODE_LIST(X)
 #undef X
-        NODE_COUNT,
+    NODE_COUNT,
 };
 
-const TextureNode BlockTextureNodes[NODE_COUNT] = {
+const struct textureNode BlockTextureNodes[NODE_COUNT] = {
 #define X(NAME, VALUE) [NAME] = VALUE,
     NODE_LIST(X)
 #undef X
@@ -73,11 +73,13 @@ const TextureNode BlockTextureNodes[NODE_COUNT] = {
 #undef ACTIVATED
 #undef VARIANT
 
+// VVVV mapping of the texture on the blocks
+
 #define BARREL(SIDE, TOPBOT) {(SIDE), (SIDE), (SIDE), (SIDE), (TOPBOT), (TOPBOT)}
 #define DONUT(SIDE, TOP, BOT) {(SIDE), (SIDE), (SIDE), (SIDE), (TOP), (BOT)}
 #define UNIFO(TEXT) {(TEXT), (TEXT), (TEXT), (TEXT), (TEXT), (TEXT)}
 
-const NodeId BlockTextures[BLOCK_COUNT][BLOCK_FACE_COUNT] = {
+const txtNodeId BlockTextures[BLOCK_COUNT][6] = {
     [BLK_AIR] = UNIFO(NODE_NONE),
     [BLK_DIRT] = UNIFO(NODE_DIRT),
     [BLK_GRASS] = DONUT(NODE_GRASS_SIDE, NODE_GRASS_TOP, NODE_DIRT),
@@ -94,67 +96,132 @@ const NodeId BlockTextures[BLOCK_COUNT][BLOCK_FACE_COUNT] = {
 #undef DONUT
 #undef UNIFO
 
-void validate_block_textures(void)
+// VVV building method
+
+static void consume_leaf(const struct textureNode* nodes, txtNodeId id, FaceTexture* res,
+                         VECTOR(texture_t)* atlas)
 {
-    for (int b = 0; b < BLOCK_COUNT; b++)
-    {
-        if (b == BLK_AIR)
-            continue;
-        for (int f = 0; f < BLOCK_FACE_COUNT; f++)
-            ASSERT(BlockTextures[b][f] != NODE_NONE,
-                   "block %d has no face-texture description for face %d "
-                   "(forgot to add it to BlockTextures?)",
-                   b, f);
-    }
+    const struct textureNode* n = &nodes[id];
+    if (res->frame_count == 0)
+        res->frame_count = n->leaf.count;
+    ASSERT(res->frame_count == n->leaf.count,
+           "mismatched animation frame counts within one face-texture bundle (node %u)",
+           id);
+
+    atlas_push_from_base_texture(atlas, n->leaf.texture_id, n->leaf.count);
 }
 
-static void build_texture_look_up(const TextureNode* nodes,
-                                  const NodeId roots[][BLOCK_FACE_COUNT],
-                                  FaceTexture destination[][BLOCK_FACE_COUNT],
-                                  ArrayAtlas* atlas)
+static void consume_connected(const textureNode* nodes, txtNodeId id, FaceTexture* res,
+                              VECTOR(texture_t)* atlas)
+{
+    const textureNode* n = &nodes[id];
+    if (!(n->type & (BLKTXT_CONNECTED4_BIT | BLKTXT_CONNECTED8_BIT)))
+    {
+        consume_leaf(nodes, id, res, atlas);
+        return;
+    }
+
+    res->flags |= n->type;
+    if (res->frame_count == 0)
+        res->frame_count = 1;
+    ASSERT(res->frame_count == 1,
+           "connected face-textures do not support animation (node %u)", id);
+
+    texture_t inner_px =
+        load_rgba(TexturePaths[nodes[n->connected.inner].leaf.texture_id]);
+    texture_t border_px =
+        load_rgba(TexturePaths[nodes[n->connected.border].leaf.texture_id]);
+
+    if (n->type & BLKTXT_CONNECTED8_BIT)
+        bake_connected8(atlas, inner_px, border_px);
+    else
+        bake_connected4(atlas, inner_px, border_px);
+
+    free(inner_px);
+    free(border_px);
+}
+
+static void consume_activated(const textureNode* nodes, txtNodeId id, FaceTexture* res,
+                              VECTOR(texture_t)* atlas)
+{
+    const textureNode* n = &nodes[id];
+    if (!(n->type & BLKTXT_ACTIVATED_BIT))
+    {
+        consume_connected(nodes, id, res, atlas);
+        return;
+    }
+    res->flags |= BLKTXT_ACTIVATED_BIT;
+    consume_connected(nodes, n->activated.off, res, atlas);
+    consume_connected(nodes, n->activated.on, res, atlas);
+}
+
+static void consume_variant(const textureNode* nodes, txtNodeId id, FaceTexture* res,
+                            VECTOR(texture_t)* atlas)
+{
+    const textureNode* n = &nodes[id];
+    if (!(n->type & BLKTXT_VARIANT_BIT))
+    {
+        consume_activated(nodes, id, res, atlas);
+        return;
+    }
+    res->flags |= BLKTXT_VARIANT_BIT;
+    res->variant_count = n->variant.count;
+    for (u8 i = 0; i < n->variant.count; i++)
+        consume_activated(nodes, n->variant.children[i], res, atlas);
+}
+
+FaceTexture face_texture_build(const textureNode* nodes, txtNodeId root,
+                               VECTOR(texture_t)* atlas)
+{
+    FaceTexture res = {
+        .base_id = atlas->size,
+        .flags = 0,
+        .variant_count = 1,
+        .frame_count = 0,
+    };
+
+    consume_variant(nodes, root, &res, atlas);
+
+    return res;
+}
+
+void build_texture_look_up(FaceTexture destination[][6], VECTOR(texture_t)* atlas)
 {
     FaceTexture cache[NODE_COUNT];
     bool built[NODE_COUNT] = {0};
 
     for (int b = 0; b < BLOCK_COUNT; b++)
-        for (int f = 0; f < BLOCK_FACE_COUNT; f++)
+        for (int f = 0; f < 6; f++)
         {
-            NodeId root = roots[b][f];
-            if (root == NODE_NONE) // air-like block
+            txtNodeId root = BlockTextures[b][f];
+            if (root == NODE_NONE) // block without texture (eg: air)
                 continue;
             if (!built[root])
             {
-                cache[root] = face_texture_build(nodes, root, atlas);
+                cache[root] = face_texture_build(BlockTextureNodes, root, atlas);
                 built[root] = true;
             }
             destination[b][f] = cache[root];
         }
 }
 
-void load_texture_into_atlas(ArrayAtlas* atlas,
-                             FaceTexture (*block_faces)[BLOCK_FACE_COUNT])
+bool validate_block_textures(void)
 {
-    validate_block_textures();
-    build_texture_look_up(BlockTextureNodes, BlockTextures, block_faces, atlas);
-}
-
-void debug_print_block_textures(const FaceTexture (*block_faces)[BLOCK_FACE_COUNT])
-{
-    for (int blk = 0; blk < BLOCK_COUNT; blk++)
+    bool no_error = true;
+    for (int b = 0; b < BLOCK_COUNT; b++)
     {
-        printf("Block %d:\n", blk);
-        for (int face = 0; face < BLOCK_FACE_COUNT; face++)
+        if (b == BLK_AIR)
+            continue;
+        for (int f = 0; f < 6; f++)
         {
-            const FaceTexture* f = &block_faces[blk][face];
-            printf("  face %d: base_id=%-4u flags=0x%02x variant_count=%-3u "
-                   "frame_count=%-3u | "
-                   "connected=%s activated=%s variant=%s\n",
-                   face, f->base_id, f->flags, f->variant_count, f->frame_count,
-                   (f->flags & BLKTXT_CONNECTED8_BIT)       ? "8"
-                       : (f->flags & BLKTXT_CONNECTED4_BIT) ? "4"
-                                                            : "-",
-                   (f->flags & BLKTXT_ACTIVATED_BIT) ? "yes" : "no",
-                   (f->flags & BLKTXT_VARIANT_BIT) ? "yes" : "no");
+            if (BlockTextures[b][f] == NODE_NONE)
+            {
+                ERROR("block %d has no face-texture description for face %d (forgot to "
+                      "add it to BlockTextures?)",
+                      b, f);
+                no_error = false;
+            }
         }
     }
+    return no_error;
 }

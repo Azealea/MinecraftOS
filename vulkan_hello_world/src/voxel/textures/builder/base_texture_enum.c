@@ -1,4 +1,4 @@
-// auto-generated source from ../../../assets/block_textures the 2026-07-16
+// auto-generated source from ../../../assets/block_textures the 2026-10-08
 #include "base_texture_enum.h"
 
 // clang-format off

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "utils/type.h"
-#include "utils/vec.h"
+#include "utils/utils.h"
 
 typedef struct Face
 {

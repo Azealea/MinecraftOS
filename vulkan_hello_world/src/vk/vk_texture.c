@@ -5,8 +5,7 @@
 #include "utils/utils.h"
 #include "vk/gpu_resources.h"
 #include "vk/renderer/vk_command.h"
-#include "voxel/textures/array_atlas.h"
-#include "voxel/textures/block_texture.h"
+#include "voxel/textures/builder/array_atlas.h"
 
 void transition_image_layout(App* app, VkImage image, uint32_t layerCount,
                              VkImageLayout oldLayout, VkImageLayout newLayout)
@@ -59,9 +58,9 @@ void transition_image_layout(App* app, VkImage image, uint32_t layerCount,
     end_single_time_commands(app, commandBuffer);
 }
 
-void create_texture_image_from_atlas(App* app, ArrayAtlas* atlas)
+void create_texture_image_from_atlas(App* app, VECTOR(texture_t)* atlas)
 {
-    uint32_t layerCount = atlas->count;
+    uint32_t layerCount = atlas->size;
     VkDeviceSize layerSize = TEXTURE_WIDTH_HEIGHT * TEXTURE_WIDTH_HEIGHT * 4;
     VkDeviceSize totalSize = layerSize * layerCount;
 
@@ -78,7 +77,7 @@ void create_texture_image_from_atlas(App* app, ArrayAtlas* atlas)
 
     for (uint32_t i = 0; i < layerCount; i++)
     {
-        memcpy((char*)data + layerSize * i, atlas->pixels[i], layerSize);
+        memcpy((char*)data + layerSize * i, atlas->data[i], layerSize);
     }
 
     vkUnmapMemory(app->renderer.context.device, staging.mem);
@@ -155,16 +154,6 @@ void destroy_texture_sampler(App* app)
                      app->renderer.allocator);
 }
 
-void create_texture_stuff(App* app)
-{
-    ArrayAtlas atlas = {0};
-    atlas_init(&atlas);
-    load_texture_into_atlas(&atlas, app->block_faces);
-    //    debug_print_block_textures(app->block_faces);
-    create_texture_image_from_atlas(app, &atlas);
-    create_texture_sampler(app);
-    atlas_free(&atlas);
-}
 void destroy_texture_stuff(App* app)
 {
     destroy_texture_sampler(app);

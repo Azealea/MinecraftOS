@@ -6,7 +6,9 @@
 #include "input/input.h"
 #include "utils/time.h"
 #include "vk/vk.h"
+#include "voxel/mesh/mesh.h"
 #include "voxel/player/player_movement.h"
+#include "voxel/world/world.h"
 
 static void display_info()
 {
@@ -42,7 +44,8 @@ static void loop(App* app)
         glfwPollEvents();
         input_poll(&app->inputState, app->window);
         player_consume_input(app);
-        do_stuff_vk(app);
+        rebuild_dirty_meshes(app);
+        drawFrame(app);
         double frameTimeEnd = glfwGetTime();
         //  printf("FPS: %f\r", 1 / (frameTimeEnd - frameTimeStart));
 
@@ -52,8 +55,11 @@ static void loop(App* app)
 
 static void cleanup(App* app)
 {
+    world_free(&app->world);
+
     clean_vk(app);
     glfwDestroyWindow(app->window);
+    glfwTerminate();
 }
 
 int main()

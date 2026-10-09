@@ -13,7 +13,6 @@ OBJ := $(SRC:.c=.o)
 
 CSTD := -std=c23
 CFLAGS := $(CSTD) -Wall -Wextra -Wpedantic -Werror -I$(SRC_DIR) -Ilibraries $(shell pkg-config --cflags glfw3 vulkan cglm) $(DEFS)
-# CFLAGS += -g -fsanitize=address,undefined
 LDFLAGS := $(shell pkg-config --libs glfw3 vulkan cglm) -lm
 
 TARGET := vulkan_hello_world
@@ -28,6 +27,10 @@ $(SHADER_DIR)/%.spv: $(SHADER_DIR)/%
 
 $(SHADER_DIR)/%.spv.c: $(SHADER_DIR)/%.spv
 	xxd -i $< > $@
+
+debug: CFLAGS += -g -fsanitize=address,undefined
+debug: LDFLAGS += -fsanitize=address,undefined
+debug: $(TARGET)
 
 clean:
 	rm -f $(SRC:.c=.o) $(SHADERS_SPV) $(SHADERS_C) $(TARGET)

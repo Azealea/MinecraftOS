@@ -1,9 +1,11 @@
 #include "mesh.h"
 
 #include "utils/utils.h"
+#include "vk/buffer/vertex.h"
 #include "voxel/textures/connected_texture.h"
-#include "voxel/textures/face_texture.h"
-#include "voxel/textures/texture_node.h"
+#include "voxel/textures/resolve/face_texture.h"
+#include "voxel/textures/texture_flags.h"
+#include "voxel/world/world.h"
 
 // offset for uvs passed down to vertex
 typedef struct
@@ -29,6 +31,29 @@ static bool same_type_at_offset(const Chunk* chunk, ChunkPos pos, World* world,
 {
     const Block* nb = block_at_offset(chunk, pos, world, local, dir);
     return nb && nb->type == type;
+}
+
+static u8 connected_mask_pack(bool u0, bool u1, bool v0, bool v1, bool nw, bool ne,
+                              bool sw, bool se)
+{
+    u8 mask = 0;
+    if (u0)
+        mask |= CONNECTED4_U0;
+    if (u1)
+        mask |= CONNECTED4_U1;
+    if (v0)
+        mask |= CONNECTED4_V0;
+    if (v1)
+        mask |= CONNECTED4_V1;
+    if (nw)
+        mask |= CONNECTED8_NW;
+    if (ne)
+        mask |= CONNECTED8_NE;
+    if (sw)
+        mask |= CONNECTED8_SW;
+    if (se)
+        mask |= CONNECTED8_SE;
+    return mask;
 }
 
 static u8 connected_neighbor_mask(const Chunk* chunk, ChunkPos pos, World* world,
@@ -61,8 +86,8 @@ static u8 connected_neighbor_mask(const Chunk* chunk, ChunkPos pos, World* world
     return connected_mask_pack(u0, u1, v0, v1, nw, ne, sw, se);
 }
 
-static u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
-                               const FaceTexture (*block_faces)[BLOCK_FACE_COUNT])
+u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
+                        const FaceTexture block_faces[][6])
 {
     u32 count = 0;
 
@@ -96,7 +121,7 @@ static u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
                     chunk->bucket_ptr[count++] = (Face){
                         .pos = VEC3_ADD(VEC3_SCALE(pos, CHUNK_SIZE), local),
                         .face_id = f,
-                        .texture_id = face_texture_resolve(ft, neighbor_mask, false, 0),
+                        .texture_id = face_texture_to_index(ft, neighbor_mask, false, 0),
                     };
                 }
             }
@@ -104,8 +129,7 @@ static u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
     return count;
 }
 
-void world_remesh_chunk(World* w, ChunkPos pos,
-                        const FaceTexture (*block_faces)[BLOCK_FACE_COUNT])
+void world_remesh_chunk(World* w, ChunkPos pos, const FaceTexture block_faces[][6])
 {
     Chunk* c = world_get_chunk(w, pos);
     ASSERT(c != NULL, "world_remesh_chunk: chunk " VEC3_FMT " does not exist",
@@ -113,4 +137,17 @@ void world_remesh_chunk(World* w, ChunkPos pos,
     if (c->bucket_ptr == NULL)
         c->bucket_ptr = bucket_alloc_acquire(&w->mesh);
     c->face_count = generate_chunk_mesh(c, pos, w, block_faces);
+}
+
+void rebuild_dirty_meshes(App* app)
+{
+    World* w = &app->world;
+    VECTOR_FOR_EACH(&w->dirty, pos)
+    {
+        world_remesh_chunk(w, *pos, app->Block2TextureMap);
+        Chunk* c = world_get_chunk(w, *pos);
+        upload_chunk_mesh(app, c->bucket_ptr, c->face_count);
+        c->dirty = false;
+    }
+    VECTOR_CLEAR(&w->dirty);
 }

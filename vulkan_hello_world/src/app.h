@@ -7,7 +7,7 @@
 #include "utils/utils.h"
 #include "vk/vk_renderer.h"
 #include "voxel/player/player.h"
-#include "voxel/textures/face_texture.h"
+#include "voxel/textures/resolve/face_texture.h"
 #include "voxel/world/world.h"
 
 typedef struct
@@ -15,9 +15,9 @@ typedef struct
     const char* applicationName;
     const char* engineName;
     const char* windowTitle;
-    uint32_t vkApiVersion;
+    u32 vkApiVersion;
     VkClearValue backgroundColor;
-    uint32_t maxFramesInFlight;
+    u32 maxFramesInFlight;
 
     // extent of the configurable field
 
@@ -32,6 +32,6 @@ typedef struct
 
     Renderer renderer;
 
-    FaceTexture block_faces[BLOCK_COUNT][BLOCK_FACE_COUNT];
+    FaceTexture Block2TextureMap[BLOCK_COUNT][6];
     World world;
 } App;

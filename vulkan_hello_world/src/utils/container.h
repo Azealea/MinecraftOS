@@ -22,15 +22,23 @@
         size_t capacity;                                                                 \
     } VECTOR(TYPE)
 
-#define VECTOR_EMPTY(VEC) (VEC).size == 0
-#define VECTOR_INIT(VEC) (VEC) = (typeof(VEC)){0}
-#define VECTOR_CLEAR(VEC) (VEC).size = 0
-#define VECTOR_BEGIN(VEC) (VEC).data
-#define VECTOR_END(VEC) (VEC).data + (VEC).size
+#define VECTOR_INIT_CAP(TYPE, CAP)                                                       \
+    ((VECTOR(TYPE)){                                                                     \
+        .data = calloc(CAP, sizeof(TYPE)),                                               \
+        .size = 0,                                                                       \
+        .capacity = CAP,                                                                 \
+    })
+
+#define VECTOR_INIT(TYPE) VECTOR_INIT_CAP(TYPE, 0)
+
+#define VECTOR_EMPTY(VEC) (VEC)->size == 0
+#define VECTOR_CLEAR(VEC) (VEC)->size = 0
+#define VECTOR_BEGIN(VEC) (VEC)->data
+#define VECTOR_END(VEC) (VEC)->data + (VEC)->size
 #define VECTOR_NEXT(ITR) (ITR) + 1
-#define VECTOR_SIZE(VEC) (VEC).size
-#define VECTOR_GET(VEC, INDEX) VEC.data[INDEX]
-#define VECTOR_TYPE(VEC) typeof(*(VEC).data)
+#define VECTOR_SIZE(VEC) (VEC)->size
+#define VECTOR_GET(VEC, INDEX) (VEC)->data[(INDEX)]
+#define VECTOR_TYPE(VEC) typeof(*(VEC)->data)
 
 #define VECTOR_FOR_EACH(VEC, ITR)                                                        \
     for (auto ITR = VECTOR_BEGIN(VEC); ITR != VECTOR_END(VEC); ITR = VECTOR_NEXT(ITR))
@@ -38,20 +46,20 @@
 #define VECTOR_POP_BACK(VEC)                                                             \
     do                                                                                   \
     {                                                                                    \
-        if ((VEC).size)                                                                  \
-            ((VEC).size)--;                                                              \
+        if ((VEC)->size)                                                                 \
+            ((VEC)->size)--;                                                             \
     } while (false)
 
 #define VECTOR_FREE(VEC)                                                                 \
     do                                                                                   \
     {                                                                                    \
-        free((VEC).data);                                                                \
-        (VEC) = ((typeof(VEC)){0});                                                      \
+        free((VEC)->data);                                                               \
+        *(VEC) = ((typeof(*(VEC))){0});                                                  \
     } while (false)
 
 #define VECTOR_PUSH_BACK(VEC, VAL)                                                       \
     ({                                                                                   \
-        typeof(VEC)* _vp = &(VEC);                                                       \
+        typeof(VEC) _vp = (VEC);                                                         \
         typeof(*_vp->data) _tmp = (VAL);                                                 \
         bool _ok = true;                                                                 \
                                                                                          \
@@ -75,7 +83,7 @@
 
 #define VECTOR_FIND(VEC, VAL)                                                            \
     ({                                                                                   \
-        typeof(VEC)* _vp = &(VEC);                                                       \
+        typeof(VEC) _vp = (VEC);                                                         \
         static_assert(__builtin_types_compatible_p(typeof(*_vp->data), typeof(VAL)),     \
                       "Type mismatch");                                                  \
                                                                                          \
@@ -93,11 +101,11 @@
 
 #define VECTOR_FIND_PREDICATE(VEC, ELEM, PREDICATE)                                      \
     ({                                                                                   \
-        typeof(VEC)* _vfp_vp = &(VEC);                                                   \
-        VECTOR_TYPE(*_vfp_vp)* _vfp_result = NULL;                                       \
+        typeof(VEC) _vfp_vp = (VEC);                                                     \
+        VECTOR_TYPE(_vfp_vp)* _vfp_result = NULL;                                        \
         for (size_t _vfp_i = 0; _vfp_i < _vfp_vp->size; _vfp_i++)                        \
         {                                                                                \
-            VECTOR_TYPE(*_vfp_vp) ELEM = _vfp_vp->data[_vfp_i];                          \
+            VECTOR_TYPE(_vfp_vp) ELEM = _vfp_vp->data[_vfp_i];                           \
             if (PREDICATE)                                                               \
             {                                                                            \
                 _vfp_result = _vfp_vp->data + _vfp_i;                                    \
@@ -128,10 +136,10 @@
     {                                                                                    \
         size_t size;                                                                     \
         size_t capacity;                                                                 \
-        VECTOR(TYPE) * buckets;                                                          \
+        VECTOR(TYPE)* buckets;                                                           \
     } SET(TYPE);                                                                         \
                                                                                          \
-    static inline void _SET_RESIZE_FN(TYPE)(SET(TYPE) * s)                               \
+    static inline void _SET_RESIZE_FN(TYPE)(SET(TYPE)* s)                                \
     {                                                                                    \
         size_t oldc = s->capacity;                                                       \
         VECTOR(TYPE)* oldb = s->buckets;                                                 \
@@ -149,15 +157,15 @@
             for (size_t j = 0; j < ob->size; ++j)                                        \
             {                                                                            \
                 size_t ix = HASH(ob->data[j]) % s->capacity;                             \
-                VECTOR_PUSH_BACK(s->buckets[ix], ob->data[j]);                           \
+                VECTOR_PUSH_BACK(&s->buckets[ix], ob->data[j]);                          \
                 s->size++;                                                               \
             }                                                                            \
-            VECTOR_FREE(*ob);                                                            \
+            VECTOR_FREE(ob);                                                             \
         }                                                                                \
         free(oldb);                                                                      \
     }                                                                                    \
                                                                                          \
-    static inline bool _SET_CONTAINS_FN(TYPE)(SET(TYPE) * s, TYPE v)                     \
+    static inline bool _SET_CONTAINS_FN(TYPE)(SET(TYPE)* s, TYPE v)                      \
     {                                                                                    \
         if (!s->capacity)                                                                \
             return false;                                                                \
@@ -169,20 +177,20 @@
         return false;                                                                    \
     }                                                                                    \
                                                                                          \
-    static inline bool _SET_INSERT_FN(TYPE)(SET(TYPE) * s, TYPE v)                       \
+    static inline bool _SET_INSERT_FN(TYPE)(SET(TYPE)* s, TYPE v)                        \
     {                                                                                    \
         if (_SET_CONTAINS_FN(TYPE)(s, v))                                                \
             return false;                                                                \
         if (!s->capacity || (float)s->size / (float)s->capacity >= SET_RESIZE_THRESHOLD) \
             _SET_RESIZE_FN(TYPE)(s);                                                     \
         size_t idx = HASH(v) % s->capacity;                                              \
-        bool ok = VECTOR_PUSH_BACK(s->buckets[idx], v);                                  \
+        bool ok = VECTOR_PUSH_BACK(&s->buckets[idx], v);                                 \
         if (ok)                                                                          \
             s->size++;                                                                   \
         return ok;                                                                       \
     }                                                                                    \
                                                                                          \
-    static inline bool _SET_REMOVE_FN(TYPE)(SET(TYPE) * s, TYPE v)                       \
+    static inline bool _SET_REMOVE_FN(TYPE)(SET(TYPE)* s, TYPE v)                        \
     {                                                                                    \
         if (!s->capacity)                                                                \
             return false;                                                                \
@@ -210,8 +218,8 @@
 
 #define SET_FOR_EACH(S, ITR)                                                             \
     for (size_t _i = 0; _i < (S).capacity; ++_i)                                         \
-        for (auto ITR = VECTOR_BEGIN((S).buckets[_i]);                                   \
-             ITR != VECTOR_END((S).buckets[_i]); ITR = VECTOR_NEXT(ITR))
+        for (auto ITR = VECTOR_BEGIN(&(S).buckets[_i]);                                  \
+             ITR != VECTOR_END(&(S).buckets[_i]); ITR = VECTOR_NEXT(ITR))
 
 #define SET_CONTAINS_T(TYPE, S, V) _SET_CONTAINS_FN(TYPE)(&(S), (V))
 
@@ -226,7 +234,7 @@
     {                                                                                    \
         typeof(S)* _sp = &(S);                                                           \
         for (size_t _i = 0; _i < _sp->capacity; ++_i)                                    \
-            VECTOR_FREE(_sp->buckets[_i]);                                               \
+            VECTOR_FREE(&_sp->buckets[_i]);                                              \
         free(_sp->buckets);                                                              \
         _sp->buckets = NULL;                                                             \
         _sp->size = 0;                                                                   \
@@ -237,7 +245,7 @@
     ({                                                                                   \
         SET_TYPE(S)* _result = NULL;                                                     \
         for (size_t _i = 0; _i < (S).capacity && !_result; ++_i)                         \
-            _result = VECTOR_FIND_PREDICATE((S).buckets[_i], ELEM, PREDICATE);           \
+            _result = VECTOR_FIND_PREDICATE(&(S).buckets[_i], ELEM, PREDICATE);          \
         _result;                                                                         \
     })
 
@@ -274,10 +282,10 @@
     {                                                                                    \
         size_t size;                                                                     \
         size_t capacity;                                                                 \
-        VECTOR(_MAP_ENTRY(KT, VT)) * buckets;                                            \
+        VECTOR(_MAP_ENTRY(KT, VT))* buckets;                                             \
     } MAP(KT, VT);                                                                       \
                                                                                          \
-    static inline void _MAP_RESIZE_FN(KT, VT)(MAP(KT, VT) * m)                           \
+    static inline void _MAP_RESIZE_FN(KT, VT)(MAP(KT, VT)* m)                            \
     {                                                                                    \
         size_t oldc = m->capacity;                                                       \
         VECTOR(_MAP_ENTRY(KT, VT))* oldb = m->buckets;                                   \
@@ -295,15 +303,15 @@
             for (size_t j = 0; j < ob->size; ++j)                                        \
             {                                                                            \
                 size_t ix = HASH(ob->data[j].key) % m->capacity;                         \
-                VECTOR_PUSH_BACK(m->buckets[ix], ob->data[j]);                           \
+                VECTOR_PUSH_BACK(&m->buckets[ix], ob->data[j]);                          \
                 m->size++;                                                               \
             }                                                                            \
-            VECTOR_FREE(*ob);                                                            \
+            VECTOR_FREE(ob);                                                             \
         }                                                                                \
         free(oldb);                                                                      \
     }                                                                                    \
                                                                                          \
-    static inline bool _MAP_CONTAINS_FN(KT, VT)(MAP(KT, VT) * m, KT k)                   \
+    static inline bool _MAP_CONTAINS_FN(KT, VT)(MAP(KT, VT)* m, KT k)                    \
     {                                                                                    \
         if (!m->capacity)                                                                \
             return false;                                                                \
@@ -315,7 +323,7 @@
         return false;                                                                    \
     }                                                                                    \
                                                                                          \
-    static inline VT* _MAP_GET_FN(KT, VT)(MAP(KT, VT) * m, KT k)                         \
+    static inline VT* _MAP_GET_FN(KT, VT)(MAP(KT, VT)* m, KT k)                          \
     {                                                                                    \
         if (!m->capacity)                                                                \
             return NULL;                                                                 \
@@ -327,7 +335,7 @@
         return NULL;                                                                     \
     }                                                                                    \
                                                                                          \
-    static inline bool _MAP_INSERT_FN(KT, VT)(MAP(KT, VT) * m, KT k, VT v)               \
+    static inline bool _MAP_INSERT_FN(KT, VT)(MAP(KT, VT)* m, KT k, VT v)                \
     {                                                                                    \
         if (_MAP_CONTAINS_FN(KT, VT)(m, k))                                              \
             return false;                                                                \
@@ -335,13 +343,13 @@
             _MAP_RESIZE_FN(KT, VT)(m);                                                   \
         size_t idx = HASH(k) % m->capacity;                                              \
         _MAP_ENTRY(KT, VT) entry = {.key = k, .value = v};                               \
-        bool ok = VECTOR_PUSH_BACK(m->buckets[idx], entry);                              \
+        bool ok = VECTOR_PUSH_BACK(&m->buckets[idx], entry);                             \
         if (ok)                                                                          \
             m->size++;                                                                   \
         return ok;                                                                       \
     }                                                                                    \
                                                                                          \
-    static inline bool _MAP_SET_FN(KT, VT)(MAP(KT, VT) * m, KT k, VT v)                  \
+    static inline bool _MAP_SET_FN(KT, VT)(MAP(KT, VT)* m, KT k, VT v)                   \
     {                                                                                    \
         VT* existing = _MAP_GET_FN(KT, VT)(m, k);                                        \
         if (existing != NULL)                                                            \
@@ -353,7 +361,7 @@
         return true;                                                                     \
     }                                                                                    \
                                                                                          \
-    static inline bool _MAP_REMOVE_FN(KT, VT)(MAP(KT, VT) * m, KT k)                     \
+    static inline bool _MAP_REMOVE_FN(KT, VT)(MAP(KT, VT)* m, KT k)                      \
     {                                                                                    \
         if (!m->capacity)                                                                \
             return false;                                                                \
@@ -384,8 +392,8 @@
 
 #define MAP_FOR_EACH(M, ITR)                                                             \
     for (size_t _i = 0; _i < (M).capacity; ++_i)                                         \
-        for (auto ITR = VECTOR_BEGIN((M).buckets[_i]);                                   \
-             ITR != VECTOR_END((M).buckets[_i]); ITR = VECTOR_NEXT(ITR))
+        for (auto ITR = VECTOR_BEGIN(&(M).buckets[_i]);                                  \
+             ITR != VECTOR_END(&(M).buckets[_i]); ITR = VECTOR_NEXT(ITR))
 
 #define MAP_CONTAINS_T(KT, VT, M, K) _MAP_CONTAINS_FN(KT, VT)(&(M), (K))
 
@@ -404,7 +412,7 @@
     {                                                                                    \
         typeof(M)* _mp = &(M);                                                           \
         for (size_t _i = 0; _i < _mp->capacity; ++_i)                                    \
-            VECTOR_FREE(_mp->buckets[_i]);                                               \
+            VECTOR_FREE(&_mp->buckets[_i]);                                              \
         free(_mp->buckets);                                                              \
         _mp->buckets = NULL;                                                             \
         _mp->size = 0;                                                                   \
@@ -415,7 +423,7 @@
     ({                                                                                   \
         MAP_ENTRY_TYPE(M)* _result = NULL;                                               \
         for (size_t _i = 0; _i < (M).capacity && !_result; ++_i)                         \
-            _result = VECTOR_FIND_PREDICATE((M).buckets[_i], ELEM, PREDICATE);           \
+            _result = VECTOR_FIND_PREDICATE(&(M).buckets[_i], ELEM, PREDICATE);          \
         _result;                                                                         \
     })
 

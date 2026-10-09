@@ -29,7 +29,7 @@ void world_mark_chunk_dirty(World* w, ChunkPos pos)
     if (!c || c->dirty)
         return;
     c->dirty = true;
-    VECTOR_PUSH_BACK(w->dirty, pos);
+    VECTOR_PUSH_BACK(&w->dirty, pos);
 }
 
 void world_set_block(World* w, VEC3(i32) global_pos, Block block)
@@ -89,5 +89,5 @@ void world_free(World* w)
     }
     MAP_FREE(w->chunks);
     bucket_alloc_free(&w->mesh);
-    VECTOR_FREE(w->dirty);
+    VECTOR_FREE(&w->dirty);
 }
