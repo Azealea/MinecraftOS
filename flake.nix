@@ -15,7 +15,7 @@
         pkgs.wayland
         pkgs.wayland-protocols
         pkgs.wayland-scanner
-        pkgs.wlroots_0_19
+        pkgs.wlroots_0_20
         pkgs.libinput
         pkgs.pixman
         pkgs.libxkbcommon
