@@ -6,11 +6,11 @@
 
 #include "utils/utils.h"
 #include "vk/vk_renderer.h"
+#include "voxel/mesh/mesher.h"
 #include "voxel/player/player.h"
-#include "voxel/textures/resolve/face_texture.h"
 #include "voxel/world/world.h"
 
-typedef struct
+typedef struct App
 {
     const char* applicationName;
     const char* engineName;
@@ -32,6 +32,6 @@ typedef struct
 
     Renderer renderer;
 
-    FaceTexture Block2TextureMap[BLOCK_COUNT][6];
     World world;
+    Mesher mesher;
 } App;

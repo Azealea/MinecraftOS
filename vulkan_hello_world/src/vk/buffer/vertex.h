@@ -1,8 +1,8 @@
 #pragma once
 
 #include "app.h"
+#include "voxel/mesh/bucket_alloc.h"
 #include "voxel/mesh/face.h"
-#include "voxel/world/bucket_alloc.h"
 
 #define INSTANCE_MAX (BUCKET_COUNT * BUCKET_FACE_CAP)
 

@@ -6,7 +6,7 @@
 #include "input/input.h"
 #include "utils/time.h"
 #include "vk/vk.h"
-#include "voxel/mesh/mesh.h"
+#include "voxel/mesh/mesher.h"
 #include "voxel/player/player_movement.h"
 #include "voxel/world/world.h"
 
@@ -56,6 +56,7 @@ static void loop(App* app)
 static void cleanup(App* app)
 {
     world_free(&app->world);
+    mesher_free(&app->mesher);
 
     clean_vk(app);
     glfwDestroyWindow(app->window);
@@ -74,7 +75,11 @@ int main()
         .start_time = current_time(),
         .player = player_init(),
         .world = world_constr(),
+        .mesher = mesher_init(),
     };
+
+    ChunkPos origin = {0, 0, 0};
+    generate_chunk_terrain(&app.world, origin, &app.mesher.dirty);
 
     init(&app);
     loop(&app);

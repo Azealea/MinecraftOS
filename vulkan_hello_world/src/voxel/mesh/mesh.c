@@ -1,7 +1,6 @@
 #include "mesh.h"
 
 #include "utils/utils.h"
-#include "vk/buffer/vertex.h"
 #include "voxel/textures/connected_texture.h"
 #include "voxel/textures/resolve/face_texture.h"
 #include "voxel/textures/texture_flags.h"
@@ -129,25 +128,3 @@ u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
     return count;
 }
 
-void world_remesh_chunk(World* w, ChunkPos pos, const FaceTexture block_faces[][6])
-{
-    Chunk* c = world_get_chunk(w, pos);
-    ASSERT(c != NULL, "world_remesh_chunk: chunk " VEC3_FMT " does not exist",
-           VEC3_ARGS(pos));
-    if (c->bucket_ptr == NULL)
-        c->bucket_ptr = bucket_alloc_acquire(&w->mesh);
-    c->face_count = generate_chunk_mesh(c, pos, w, block_faces);
-}
-
-void rebuild_dirty_meshes(App* app)
-{
-    World* w = &app->world;
-    VECTOR_FOR_EACH(&w->dirty, pos)
-    {
-        world_remesh_chunk(w, *pos, app->Block2TextureMap);
-        Chunk* c = world_get_chunk(w, *pos);
-        upload_chunk_mesh(app, c->bucket_ptr, c->face_count);
-        c->dirty = false;
-    }
-    VECTOR_CLEAR(&w->dirty);
-}

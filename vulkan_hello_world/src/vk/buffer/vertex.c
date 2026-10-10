@@ -63,7 +63,8 @@ void upload_chunk_mesh(App* app, const Face* faces, uint32_t face_count)
 
     vkDeviceWaitIdle(app->renderer.context.device);
     VkDeviceSize dataSize = face_count * sizeof(Face);
-    VkDeviceSize dstOffset = (faces - app->world.mesh.faces) * sizeof(Face);
+    VkDeviceSize dstOffset =
+        bucket_alloc_index_of(&app->mesher.mesh, faces) * sizeof(Face);
 
     GpuBuffer staging;
     gpu_buffer_create(app, dataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,

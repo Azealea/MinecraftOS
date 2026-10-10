@@ -1,5 +1,7 @@
 #pragma once
 
-#include "app.h"
+#include "voxel/textures/resolve/face_texture.h"
+#include "voxel/world/world.h"
 
-void rebuild_dirty_meshes(App* app);
+u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
+                        const FaceTexture block_faces[][6]);

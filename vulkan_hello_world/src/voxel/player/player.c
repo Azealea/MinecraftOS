@@ -15,14 +15,14 @@ Player player_init(void)
 
 static void break_on_hit(App* app, RaycastHit hit)
 {
-    world_set_block(&app->world, hit.block, (Block){.type = BLK_AIR});
+    world_set_block(&app->world, hit.block, (Block){.type = BLK_AIR}, &app->mesher.dirty);
     TRACE("breaking " VEC3_FMT, VEC3_ARGS(hit.block));
 }
 
 static void place_on_hit(App* app, RaycastHit hit, Block block)
 {
     VEC3(i32) blockPlace = VEC3_ADD(hit.block, hit.normal);
-    world_set_block(&app->world, blockPlace, block);
+    world_set_block(&app->world, blockPlace, block, &app->mesher.dirty);
     TRACE("placing " VEC3_FMT, VEC3_ARGS(blockPlace));
 }
 

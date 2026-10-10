@@ -1,6 +1,5 @@
 #pragma once
 
-#include "bucket_alloc.h"
 #include "chunk.h"
 #include "utils/container.h"
 
@@ -24,8 +23,6 @@ VECTOR_DECLARE(ChunkPos);
 typedef struct World
 {
     MAP(ChunkPos, Chunk_ptr) chunks;
-    BucketAlloc mesh;
-    VECTOR(ChunkPos) dirty; // chunks needing a mesh rebuild
 } World;
 
 World world_constr(void);
@@ -34,8 +31,9 @@ void world_free(World* w);
 Chunk* world_get_chunk(World* w, ChunkPos pos);
 Chunk* world_get_or_add_chunk(World* w, ChunkPos pos);
 
-void world_set_block(World* w, VEC3(i32) global_pos, Block block);
-void world_mark_chunk_dirty(World* w, ChunkPos pos);
+void world_set_block(World* w, VEC3(i32) global_pos, Block block,
+                     VECTOR(ChunkPos)* dirty);
+void world_mark_chunk_dirty(World* w, ChunkPos pos, VECTOR(ChunkPos)* dirty);
 
-void generate_chunk_terrain(World* w, ChunkPos pos);
-void world_dirty_existing_neighbors(World* w, ChunkPos pos);
+void generate_chunk_terrain(World* w, ChunkPos pos, VECTOR(ChunkPos)* dirty);
+void world_dirty_existing_neighbors(World* w, ChunkPos pos, VECTOR(ChunkPos)* dirty);

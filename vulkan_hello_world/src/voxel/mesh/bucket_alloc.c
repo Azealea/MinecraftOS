@@ -39,3 +39,8 @@ void bucket_alloc_release(BucketAlloc* ba, Face* slot)
 
     ba->free[index] = true;
 }
+
+u32 bucket_alloc_index_of(const BucketAlloc* ba, const Face* slot)
+{
+    return slot - ba->faces;
+}

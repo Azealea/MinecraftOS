@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "chunk.h"
 #include "voxel/mesh/face.h"
+#include "voxel/world/chunk.h"
 
 #define BUCKET_COUNT (8 * 8 * 8)
 #define BUCKET_FACE_CAP (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 6)
@@ -20,3 +20,5 @@ void bucket_alloc_free(BucketAlloc* ba);
 
 Face* bucket_alloc_acquire(BucketAlloc* ba);
 void bucket_alloc_release(BucketAlloc* ba, Face* slot);
+
+u32 bucket_alloc_index_of(const BucketAlloc* ba, const Face* slot);
