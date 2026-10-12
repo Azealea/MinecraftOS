@@ -4,6 +4,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "argv_option.h"
 #include "utils/utils.h"
 #include "vk/vk_renderer.h"
 #include "voxel/mesh/mesher.h"
@@ -20,6 +21,8 @@ typedef struct App
     u32 maxFramesInFlight;
 
     // extent of the configurable field
+
+    struct argv_option argv_options;
 
     Input inputState;
     double start_time;

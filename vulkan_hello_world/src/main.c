@@ -1,7 +1,7 @@
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "app.h"
+#include "argv_option.h"
 #include "glfw.h"
 #include "input/input.h"
 #include "utils/time.h"
@@ -63,7 +63,17 @@ static void cleanup(App* app)
     glfwTerminate();
 }
 
-int main()
+static void run(App* app)
+{
+    ChunkPos origin = {0, 0, 0};
+    generate_chunk_terrain(&app->world, origin, &app->mesher.dirty);
+
+    init(app);
+    loop(app);
+    cleanup(app);
+}
+
+int main(int argc, char** argv)
 {
     App app = {
         .applicationName = "hello_world",
@@ -76,14 +86,10 @@ int main()
         .player = player_init(),
         .world = world_constr(),
         .mesher = mesher_init(),
+        .argv_options = parse_options(argc, argv),
     };
 
-    ChunkPos origin = {0, 0, 0};
-    generate_chunk_terrain(&app.world, origin, &app.mesher.dirty);
-
-    init(&app);
-    loop(&app);
-    cleanup(&app);
+    run(&app);
 
     return EXIT_SUCCESS;
 }
