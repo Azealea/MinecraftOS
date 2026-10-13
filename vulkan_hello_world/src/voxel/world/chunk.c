@@ -2,13 +2,13 @@
 
 #include <stdlib.h>
 
-Chunk* chunk_constr(void)
+Chunk* chunk_alloc(void)
 {
     Chunk* c = calloc(1, sizeof(Chunk));
     return c;
 }
 
-void chunk_deconstr(Chunk* c)
+void chunk_free(Chunk* c)
 {
     free(c);
 }

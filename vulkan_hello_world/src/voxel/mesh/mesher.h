@@ -14,7 +14,7 @@ typedef struct Mesher
 } Mesher;
 
 Mesher mesher_init(void);
-void mesher_free(Mesher* m);
+void mesher_clean(Mesher* m);
 
 void mesher_mesh_chunk(Mesher* m, World* w, ChunkPos pos);
 void rebuild_dirty_meshes(App* app);

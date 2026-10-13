@@ -12,7 +12,7 @@ typedef uint8_t* texture_t;
 
 VECTOR_DECLARE(texture_t);
 
-void atlas_free(VECTOR(texture_t)* atlas);
+void atlas_clean(VECTOR(texture_t)* atlas);
 
 void atlas_push_from_base_texture(VECTOR(texture_t)* atlas, enum BaseTexture bid,
                                   uint16_t frame_count);

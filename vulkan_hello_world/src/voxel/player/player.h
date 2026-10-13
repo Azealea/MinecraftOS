@@ -7,4 +7,4 @@ typedef struct
     Camera cam;
 } Player;
 
-Player player_init(void);
+Player player_init(VEC3(i32) pos);

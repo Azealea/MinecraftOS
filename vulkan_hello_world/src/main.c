@@ -55,8 +55,8 @@ static void loop(App* app)
 
 static void cleanup(App* app)
 {
-    world_free(&app->world);
-    mesher_free(&app->mesher);
+    world_clean(&app->world);
+    mesher_clean(&app->mesher);
 
     clean_vk(app);
     glfwDestroyWindow(app->window);
@@ -83,8 +83,8 @@ int main(int argc, char** argv)
         .backgroundColor = {{{0.01f, 0.1f, 0.1f, 0.01f}}},
         .maxFramesInFlight = 3,
         .start_time = current_time(),
-        .player = player_init(),
-        .world = world_constr(),
+        .player = player_init((VEC3(i32)){0, 0, 0}),
+        .world = world_init(),
         .mesher = mesher_init(),
         .argv_options = parse_options(argc, argv),
     };

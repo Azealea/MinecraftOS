@@ -35,5 +35,5 @@ void create_texture_stuff(App* app)
     //    debug_print_block_textures(app->mesher.Block2TextureMap);
     create_texture_image_from_atlas(app, &atlas);
     create_texture_sampler(app);
-    atlas_free(&atlas);
+    atlas_clean(&atlas);
 }

@@ -25,8 +25,8 @@ typedef struct World
     MAP(ChunkPos, Chunk_ptr) chunks;
 } World;
 
-World world_constr(void);
-void world_free(World* w);
+World world_init(void);
+void world_clean(World* w);
 
 Chunk* world_get_chunk(World* w, ChunkPos pos);
 Chunk* world_get_or_add_chunk(World* w, ChunkPos pos);

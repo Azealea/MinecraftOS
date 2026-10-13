@@ -18,7 +18,7 @@ Chunk* world_get_or_add_chunk(World* w, ChunkPos p)
     if (existing)
         return *existing;
 
-    Chunk* c = chunk_constr();
+    Chunk* c = chunk_alloc();
     MAP_INSERT_T(ChunkPos, Chunk_ptr, w->chunks, p, c);
     return c;
 }
@@ -68,17 +68,17 @@ void world_dirty_existing_neighbors(World* w, ChunkPos pos, VECTOR(ChunkPos)* di
     }
 }
 
-World world_constr(void)
+World world_init(void)
 {
     World w = {.chunks = {0}};
     return w;
 }
 
-void world_free(World* w)
+void world_clean(World* w)
 {
     MAP_FOR_EACH(w->chunks, entry)
     {
-        chunk_deconstr(entry->value);
+        chunk_free(entry->value);
     }
     MAP_FREE(w->chunks);
 }

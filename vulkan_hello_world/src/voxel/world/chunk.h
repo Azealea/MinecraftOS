@@ -18,9 +18,8 @@ typedef struct Chunk
     bool dirty; // needs meshing
 } Chunk;
 
-Chunk* chunk_constr(void);
-
-void chunk_deconstr(Chunk* c);
+Chunk* chunk_alloc(void);
+void chunk_free(Chunk* c);
 
 const Block* chunk_get(const Chunk* chunk, VEC3(u8) pos);
 

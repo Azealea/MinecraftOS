@@ -3,6 +3,7 @@
 #include <cglm/mat4.h>
 
 #include "input/input.h"
+#include "utils/utils.h"
 
 typedef struct CameraBasis
 {
@@ -25,6 +26,6 @@ typedef struct Camera
     CameraBasis basis;
 } Camera;
 
-Camera camera_init(void);
+Camera camera_init(VEC3(i32) pos);
 
 void update_camera_pos(Camera* camera, const Input* input);

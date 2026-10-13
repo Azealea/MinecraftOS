@@ -16,7 +16,7 @@ typedef struct
 } BucketAlloc;
 
 BucketAlloc bucket_alloc_init(void);
-void bucket_alloc_free(BucketAlloc* ba);
+void bucket_alloc_clean(BucketAlloc* ba);
 
 Face* bucket_alloc_acquire(BucketAlloc* ba);
 void bucket_alloc_release(BucketAlloc* ba, Face* slot);

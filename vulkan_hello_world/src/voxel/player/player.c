@@ -8,9 +8,9 @@
 #include "voxel/block.h"
 #include "voxel/world/world.h"
 
-Player player_init(void)
+Player player_init(VEC3(i32) pos)
 {
-    return (Player){.cam = camera_init()};
+    return (Player){.cam = camera_init(pos)};
 }
 
 static void break_on_hit(App* app, RaycastHit hit)

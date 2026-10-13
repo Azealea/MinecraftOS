@@ -12,9 +12,9 @@ Mesher mesher_init(void)
     };
 }
 
-void mesher_free(Mesher* m)
+void mesher_clean(Mesher* m)
 {
-    bucket_alloc_free(&m->mesh);
+    bucket_alloc_clean(&m->mesh);
     VECTOR_FREE(&m->dirty);
 }
 

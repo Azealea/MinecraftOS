@@ -14,7 +14,7 @@ BucketAlloc bucket_alloc_init(void)
     return ba;
 }
 
-void bucket_alloc_free(BucketAlloc* ba)
+void bucket_alloc_clean(BucketAlloc* ba)
 {
     free(ba->faces);
 }
