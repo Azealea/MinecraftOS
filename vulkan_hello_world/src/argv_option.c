@@ -24,7 +24,7 @@ struct argv_option parse_options(int argc, char** argv)
             res.save_to = optarg;
             break;
         case 'l':
-            res.load_to = optarg;
+            res.load_from = optarg;
             break;
         default:
             printf("TODO: list options\n");

@@ -1,13 +1,16 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "app.h"
 #include "argv_option.h"
 #include "glfw.h"
 #include "input/input.h"
+#include "utils/container.h"
 #include "utils/time.h"
 #include "vk/vk.h"
 #include "voxel/mesh/mesher.h"
 #include "voxel/player/player_movement.h"
+#include "voxel/world/chunk.h"
 #include "voxel/world/world.h"
 
 static void display_info()
@@ -26,6 +29,21 @@ static void display_info()
 
 static void init(App* app)
 {
+    if (app->argv_options.load_from == NULL)
+    {
+        Chunk* c = world_get_or_add_chunk(&app->world, (VEC3(i32)){0, 0, 0});
+
+        for (int x = 0; x < CHUNK_SIZE; x++)
+            for (int z = 0; z < CHUNK_SIZE; z++)
+            {
+                chunk_set(c, (VEC3(u8)){x, z, 0}, (Block){.type = BLK_GRASS});
+            }
+    }
+    MAP_FOR_EACH(app->world.chunks, chunk)
+    {
+        world_mark_chunk_dirty(&app->world, chunk->key, &app->mesher.dirty);
+    }
+
     display_info();
     init_glfw();
     create_glfw_window(app);
@@ -55,7 +73,7 @@ static void loop(App* app)
 
 static void cleanup(App* app)
 {
-    world_clean(&app->world);
+    world_clean(&app->world, app->argv_options.save_to);
     mesher_clean(&app->mesher);
 
     clean_vk(app);
@@ -65,9 +83,6 @@ static void cleanup(App* app)
 
 static void run(App* app)
 {
-    ChunkPos origin = {0, 0, 0};
-    generate_chunk_terrain(&app->world, origin, &app->mesher.dirty);
-
     init(app);
     loop(app);
     cleanup(app);
@@ -75,6 +90,7 @@ static void run(App* app)
 
 int main(int argc, char** argv)
 {
+    struct argv_option options = parse_options(argc, argv);
     App app = {
         .applicationName = "hello_world",
         .engineName = "AZEA ENGINE",
@@ -83,10 +99,10 @@ int main(int argc, char** argv)
         .backgroundColor = {{{0.01f, 0.1f, 0.1f, 0.01f}}},
         .maxFramesInFlight = 3,
         .start_time = current_time(),
-        .player = player_init((VEC3(i32)){0, 0, 0}),
-        .world = world_init(),
+        .player = player_init((VEC3(i32)){8, 8, 2}),
+        .world = world_init(options.load_from),
         .mesher = mesher_init(),
-        .argv_options = parse_options(argc, argv),
+        .argv_options = options,
     };
 
     run(&app);

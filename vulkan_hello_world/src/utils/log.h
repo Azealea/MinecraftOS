@@ -8,7 +8,7 @@
 #define LOG_LEVEL_ERROR 4
 
 #ifndef LOG_LEVEL
-#    define LOG_LEVEL LOG_LEVEL_DEBUG
+#    define LOG_LEVEL LOG_LEVEL_INFO
 #endif
 
 #define _LOG_COL_TRACE "\033[90m"

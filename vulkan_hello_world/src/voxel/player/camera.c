@@ -1,7 +1,6 @@
 #include "camera.h"
 
 #include <cglm/cam.h>
-#include <string.h>
 
 #include "input/input.h"
 #include "utils/utils.h"
@@ -79,11 +78,11 @@ void update_camera_pos(Camera* camera, const Input* input)
 
 Camera camera_init(VEC3(i32) pos)
 {
+    TRACE(VEC3_FMT "\n", VEC3_ARGS(pos));
     Camera camera = {
         .pos = {pos.x, pos.y, pos.z},
     };
 
-    glm_vec3_copy((vec3){0.0f, -3.0f, 1.0f}, camera.pos);
     camera.yaw = glm_rad(90.0f);
     camera.pitch = 0.0f;
 

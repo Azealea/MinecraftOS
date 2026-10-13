@@ -17,3 +17,4 @@
 **/*.spv.c
 
 .direnv/
+maps/
