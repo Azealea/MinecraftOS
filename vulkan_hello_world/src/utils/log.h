@@ -12,8 +12,8 @@
 #endif
 
 #define _LOG_COL_TRACE "\033[90m"
-#define _LOG_COL_DEBUG "\033[36m"
-#define _LOG_COL_INFO "\033[32m"
+#define _LOG_COL_DEBUG "\033[32m"
+#define _LOG_COL_INFO "\033[36m"
 #define _LOG_COL_WARN "\033[33m"
 #define _LOG_COL_ERROR "\033[31m"
 #define _LOG_COL_RESET "\033[0m"

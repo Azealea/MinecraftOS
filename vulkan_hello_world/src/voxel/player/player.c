@@ -1,6 +1,7 @@
 #include "player.h"
 
 #include "app.h"
+#include "input/input.h"
 #include "player_movement.h"
 #include "raycast.h"
 #include "utils/log.h"
@@ -28,21 +29,41 @@ static void place_on_hit(App* app, RaycastHit hit, Block block)
 
 void player_consume_input(App* app)
 {
-    update_camera_pos(&app->player.cam, &app->inputState);
+    Player* p = &app->player;
+    update_camera_pos(&p->cam, &app->inputState);
 
     if (app->inputState.meta)
         return;
 
-    if (input_mouse_pressed(&app->inputState, 0))
+    if (input_key_pressed(&app->inputState, KEY_1))
     {
-        RaycastHit hit = raycast(&app->player.cam, &app->world, 8.0f);
+        p->chosenBlock = BLK_APP_CONTROLLER;
+    }
+
+    if (input_key_pressed(&app->inputState, KEY_2))
+    {
+    }
+
+    if (input_key_pressed(&app->inputState, KEY_3))
+    {
+        p->chosenBlock = BLK_GRASS;
+    }
+
+    if (input_key_pressed(&app->inputState, KEY_4))
+    {
+        p->chosenBlock = BLK_STONE;
+    }
+
+    if (input_mouse_pressed(&app->inputState, MOUSE_LEFT))
+    {
+        RaycastHit hit = raycast(&p->cam, &app->world, 8.0f);
         if (hit.hit)
             break_on_hit(app, hit);
     }
-    if (input_mouse_pressed(&app->inputState, 1))
+    if (input_mouse_pressed(&app->inputState, MOUSE_RIGHT))
     {
-        RaycastHit hit = raycast(&app->player.cam, &app->world, 8.0f);
+        RaycastHit hit = raycast(&p->cam, &app->world, 8.0f);
         if (hit.hit)
-            place_on_hit(app, hit, (Block){.type = BLK_APP_CONTROLLER});
+            place_on_hit(app, hit, (Block){.type = p->chosenBlock});
     }
 }

@@ -118,7 +118,6 @@ static World world_load(char* load_from)
 
 World world_init(char* load_from)
 {
-    DEBUG("%p", load_from);
     if (load_from)
     {
         return world_load(load_from);

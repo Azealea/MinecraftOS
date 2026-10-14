@@ -11,12 +11,13 @@ struct argv_option parse_options(int argc, char** argv)
         {"help", no_argument, 0, 'h'},
         {"load", required_argument, 0, 'l'},
         {"save", required_argument, 0, 's'},
+        {"map", required_argument, 0, 'm'},
     };
 
     struct argv_option res = {0};
 
     int c;
-    while ((c = getopt_long(argc, argv, "s:l:h", long_options, nullptr)) != -1)
+    while ((c = getopt_long(argc, argv, "m:s:l:h", long_options, nullptr)) != -1)
     {
         switch (c)
         {
@@ -25,6 +26,10 @@ struct argv_option parse_options(int argc, char** argv)
             break;
         case 'l':
             res.load_from = optarg;
+            break;
+        case 'm':
+            res.load_from = optarg;
+            res.save_to = optarg;
             break;
         default:
             printf("TODO: list options\n");
