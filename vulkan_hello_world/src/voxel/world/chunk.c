@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 
+#include "voxel/block.h"
+
 Chunk* chunk_alloc(void)
 {
     Chunk* c = calloc(1, sizeof(Chunk));
@@ -30,5 +32,18 @@ const Block* chunk_get(const Chunk* chunk, VEC3(u8) pos)
 
 void chunk_set(Chunk* chunk, VEC3(u8) pos, Block block)
 {
+    Block old = chunk->blocks[chunk_index(pos)];
+    auto on_break_fn = blockBehaviours[old.type].on_break;
+    if (on_break_fn)
+    {
+        on_break_fn(&old, chunk);
+    }
+
+    auto on_place_fn = blockBehaviours[block.type].on_place;
+    if (on_place_fn)
+    {
+        on_place_fn(&block, chunk);
+    }
+
     chunk->blocks[chunk_index(pos)] = block;
 }

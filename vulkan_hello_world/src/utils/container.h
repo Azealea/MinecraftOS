@@ -1,8 +1,9 @@
 #pragma once
 #pragma GCC diagnostic ignored "-Wpedantic"
 
-#include <assert.h>
 #include <stdlib.h>
+
+#include "utils/utils.h"
 
 #define ZAZ_CAT__(a, b) a##b
 #define ZAZ_CAT_(a, b) ZAZ_CAT__(a, b)
@@ -58,28 +59,22 @@
     } while (false)
 
 #define VECTOR_PUSH_BACK(VEC, VAL)                                                       \
-    ({                                                                                   \
-        typeof(VEC) _vp = (VEC);                                                         \
-        typeof(*_vp->data) _tmp = (VAL);                                                 \
-        bool _ok = true;                                                                 \
+    do                                                                                   \
+    {                                                                                    \
+        typeof((VEC)) vp = (VEC);                                                        \
                                                                                          \
-        if (_vp->size >= _vp->capacity)                                                  \
+        if (vp->size >= vp->capacity)                                                    \
         {                                                                                \
-            size_t _new_cap = _vp->capacity ? _vp->capacity * 2 : 2;                     \
-            void* _new = realloc(_vp->data, _new_cap * sizeof(*_vp->data));              \
-            if (_new == NULL)                                                            \
-                _ok = false;                                                             \
-            else                                                                         \
-            {                                                                            \
-                _vp->data = _new;                                                        \
-                _vp->capacity = _new_cap;                                                \
-            }                                                                            \
+            size_t new_cap = vp->capacity ? vp->capacity * 2 : 2;                        \
+            void* new_alloc = realloc(vp->data, new_cap * sizeof(*vp->data));            \
+            ASSERT(new_alloc != NULL, "realloc failed");                                 \
+                                                                                         \
+            vp->data = new_alloc;                                                        \
+            vp->capacity = new_cap;                                                      \
         }                                                                                \
                                                                                          \
-        if (_ok)                                                                         \
-            _vp->data[_vp->size++] = _tmp;                                               \
-        _ok;                                                                             \
-    })
+        vp->data[vp->size++] = (VAL);                                                    \
+    } while (0)
 
 #define VECTOR_FIND(VEC, VAL)                                                            \
     ({                                                                                   \
@@ -146,7 +141,7 @@
                                                                                          \
         s->capacity = s->capacity ? s->capacity * 2 : SET_BASE_CAPACITY;                 \
         s->buckets = malloc(s->capacity * sizeof(*s->buckets));                          \
-        assert(s->buckets != NULL);                                                      \
+        ASSERT(s->buckets != NULL, "malloc failed for set resize");                      \
         s->size = 0;                                                                     \
         for (size_t i = 0; i < s->capacity; ++i)                                         \
             s->buckets[i] = (VECTOR(TYPE)){0};                                           \
@@ -184,10 +179,9 @@
         if (!s->capacity || (float)s->size / (float)s->capacity >= SET_RESIZE_THRESHOLD) \
             _SET_RESIZE_FN(TYPE)(s);                                                     \
         size_t idx = HASH(v) % s->capacity;                                              \
-        bool ok = VECTOR_PUSH_BACK(&s->buckets[idx], v);                                 \
-        if (ok)                                                                          \
-            s->size++;                                                                   \
-        return ok;                                                                       \
+        VECTOR_PUSH_BACK(&s->buckets[idx], v);                                           \
+        s->size++;                                                                       \
+        return true;                                                                     \
     }                                                                                    \
                                                                                          \
     static inline bool _SET_REMOVE_FN(TYPE)(SET(TYPE)* s, TYPE v)                        \
@@ -292,7 +286,7 @@
                                                                                          \
         m->capacity = m->capacity ? m->capacity * 2 : MAP_BASE_CAPACITY;                 \
         m->buckets = malloc(m->capacity * sizeof(*m->buckets));                          \
-        assert(m->buckets != NULL);                                                      \
+        ASSERT(m->buckets != NULL, "malloc failed for set resize");                      \
         m->size = 0;                                                                     \
         for (size_t i = 0; i < m->capacity; ++i)                                         \
             m->buckets[i] = (VECTOR(_MAP_ENTRY(KT, VT))){0};                             \
@@ -343,10 +337,9 @@
             _MAP_RESIZE_FN(KT, VT)(m);                                                   \
         size_t idx = HASH(k) % m->capacity;                                              \
         _MAP_ENTRY(KT, VT) entry = {.key = k, .value = v};                               \
-        bool ok = VECTOR_PUSH_BACK(&m->buckets[idx], entry);                             \
-        if (ok)                                                                          \
-            m->size++;                                                                   \
-        return ok;                                                                       \
+        VECTOR_PUSH_BACK(&m->buckets[idx], entry);                                       \
+        m->size++;                                                                       \
+        return true;                                                                     \
     }                                                                                    \
                                                                                          \
     static inline bool _MAP_SET_FN(KT, VT)(MAP(KT, VT)* m, KT k, VT v)                   \

@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "app.h"
@@ -22,9 +21,9 @@ static void display_info()
     uint32_t apiVersionMajor = VK_API_VERSION_MAJOR(instanceApiVersion);
     uint32_t apiVersionMinor = VK_API_VERSION_MINOR(instanceApiVersion);
     uint32_t apiVersionPatch = VK_API_VERSION_PATCH(instanceApiVersion);
-    INFO("Vulkan API %i.%i.%i.%i\n", apiVersionVariant, apiVersionMajor, apiVersionMinor,
+    INFO("Vulkan API %i.%i.%i.%i", apiVersionVariant, apiVersionMajor, apiVersionMinor,
          apiVersionPatch);
-    INFO("GLFW %s\n", glfwGetVersionString());
+    INFO("GLFW %s", glfwGetVersionString());
 }
 
 static void init(App* app)

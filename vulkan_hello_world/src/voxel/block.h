@@ -1,20 +1,27 @@
 #pragma once
 
 #include "utils/utils.h"
+#include "voxel/block/app_controller.h"
+
+#define XBLOCK(X)                                                                        \
+    X(BLK_AIR, .has_mesh = false)                                                        \
+    X(BLK_GRASS)                                                                         \
+    X(BLK_DIRT)                                                                          \
+    X(BLK_SAND)                                                                          \
+    X(BLK_RED_SAND)                                                                      \
+    X(BLK_STONE)                                                                         \
+    X(BLK_DARKSTONE)                                                                     \
+    X(BLK_OAK)                                                                           \
+    X(BLK_LAMP)                                                                          \
+    X(BLK_APP_CONTROLLER, .on_break = app_controller_on_break,                           \
+      .on_place = app_controller_on_place)                                               \
+    //    X(BLK_SCREEN, .texture_connect_with = {BLK_APP_CONTROLLER})
 
 typedef enum BlockType : u16
 {
-    BLK_AIR = 0,
-    BLK_GRASS,
-    BLK_DIRT,
-    BLK_SAND,
-    BLK_RED_SAND,
-    BLK_STONE,
-    BLK_DARKSTONE,
-    BLK_OAK,
-    BLK_LAMP,
-    BLK_APP_CONTROLLER,
-    // BLK_SCREEN,
+#define XBLOCK_FN(NAME, ...) NAME,
+    XBLOCK(XBLOCK_FN)
+#undef XBLOCK_FN
     BLOCK_COUNT
 } BlockType;
 
@@ -24,3 +31,16 @@ typedef struct Block
     u16 state;
     u16 entity_id;
 } Block;
+
+struct Chunk;
+
+typedef struct BlockBehaviour
+{
+    bool has_mesh;
+    BlockType texture_connect_with[10];
+    void (*on_place)(Block*, Chunk*);
+    void (*on_break)(Block*, Chunk*);
+    void (*on_tick)(Block*, Chunk*);
+} BlockBehaviour;
+
+extern const BlockBehaviour blockBehaviours[BLOCK_COUNT];

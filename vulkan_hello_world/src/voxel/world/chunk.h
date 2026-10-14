@@ -2,6 +2,7 @@
 
 #include "utils/vec.h"
 #include "voxel/block.h"
+#include "voxel/block/entities.h"
 #include "voxel/mesh/face.h"
 
 #define CHUNK_SIZE 16
@@ -13,6 +14,9 @@ typedef VEC3(i32) ChunkPos;
 typedef struct Chunk
 {
     Block blocks[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+    VECTOR(EntityData_ptr) entities;
+
+    // runtime
     Face* bucket_ptr; // where mesh are stored in the Big Buffer (tm)
     uint32_t face_count;
     bool dirty; // needs meshing
