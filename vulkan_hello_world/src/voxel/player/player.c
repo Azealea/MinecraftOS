@@ -2,12 +2,8 @@
 
 #include "app.h"
 #include "input/input.h"
-#include "player_movement.h"
 #include "raycast.h"
 #include "utils/log.h"
-#include "utils/vec.h"
-#include "voxel/block.h"
-#include "voxel/world/world.h"
 
 Player player_init(VEC3(i32) pos)
 {
@@ -27,6 +23,12 @@ static void place_on_hit(App* app, RaycastHit hit, Block block)
     TRACE("placing " VEC3_FMT, VEC3_ARGS(blockPlace));
 }
 
+static void interact_on_hit(App* app, RaycastHit hit)
+{
+    world_interact_block(&app->world, hit.block, &app->mesher.dirty);
+    TRACE("interacting " VEC3_FMT, VEC3_ARGS(hit.block));
+}
+
 void player_consume_input(App* app)
 {
     Player* p = &app->player;
@@ -35,6 +37,11 @@ void player_consume_input(App* app)
     if (app->inputState.meta)
         return;
 
+    if (input_key_pressed(&app->inputState, KEY_0))
+    {
+        p->chosenBlock = BLK_AIR;
+    }
+
     if (input_key_pressed(&app->inputState, KEY_1))
     {
         p->chosenBlock = BLK_APP_CONTROLLER;
@@ -42,6 +49,7 @@ void player_consume_input(App* app)
 
     if (input_key_pressed(&app->inputState, KEY_2))
     {
+        p->chosenBlock = BLK_LAMP;
     }
 
     if (input_key_pressed(&app->inputState, KEY_3))
@@ -64,6 +72,15 @@ void player_consume_input(App* app)
     {
         RaycastHit hit = raycast(&p->cam, &app->world, 8.0f);
         if (hit.hit)
-            place_on_hit(app, hit, (Block){.type = p->chosenBlock});
+        {
+            if (p->chosenBlock == BLK_AIR)
+            {
+                interact_on_hit(app, hit);
+            }
+            else
+            {
+                place_on_hit(app, hit, (Block){.type = p->chosenBlock});
+            }
+        }
     }
 }

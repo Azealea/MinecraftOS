@@ -27,6 +27,7 @@ void chunk_free(Chunk* c);
 
 Block* chunk_get(const Chunk* chunk, VEC3(u8) pos);
 void chunk_set(Chunk* chunk, VEC3(u8) pos, Block block);
+void chunk_interact(Chunk* chunk, VEC3(u8) pos);
 bool chunk_is_in_bound(VEC3(u8) relative_pos_chunk);
 VEC3(u8) chunk_pos_of(const Chunk* chunk, const Block* b);
 

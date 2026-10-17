@@ -58,6 +58,17 @@ void chunk_trigger_update_around(Chunk* c, VEC3(u8) pos)
     }
 }
 
+void chunk_interact(Chunk* chunk, VEC3(u8) pos)
+{
+    Block* slot = &chunk->blocks[chunk_index(pos)];
+
+    auto on_interact_fn = blockBehaviours[slot->type].on_interact;
+    if (on_interact_fn)
+    {
+        on_interact_fn(slot, chunk);
+    }
+}
+
 void chunk_set(Chunk* chunk, VEC3(u8) pos, Block block)
 {
     Block* slot = &chunk->blocks[chunk_index(pos)];

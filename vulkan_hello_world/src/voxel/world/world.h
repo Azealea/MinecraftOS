@@ -33,7 +33,10 @@ Chunk* world_get_or_add_chunk(World* w, ChunkPos pos);
 
 void world_set_block(World* w, VEC3(i32) global_pos, Block block,
                      VECTOR(ChunkPos)* dirty);
+Block* world_get_block(World* w, VEC3(i32) global_pos);
+void world_interact_block(World* w, VEC3(i32) global_pos, VECTOR(ChunkPos)* dirty);
+
 void world_mark_chunk_dirty(World* w, ChunkPos pos, VECTOR(ChunkPos)* dirty);
 
-void generate_chunk_terrain(World* w, ChunkPos pos, VECTOR(ChunkPos)* dirty);
+void generate_chunk_terrain_random(World* w, ChunkPos pos, VECTOR(ChunkPos)* dirty);
 void world_dirty_existing_neighbors(World* w, ChunkPos pos, VECTOR(ChunkPos)* dirty);

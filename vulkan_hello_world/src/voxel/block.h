@@ -14,7 +14,7 @@
     X(BLK_OAK)                                                                           \
     X(BLK_LAMP, .on_place = lamp_on_place, .on_break = lamp_on_break)                    \
     X(BLK_APP_CONTROLLER, .on_break = app_controller_on_break,                           \
-      .on_place = app_controller_on_place)                                               \
+      .on_place = app_controller_on_place, .on_interact = app_controller_on_interact)    \
     //    X(BLK_SCREEN, .texture_connect_with = {BLK_APP_CONTROLLER})
 
 typedef enum BlockType : u16

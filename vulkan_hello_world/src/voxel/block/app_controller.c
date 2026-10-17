@@ -1,6 +1,5 @@
-#include <stddef.h>
+#include "voxel/block/app_controller.h"
 
-#include "voxel/block/entities.h"
 #include "voxel/world/chunk.h"
 
 static bool is_network_type_block(const Block* b)
@@ -129,6 +128,13 @@ void app_controller_on_break(Block* b, Chunk* c)
     checks_break(b, c, BLK_APP_CONTROLLER);
     network_on_break(b, c);
     chunk_release_entity_slot(c, b->entity_id);
+}
+
+void app_controller_on_interact(Block* b, Chunk* c)
+{
+    // EntityData* data = chunk_get_entity(c, b->type);
+
+    INFO("hello from " VEC3_FMT, VEC3_ARGS(chunk_pos_of(c, b)));
 }
 
 void lamp_on_place(Block* b, Chunk* c)

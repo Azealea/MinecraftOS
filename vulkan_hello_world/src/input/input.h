@@ -2,6 +2,7 @@
 
 typedef enum
 {
+    KEY_0,
     KEY_1,
     KEY_2,
     KEY_3,

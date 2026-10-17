@@ -32,6 +32,13 @@ void world_mark_chunk_dirty(World* w, ChunkPos pos, VECTOR(ChunkPos)* dirty)
     VECTOR_PUSH_BACK(dirty, pos);
 }
 
+Block* world_get_block(World* w, VEC3(i32) global_pos)
+{
+    ChunkPos cpos = pos_glob_to_chunk(global_pos);
+    Chunk* c = world_get_or_add_chunk(w, cpos);
+    return chunk_get(c, pos_glob_to_rel(global_pos));
+}
+
 void world_set_block(World* w, VEC3(i32) global_pos, Block block, VECTOR(ChunkPos)* dirty)
 {
     ChunkPos cpos = pos_glob_to_chunk(global_pos);
@@ -40,7 +47,15 @@ void world_set_block(World* w, VEC3(i32) global_pos, Block block, VECTOR(ChunkPo
     world_mark_chunk_dirty(w, cpos, dirty);
 }
 
-void generate_chunk_terrain(World* w, ChunkPos pos, VECTOR(ChunkPos)* dirty)
+void world_interact_block(World* w, VEC3(i32) global_pos, VECTOR(ChunkPos)* dirty)
+{
+    ChunkPos cpos = pos_glob_to_chunk(global_pos);
+    Chunk* c = world_get_or_add_chunk(w, cpos);
+    chunk_interact(c, pos_glob_to_rel(global_pos));
+    world_mark_chunk_dirty(w, cpos, dirty);
+}
+
+void generate_chunk_terrain_random(World* w, ChunkPos pos, VECTOR(ChunkPos)* dirty)
 {
     Chunk* c = world_get_or_add_chunk(w, pos);
     for (u8 x = 0; x < CHUNK_SIZE; x++)
