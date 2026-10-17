@@ -44,7 +44,7 @@
     X(NODE_OAK_INNER, LEAF(TEX_OAK_INNER))                                               \
     X(NODE_LAMP_ON, LEAF(TEX_LAMP_ON))                                                   \
     X(NODE_LAMP_OFF, LEAF(TEX_LAMP_OFF))                                                 \
-    X(NODE_LAMP_ACTIVATED, ACTIVATED(NODE_LAMP_ON, NODE_LAMP_OFF))                       \
+    X(NODE_LAMP_ACTIVATED, ACTIVATED(NODE_LAMP_OFF, NODE_LAMP_ON))                       \
     X(NODE_APP_CONTROLLER_INNER, LEAF(TEX_APP_CONTROLER_SIDE))                           \
     X(NODE_BORDER_ACTIVE, LEAF(TEX_BORDER_ACTIVE))                                       \
     X(NODE_APP_CONTROLLER_SIDE, CONNECTED8(NODE_APP_CONTROLLER_INNER, NODE_BORDER_ACTIVE))

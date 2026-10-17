@@ -1,12 +1,11 @@
 #pragma once
 
 #include "utils/container.h"
+#include "voxel/block.h"
 
 typedef struct EntityData
 {
-    char* msg;
+    BlockType type;
 } EntityData;
 
-typedef EntityData* EntityData_ptr;
-
-VECTOR_DECLARE(EntityData_ptr);
+VECTOR_DECLARE(EntityData);

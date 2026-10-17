@@ -90,10 +90,6 @@ u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
 {
     u32 count = 0;
 
-    static const VEC3(i8) dirs[6] = {
-        {1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1},
-    };
-
     for (u8 x = 0; x < CHUNK_SIZE; x++)
         for (u8 y = 0; y < CHUNK_SIZE; y++)
             for (u8 z = 0; z < CHUNK_SIZE; z++)
@@ -105,8 +101,7 @@ u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
                 for (int f = 0; f < 6; f++)
                 {
                     VEC3(u8)
-                    npos = {(u8)(x + dirs[f].x), (u8)(y + dirs[f].y),
-                            (u8)(z + dirs[f].z)};
+                    npos = VEC3_ADD(((VEC3(u8)){x, y, z}), BLOCK_NEIGHB_DIRS[f]);
 
                     if (chunk_is_in_bound(npos)
                         && chunk_get(chunk, npos)->type != BLK_AIR)
@@ -120,11 +115,11 @@ u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
                     chunk->bucket_ptr[count++] = (Face){
                         .pos = VEC3_ADD(VEC3_SCALE(pos, CHUNK_SIZE), local),
                         .face_id = f,
-                        .texture_id = face_texture_to_index(ft, neighbor_mask, false, 0),
+                        .texture_id =
+                            face_texture_to_index(ft, neighbor_mask, b->state, 0),
                     };
                 }
             }
 
     return count;
 }
-

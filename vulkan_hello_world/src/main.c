@@ -9,7 +9,6 @@
 #include "vk/vk.h"
 #include "voxel/mesh/mesher.h"
 #include "voxel/player/player_movement.h"
-#include "voxel/world/chunk.h"
 #include "voxel/world/world.h"
 
 static void display_info()
@@ -28,16 +27,6 @@ static void display_info()
 
 static void init(App* app)
 {
-    if (app->argv_options.load_from == NULL)
-    {
-        Chunk* c = world_get_or_add_chunk(&app->world, (VEC3(i32)){0, 0, 0});
-
-        for (int x = 0; x < CHUNK_SIZE; x++)
-            for (int z = 0; z < CHUNK_SIZE; z++)
-            {
-                chunk_set(c, (VEC3(u8)){x, z, 0}, (Block){.type = BLK_GRASS});
-            }
-    }
     MAP_FOR_EACH(app->world.chunks, chunk)
     {
         world_mark_chunk_dirty(&app->world, chunk->key, &app->mesher.dirty);

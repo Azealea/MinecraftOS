@@ -14,7 +14,7 @@ typedef VEC3(i32) ChunkPos;
 typedef struct Chunk
 {
     Block blocks[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
-    VECTOR(EntityData_ptr) entities;
+    VECTOR(EntityData) entities;
 
     // runtime
     Face* bucket_ptr; // where mesh are stored in the Big Buffer (tm)
@@ -25,11 +25,10 @@ typedef struct Chunk
 Chunk* chunk_alloc(void);
 void chunk_free(Chunk* c);
 
-const Block* chunk_get(const Chunk* chunk, VEC3(u8) pos);
-
+Block* chunk_get(const Chunk* chunk, VEC3(u8) pos);
 void chunk_set(Chunk* chunk, VEC3(u8) pos, Block block);
-
 bool chunk_is_in_bound(VEC3(u8) relative_pos_chunk);
+VEC3(u8) chunk_pos_of(const Chunk* chunk, const Block* b);
 
 static inline i32 floor_div_chunk(i32 v)
 {
@@ -49,7 +48,14 @@ static inline VEC3(u8) pos_glob_to_rel(VEC3(i32) g)
     return VEC3_APPLY(u8, floor_mod_chunk, g);
 }
 
-static inline VEC3(i32) pos_glob_to_chunk(VEC3(i32) g)
+static inline ChunkPos pos_glob_to_chunk(VEC3(i32) g)
 {
     return VEC3_APPLY(i32, floor_div_chunk, g);
 }
+
+EntityData* chunk_acquire_new_entity_slot(Chunk* c, u16* entity_id_ptr,
+                                          enum BlockType btype);
+EntityData* chunk_get_entity(Chunk* c, u16 entity_id);
+void chunk_release_entity_slot(Chunk* c, u16 entity_id);
+
+void chunk_trigger_update_around(Chunk* c, VEC3(u8) pos);
