@@ -58,6 +58,8 @@
         echo "ICD: $VK_ICD_FILENAMES"
         echo "VK_LAYER_PATH: $VK_LAYER_PATH"
 
+        # clumsy way to silence falsy mem leaks
+        export LSAN_OPTIONS=suppressions=lsan.supp
       '';
     };
   };

@@ -10,10 +10,16 @@ SHADERS_C := $(SHADERS_SPV:%=%.c)
 
 SRC += $(SHADERS_C)
 OBJ := $(SRC:.c=.o)
+DEP := $(OBJ:.o=.d)
+
+PKG = glfw3 vulkan cglm
+PKG_CFLAGS = $(shell pkg-config --cflags $(PKG))
+PKG_LDFLAGS = $(shell pkg-config --libs $(PKG))
 
 CSTD := -std=c23
-CFLAGS := $(CSTD) -Wall -Wextra -Wpedantic -Werror -I$(SRC_DIR) -Ilibraries $(shell pkg-config --cflags glfw3 vulkan cglm) $(DEFS)
-LDFLAGS := $(shell pkg-config --libs glfw3 vulkan cglm) -lm
+WARN = -Wall -Wextra -Wpedantic -Werror
+CFLAGS := $(CSTD) $(WARN) -I$(SRC_DIR) -Ilibraries $(DEFS) $(PKG_CFLAGS) -MMD -MP
+LDFLAGS := -lm $(PKG_LDFLAGS)
 
 TARGET := vulkan_hello_world
 
@@ -33,7 +39,7 @@ debug: LDFLAGS += -fsanitize=address,undefined
 debug: $(TARGET)
 
 clean:
-	rm -f $(SRC:.c=.o) $(SHADERS_SPV) $(SHADERS_C) $(TARGET)
+	rm -f $(OBJ) $(DEP) $(SHADERS_SPV) $(SHADERS_C) $(TARGET)
 
 fix:
 	find src/ \( -name "*.h" -o -name "*.c" \) -exec clang-format -i {} \+
