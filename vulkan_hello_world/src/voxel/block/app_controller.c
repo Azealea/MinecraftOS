@@ -4,7 +4,8 @@
 
 static bool is_network_type_block(const Block* b)
 {
-    return b->type == BLK_APP_CONTROLLER || b->type == BLK_LAMP;
+    return b->type == BLK_APP_CONTROLLER || b->type == BLK_LAMP
+        || b->type == BLK_APP_BRIDGE;
 }
 
 void dfs_for_devices_and_source(VEC3(u8) start, Chunk* c,
@@ -68,14 +69,14 @@ void dfs_for_devices_and_source(VEC3(u8) start, Chunk* c,
     }
 }
 
-static void network_on_place(Block* b, Chunk* c)
+void network_on_place(Block* b, Chunk* c)
 {
     bool visited[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE] = {0};
 
     dfs_for_devices_and_source(chunk_pos_of(c, b), c, visited);
 }
 
-static void network_on_break(Block* b, Chunk* c)
+void network_on_break(Block* b, Chunk* c)
 {
     VEC3(u8) pos = chunk_pos_of(c, b);
 
@@ -135,14 +136,4 @@ void app_controller_on_interact(Block* b, Chunk* c)
     // EntityData* data = chunk_get_entity(c, b->type);
 
     INFO("hello from " VEC3_FMT, VEC3_ARGS(chunk_pos_of(c, b)));
-}
-
-void lamp_on_place(Block* b, Chunk* c)
-{
-    network_on_place(b, c);
-}
-
-void lamp_on_break(Block* b, Chunk* c)
-{
-    network_on_break(b, c);
 }

@@ -4,6 +4,7 @@
 #include "input/input.h"
 #include "raycast.h"
 #include "utils/log.h"
+#include "voxel/block.h"
 
 Player player_init(VEC3(i32) pos)
 {
@@ -37,30 +38,20 @@ void player_consume_input(App* app)
     if (app->inputState.meta)
         return;
 
-    if (input_key_pressed(&app->inputState, KEY_0))
+    struct pair_key_block
     {
-        p->chosenBlock = BLK_AIR;
-    }
+        InputKey key;
+        enum BlockType block;
+    } pairs[] = {
+        {KEY_0, BLK_AIR},  {KEY_1, BLK_APP_CONTROLLER}, {KEY_2, BLK_APP_BRIDGE},
+        {KEY_3, BLK_LAMP}, {KEY_4, BLK_GRASS},
+    };
 
-    if (input_key_pressed(&app->inputState, KEY_1))
-    {
-        p->chosenBlock = BLK_APP_CONTROLLER;
-    }
-
-    if (input_key_pressed(&app->inputState, KEY_2))
-    {
-        p->chosenBlock = BLK_LAMP;
-    }
-
-    if (input_key_pressed(&app->inputState, KEY_3))
-    {
-        p->chosenBlock = BLK_GRASS;
-    }
-
-    if (input_key_pressed(&app->inputState, KEY_4))
-    {
-        p->chosenBlock = BLK_STONE;
-    }
+    for (size_t i = 0; i < sizeof(pairs) / sizeof(pairs[0]); i++)
+        if (input_key_pressed(&app->inputState, pairs[i].key))
+        {
+            p->chosenBlock = pairs[i].block;
+        }
 
     if (input_mouse_pressed(&app->inputState, MOUSE_LEFT))
     {

@@ -45,3 +45,5 @@ fix:
 	find src/ \( -name "*.h" -o -name "*.c" \) -exec clang-format -i {} \+
 
 .PHONY: all clean
+
+-include $(DEP)

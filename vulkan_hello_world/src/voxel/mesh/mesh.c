@@ -85,6 +85,14 @@ static u8 connected_neighbor_mask(const Chunk* chunk, ChunkPos pos, World* world
     return connected_mask_pack(u0, u1, v0, v1, nw, ne, sw, se);
 }
 
+static inline u32 hash3(VEC3(i32) pos)
+{
+    u32 h = pos.x * 0x9e3779b1u;
+    h = (h ^ pos.y) * 0x85ebca6bu;
+    h = (h ^ pos.z) * 0xc2b2ae35u;
+    return h ^ (h >> 16);
+}
+
 u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
                         const FaceTexture block_faces[][6])
 {
@@ -100,8 +108,7 @@ u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
 
                 for (int f = 0; f < 6; f++)
                 {
-                    VEC3(u8)
-                    npos = VEC3_ADD(((VEC3(u8)){x, y, z}), BLOCK_NEIGHB_DIRS[f]);
+                    VEC3(u8) npos = VEC3_ADD(((VEC3(u8)){x, y, z}), BLOCK_NEIGHB_DIRS[f]);
 
                     if (chunk_is_in_bound(npos)
                         && chunk_get(chunk, npos)->type != BLK_AIR)
@@ -115,8 +122,8 @@ u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
                     chunk->bucket_ptr[count++] = (Face){
                         .pos = VEC3_ADD(VEC3_SCALE(pos, CHUNK_SIZE), local),
                         .face_id = f,
-                        .texture_id =
-                            face_texture_to_index(ft, neighbor_mask, b->state, 0),
+                        .texture_id = face_texture_to_index(ft, neighbor_mask, b->state,
+                                                            hash3(local)),
                     };
                 }
             }

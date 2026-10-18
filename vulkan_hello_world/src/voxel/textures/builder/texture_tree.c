@@ -35,7 +35,9 @@
 #define NODE_LIST(X)                                                                     \
     X(NODE_DIRT, LEAF(TEX_DIRT))                                                         \
     X(NODE_GRASS_SIDE, LEAF(TEX_GRASS_SIDE))                                             \
-    X(NODE_GRASS_TOP, LEAF(TEX_GRASS))                                                   \
+    X(NODE_GRASS_TOP1, LEAF(TEX_GRASS1))                                                 \
+    X(NODE_GRASS_TOP2, LEAF(TEX_GRASS2))                                                 \
+    X(NODE_GRASS_TOP, VARIANT(NODE_GRASS_TOP1, NODE_GRASS_TOP2))                         \
     X(NODE_STONE, LEAF(TEX_STONE))                                                       \
     X(NODE_DARKSTONE, LEAF(TEX_DARKSTONE))                                               \
     X(NODE_SAND, LEAF(TEX_SAND))                                                         \
@@ -45,9 +47,10 @@
     X(NODE_LAMP_ON, LEAF(TEX_LAMP_ON))                                                   \
     X(NODE_LAMP_OFF, LEAF(TEX_LAMP_OFF))                                                 \
     X(NODE_LAMP_ACTIVATED, ACTIVATED(NODE_LAMP_OFF, NODE_LAMP_ON))                       \
-    X(NODE_APP_CONTROLLER_INNER, LEAF(TEX_APP_CONTROLER_SIDE))                           \
+    X(NODE_APP_BRIDGE_INNER, LEAF(TEX_APP_BRIDGE))                                       \
     X(NODE_BORDER_ACTIVE, LEAF(TEX_BORDER_ACTIVE))                                       \
-    X(NODE_APP_CONTROLLER_SIDE, CONNECTED8(NODE_APP_CONTROLLER_INNER, NODE_BORDER_ACTIVE))
+    X(NODE_APP_BRIDGE, CONNECTED8(NODE_APP_BRIDGE_INNER, NODE_BORDER_ACTIVE))            \
+    X(NODE_APP_CONTROLLER, LEAF(TEX_APP_CONTROLLER))
 
 enum
 {
@@ -89,7 +92,8 @@ const txtNodeId BlockTextures[BLOCK_COUNT][6] = {
     [BLK_RED_SAND] = UNIFO(NODE_RED_SAND),
     [BLK_OAK] = BARREL(NODE_OAK, NODE_OAK_INNER),
     [BLK_LAMP] = UNIFO(NODE_LAMP_ACTIVATED),
-    [BLK_APP_CONTROLLER] = UNIFO(NODE_APP_CONTROLLER_SIDE),
+    [BLK_APP_BRIDGE] = UNIFO(NODE_APP_BRIDGE),
+    [BLK_APP_CONTROLLER] = UNIFO(NODE_APP_CONTROLLER),
 };
 
 #undef BARREL

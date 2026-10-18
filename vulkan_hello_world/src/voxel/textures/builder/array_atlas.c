@@ -1,9 +1,5 @@
 #include "array_atlas.h"
 
-#include "base_texture_enum.h"
-#include "utils/container.h"
-#include "utils/utils.h"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
