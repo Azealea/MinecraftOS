@@ -11,12 +11,14 @@
     X(BLK_RED_SAND)                                                                      \
     X(BLK_STONE)                                                                         \
     X(BLK_DARKSTONE)                                                                     \
-    X(BLK_OAK)                                                                           \
+    X(BLK_OAK, .rotates = true)                                                          \
     X(BLK_LAMP, .on_place = network_on_place, .on_break = network_on_break)              \
     X(BLK_APP_BRIDGE, .on_place = network_on_place, .on_break = network_on_break)        \
+    X(BLK_APP_SCREEN, .on_place = network_on_place, .on_break = network_on_break,        \
+      .rotates = true)                                                                   \
     X(BLK_APP_CONTROLLER, .on_break = app_controller_on_break,                           \
       .on_place = app_controller_on_place, .on_interact = app_controller_on_interact)    \
-    //    X(BLK_SCREEN, .texture_connect_with = {BLK_APP_CONTROLLER})
+    X(BLK_SNAKE_TEST, .rotates = true)
 
 typedef enum BlockType : u16
 {
@@ -38,6 +40,7 @@ struct Chunk;
 typedef struct BlockBehaviour
 {
     bool has_mesh;
+    bool rotates;
     BlockType texture_connect_with[10];
     void (*on_place)(Block*, Chunk*);
     void (*on_break)(Block*, Chunk*);

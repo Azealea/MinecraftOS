@@ -1,6 +1,5 @@
 #include "texture_tree.h"
 
-#include "base_texture_enum.h"
 #include "connected_texture_build.h"
 #include "voxel/block.h"
 
@@ -48,9 +47,16 @@
     X(NODE_LAMP_OFF, LEAF(TEX_LAMP_OFF))                                                 \
     X(NODE_LAMP_ACTIVATED, ACTIVATED(NODE_LAMP_OFF, NODE_LAMP_ON))                       \
     X(NODE_APP_BRIDGE_INNER, LEAF(TEX_APP_BRIDGE))                                       \
+    X(NODE_APP_SCREEN, LEAF(TEX_APP_SCREEN))                                             \
     X(NODE_BORDER_ACTIVE, LEAF(TEX_BORDER_ACTIVE))                                       \
     X(NODE_APP_BRIDGE, CONNECTED8(NODE_APP_BRIDGE_INNER, NODE_BORDER_ACTIVE))            \
-    X(NODE_APP_CONTROLLER, LEAF(TEX_APP_CONTROLLER))
+    X(NODE_APP_CONTROLLER, LEAF(TEX_APP_CONTROLLER))                                     \
+    X(NODE_TEST_FRONT, LEAF(TEX_TEST_FRONT))                                             \
+    X(NODE_TEST_BACK, LEAF(TEX_TEST_BACK))                                               \
+    X(NODE_TEST_LEFT, LEAF(TEX_TEST_LEFT))                                               \
+    X(NODE_TEST_RIGHT, LEAF(TEX_TEST_RIGHT))                                             \
+    X(NODE_TEST_TOP, LEAF(TEX_TEST_UP))                                                  \
+    X(NODE_TEST_BOTTOM, LEAF(TEX_TEST_DOWN))
 
 enum
 {
@@ -81,6 +87,11 @@ const struct textureNode BlockTextureNodes[NODE_COUNT] = {
 #define BARREL(SIDE, TOPBOT) {(SIDE), (SIDE), (SIDE), (SIDE), (TOPBOT), (TOPBOT)}
 #define DONUT(SIDE, TOP, BOT) {(SIDE), (SIDE), (SIDE), (SIDE), (TOP), (BOT)}
 #define UNIFO(TEXT) {(TEXT), (TEXT), (TEXT), (TEXT), (TEXT), (TEXT)}
+#define FRONT(SIDE, FACE) {(FACE), (SIDE), (SIDE), (SIDE), (SIDE), (SIDE)}
+#define SNAKE(FRONT, BACK, SIDES, TOP, BOTTOM)                                           \
+    {(FRONT), (BACK), (TOP), (BOTTOM), (SIDES), (SIDES)}
+#define ALLSIDES(FRONT, BACK, TOP, BOTTOM, RIGHT, LEFT)                                  \
+    {(FRONT), (BACK), (TOP), (BOTTOM), (RIGHT), (LEFT)}
 
 const txtNodeId BlockTextures[BLOCK_COUNT][DIRECTION_COUNT] = {
     [BLK_AIR] = UNIFO(NODE_NONE),
@@ -90,15 +101,21 @@ const txtNodeId BlockTextures[BLOCK_COUNT][DIRECTION_COUNT] = {
     [BLK_DARKSTONE] = UNIFO(NODE_DARKSTONE),
     [BLK_SAND] = UNIFO(NODE_SAND),
     [BLK_RED_SAND] = UNIFO(NODE_RED_SAND),
-    [BLK_OAK] = BARREL(NODE_OAK, NODE_OAK_INNER),
+    [BLK_OAK] = SNAKE(NODE_OAK_INNER, NODE_OAK_INNER, NODE_OAK, NODE_OAK, NODE_OAK),
     [BLK_LAMP] = UNIFO(NODE_LAMP_ACTIVATED),
     [BLK_APP_BRIDGE] = UNIFO(NODE_APP_BRIDGE),
+    [BLK_APP_SCREEN] = FRONT(NODE_APP_BRIDGE, NODE_APP_SCREEN),
     [BLK_APP_CONTROLLER] = UNIFO(NODE_APP_CONTROLLER),
+    [BLK_SNAKE_TEST] = ALLSIDES(NODE_TEST_FRONT, NODE_TEST_BACK, NODE_TEST_TOP,
+                                NODE_TEST_BOTTOM, NODE_TEST_RIGHT, NODE_TEST_LEFT),
 };
 
 #undef BARREL
 #undef DONUT
 #undef UNIFO
+#undef FRONT
+#undef SNAKE
+#undef ALLSIDES
 
 // VVV building method
 

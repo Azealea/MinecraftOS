@@ -1,10 +1,11 @@
-// auto-generated from ../../../../assets/block_textures the 2026-10-18
+// auto-generated from ../../../../assets/block_textures the 2026-10-26
 #pragma once
 
 enum BaseTexture
 {
     TEX_APP_BRIDGE,
     TEX_APP_CONTROLLER,
+    TEX_APP_SCREEN,
     TEX_APP_SOMETHING,
     TEX_BORDER_ACTIVE,
     TEX_BORDER_INACTIVE,
@@ -22,11 +23,16 @@ enum BaseTexture
     TEX_OAK,
     TEX_RED_SAND,
     TEX_SAND,
-    TEX_SCREEN,
     TEX_SNOW,
     TEX_STONE,
+    TEX_TEST_BACK,
+    TEX_TEST_DOWN,
+    TEX_TEST_FRONT,
+    TEX_TEST_LEFT,
+    TEX_TEST_RIGHT,
+    TEX_TEST_UP,
 };
 
-#define TEXTURE_COUNT 22
+#define TEXTURE_COUNT 28
 
 extern const char* TexturePaths[TEXTURE_COUNT];

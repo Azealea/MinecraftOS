@@ -6,17 +6,14 @@
 void input_poll(Input* state, void* backend_ctx)
 {
     static const int glfw_key_map[KEY_COUNT] = {
-        [KEY_0] = GLFW_KEY_0,
-        [KEY_1] = GLFW_KEY_1,
-        [KEY_2] = GLFW_KEY_2,
-        [KEY_3] = GLFW_KEY_3,
-        [KEY_4] = GLFW_KEY_4,
-        [KEY_W] = GLFW_KEY_W,
-        [KEY_S] = GLFW_KEY_S,
-        [KEY_A] = GLFW_KEY_A,
-        [KEY_D] = GLFW_KEY_D,
-        [KEY_SPACE] = GLFW_KEY_SPACE,
-        [KEY_LEFT_SHIFT] = GLFW_KEY_LEFT_SHIFT,
+        [KEY_0] = GLFW_KEY_0,         [KEY_1] = GLFW_KEY_1,
+        [KEY_2] = GLFW_KEY_2,         [KEY_3] = GLFW_KEY_3,
+        [KEY_4] = GLFW_KEY_4,         [KEY_5] = GLFW_KEY_5,
+        [KEY_6] = GLFW_KEY_6,         [KEY_7] = GLFW_KEY_7,
+        [KEY_8] = GLFW_KEY_8,         [KEY_9] = GLFW_KEY_9,
+        [KEY_W] = GLFW_KEY_W,         [KEY_S] = GLFW_KEY_S,
+        [KEY_A] = GLFW_KEY_A,         [KEY_D] = GLFW_KEY_D,
+        [KEY_SPACE] = GLFW_KEY_SPACE, [KEY_LEFT_SHIFT] = GLFW_KEY_LEFT_SHIFT,
         [KEY_TAB] = GLFW_KEY_TAB,
     };
 

@@ -1,10 +1,11 @@
-// auto-generated source from ../../../../assets/block_textures the 2026-10-18
+// auto-generated source from ../../../../assets/block_textures the 2026-10-26
 #include "base_texture_enum.h"
 
 // clang-format off
 const char* TexturePaths[TEXTURE_COUNT] = {
     [TEX_APP_BRIDGE] = "assets/block_textures/app_bridge.PNG",
     [TEX_APP_CONTROLLER] = "assets/block_textures/app_controller.PNG",
+    [TEX_APP_SCREEN] = "assets/block_textures/app_screen.PNG",
     [TEX_APP_SOMETHING] = "assets/block_textures/app_something.PNG",
     [TEX_BORDER_ACTIVE] = "assets/block_textures/border_active.PNG",
     [TEX_BORDER_INACTIVE] = "assets/block_textures/border_inactive.PNG",
@@ -22,7 +23,12 @@ const char* TexturePaths[TEXTURE_COUNT] = {
     [TEX_OAK] = "assets/block_textures/oak.PNG",
     [TEX_RED_SAND] = "assets/block_textures/red_sand.PNG",
     [TEX_SAND] = "assets/block_textures/sand.PNG",
-    [TEX_SCREEN] = "assets/block_textures/screen.PNG",
     [TEX_SNOW] = "assets/block_textures/snow.PNG",
     [TEX_STONE] = "assets/block_textures/stone.PNG",
+    [TEX_TEST_BACK] = "assets/block_textures/test_back.PNG",
+    [TEX_TEST_DOWN] = "assets/block_textures/test_down.PNG",
+    [TEX_TEST_FRONT] = "assets/block_textures/test_front.PNG",
+    [TEX_TEST_LEFT] = "assets/block_textures/test_left.PNG",
+    [TEX_TEST_RIGHT] = "assets/block_textures/test_right.PNG",
+    [TEX_TEST_UP] = "assets/block_textures/test_up.PNG",
 };

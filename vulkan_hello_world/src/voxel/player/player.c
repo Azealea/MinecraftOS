@@ -43,8 +43,9 @@ void player_consume_input(App* app)
         InputKey key;
         enum BlockType block;
     } pairs[] = {
-        {KEY_0, BLK_AIR},  {KEY_1, BLK_APP_CONTROLLER}, {KEY_2, BLK_APP_BRIDGE},
-        {KEY_3, BLK_LAMP}, {KEY_4, BLK_GRASS},
+        {KEY_0, BLK_AIR},       {KEY_1, BLK_APP_CONTROLLER}, {KEY_2, BLK_APP_BRIDGE},
+        {KEY_3, BLK_LAMP},      {KEY_4, BLK_APP_SCREEN},     {KEY_5, BLK_GRASS},
+        {KEY_6, BLK_DARKSTONE}, {KEY_7, BLK_SNAKE_TEST},     {KEY_8, BLK_OAK},
     };
 
     for (size_t i = 0; i < sizeof(pairs) / sizeof(pairs[0]); i++)
