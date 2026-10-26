@@ -1,5 +1,5 @@
 #pragma once
 
-#include "app.h"
+struct App;
 
-void create_texture_stuff(App* app);
+void create_texture_stuff(struct App* app);

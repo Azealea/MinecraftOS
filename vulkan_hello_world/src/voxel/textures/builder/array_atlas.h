@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-
 #include "base_texture_enum.h"
 #include "utils/container.h"
 

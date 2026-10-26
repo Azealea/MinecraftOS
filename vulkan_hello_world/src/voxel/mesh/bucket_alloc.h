@@ -1,9 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
-#include <stddef.h>
-
-#include "voxel/mesh/face.h"
 #include "voxel/world/chunk.h"
 
 #define BUCKET_COUNT (8 * 8 * 8)

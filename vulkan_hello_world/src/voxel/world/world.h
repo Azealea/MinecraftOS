@@ -1,7 +1,6 @@
 #pragma once
 
 #include "chunk.h"
-#include "utils/container.h"
 
 static inline size_t chunkpos_hash(ChunkPos p)
 {

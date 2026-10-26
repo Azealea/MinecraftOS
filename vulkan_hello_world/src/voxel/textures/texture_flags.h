@@ -1,7 +1,5 @@
 #pragma once
 
-#include "utils/utils.h"
-
 enum textureFlags : u8
 {
     BLKTXT_CONNECTED4_BIT = 1 << 0,

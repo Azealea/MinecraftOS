@@ -1,10 +1,5 @@
 #include "camera.h"
 
-#include <cglm/cam.h>
-
-#include "input/input.h"
-#include "utils/utils.h"
-
 static vec3 worldup = {0.0f, 0.0f, 1.0f};
 
 void update_camera_pos(Camera* camera, const Input* input)

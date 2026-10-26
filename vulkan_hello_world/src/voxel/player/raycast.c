@@ -1,12 +1,5 @@
 #include "raycast.h"
 
-#include <math.h>
-
-#include "utils/vec.h"
-#include "voxel/block.h"
-#include "voxel/world/chunk.h"
-#include "voxel/world/world.h"
-
 RaycastHit raycast(const Camera* cam, World* world, float max_dist)
 {
     VEC3(f32)
