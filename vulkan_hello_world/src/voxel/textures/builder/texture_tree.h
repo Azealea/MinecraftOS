@@ -1,5 +1,6 @@
 #pragma once
 
+#include "voxel/direction.h"
 #include "voxel/textures/builder/array_atlas.h"
 #include "voxel/textures/resolve/face_texture.h"
 #include "voxel/textures/texture_flags.h"
@@ -36,5 +37,6 @@ typedef struct textureNode textureNode;
 
 FaceTexture face_texture_build(const textureNode* nodes, txtNodeId root,
                                VECTOR(texture_t)* atlas);
-void build_texture_look_up(FaceTexture destination[][6], VECTOR(texture_t)* atlas);
+void build_texture_look_up(FaceTexture destination[][DIRECTION_COUNT],
+                           VECTOR(texture_t)* atlas);
 bool validate_block_textures(void);

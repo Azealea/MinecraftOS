@@ -47,5 +47,3 @@ typedef struct BlockBehaviour
 } BlockBehaviour;
 
 extern const BlockBehaviour blockBehaviours[BLOCK_COUNT];
-
-extern const VEC3(i8) BLOCK_NEIGHB_DIRS[6];

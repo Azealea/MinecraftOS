@@ -1,5 +1,6 @@
 #include "voxel/block/app_controller.h"
 
+#include "voxel/direction.h"
 #include "voxel/world/chunk.h"
 
 static bool is_network_type_block(const Block* b)
@@ -37,9 +38,9 @@ void dfs_for_devices_and_source(VEC3(u8) start, Chunk* c,
             found_devices[found_devices_size++] = pos;
         }
 
-        for (int i = 0; i < 6; i++)
+        for (Direction i = 0; i < DIRECTION_COUNT; i++)
         {
-            VEC3(u8) npos = VEC3_ADD(pos, BLOCK_NEIGHB_DIRS[i]);
+            VEC3(u8) npos = VEC3_ADD(pos, DIRECTIONS[i]);
 
             if (!chunk_is_in_bound(npos))
                 continue;
@@ -83,9 +84,9 @@ void network_on_break(Block* b, Chunk* c)
     bool visited[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE] = {0};
     visited[pos.x][pos.y][pos.z] = true;
 
-    for (int i = 0; i < 6; i++)
+    for (Direction i = 0; i < DIRECTION_COUNT; i++)
     {
-        VEC3(u8) npos = VEC3_ADD(pos, BLOCK_NEIGHB_DIRS[i]);
+        VEC3(u8) npos = VEC3_ADD(pos, DIRECTIONS[i]);
         if (!chunk_is_in_bound(npos))
             continue;
 

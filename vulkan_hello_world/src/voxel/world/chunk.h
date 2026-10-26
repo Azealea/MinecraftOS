@@ -1,6 +1,5 @@
 #pragma once
 
-#include "utils/vec.h"
 #include "voxel/block.h"
 #include "voxel/block/entities.h"
 #include "voxel/mesh/face.h"
@@ -13,6 +12,7 @@ typedef VEC3(i32) ChunkPos;
 
 typedef struct Chunk
 {
+    // serialized field
     Block blocks[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
     VECTOR(EntityData) entities;
 

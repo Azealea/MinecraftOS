@@ -1,5 +1,6 @@
 #pragma once
 
+#include "voxel/direction.h"
 #include "voxel/mesh/bucket_alloc.h"
 #include "voxel/textures/resolve/face_texture.h"
 #include "voxel/world/world.h"
@@ -10,7 +11,7 @@ typedef struct Mesher
 {
     VECTOR(ChunkPos) dirty; // chunks needing a mesh rebuild
     BucketAlloc mesh;
-    FaceTexture Block2TextureMap[BLOCK_COUNT][6];
+    FaceTexture Block2TextureMap[BLOCK_COUNT][DIRECTION_COUNT];
 } Mesher;
 
 Mesher mesher_init(void);

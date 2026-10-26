@@ -3,8 +3,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include "chunk.h"
-#include "voxel/block.h"
+#include "voxel/direction.h"
 
 Chunk* world_get_chunk(World* w, ChunkPos p)
 {
@@ -72,12 +71,9 @@ void generate_chunk_terrain_random(World* w, ChunkPos pos, VECTOR(ChunkPos)* dir
 // update connected texture (and mesh ) // TODO do a function to update texture only ?
 void world_dirty_existing_neighbors(World* w, ChunkPos pos, VECTOR(ChunkPos)* dirty)
 {
-    static const ChunkPos ADJ[6] = {
-        {1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1},
-    };
-    for (int i = 0; i < 6; i++)
+    for (Direction i = 0; i < DIRECTION_COUNT; i++)
     {
-        ChunkPos npos = VEC3_ADD(pos, ADJ[i]);
+        ChunkPos npos = VEC3_ADD(pos, DIRECTIONS[i]);
         if (world_get_chunk(w, npos))
             world_mark_chunk_dirty(w, npos, dirty);
     }

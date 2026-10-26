@@ -82,7 +82,7 @@ const struct textureNode BlockTextureNodes[NODE_COUNT] = {
 #define DONUT(SIDE, TOP, BOT) {(SIDE), (SIDE), (SIDE), (SIDE), (TOP), (BOT)}
 #define UNIFO(TEXT) {(TEXT), (TEXT), (TEXT), (TEXT), (TEXT), (TEXT)}
 
-const txtNodeId BlockTextures[BLOCK_COUNT][6] = {
+const txtNodeId BlockTextures[BLOCK_COUNT][DIRECTION_COUNT] = {
     [BLK_AIR] = UNIFO(NODE_NONE),
     [BLK_DIRT] = UNIFO(NODE_DIRT),
     [BLK_GRASS] = DONUT(NODE_GRASS_SIDE, NODE_GRASS_TOP, NODE_DIRT),
@@ -189,13 +189,14 @@ FaceTexture face_texture_build(const textureNode* nodes, txtNodeId root,
     return res;
 }
 
-void build_texture_look_up(FaceTexture destination[][6], VECTOR(texture_t)* atlas)
+void build_texture_look_up(FaceTexture destination[][DIRECTION_COUNT],
+                           VECTOR(texture_t)* atlas)
 {
     FaceTexture cache[NODE_COUNT];
     bool built[NODE_COUNT] = {0};
 
     for (int b = 0; b < BLOCK_COUNT; b++)
-        for (int f = 0; f < 6; f++)
+        for (Direction f = 0; f < DIRECTION_COUNT; f++)
         {
             txtNodeId root = BlockTextures[b][f];
             if (root == NODE_NONE) // block without texture (eg: air)
@@ -216,7 +217,7 @@ bool validate_block_textures(void)
     {
         if (b == BLK_AIR)
             continue;
-        for (int f = 0; f < 6; f++)
+        for (Direction f = 0; f < DIRECTION_COUNT; f++)
         {
             if (BlockTextures[b][f] == NODE_NONE)
             {
