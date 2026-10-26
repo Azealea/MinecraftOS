@@ -1,10 +1,8 @@
 #include "mesh.h"
 
-#include "utils/utils.h"
+#include "voxel/block_state.h"
 #include "voxel/textures/connected_texture.h"
-#include "voxel/textures/resolve/face_texture.h"
 #include "voxel/textures/texture_flags.h"
-#include "voxel/world/world.h"
 
 // offset for uvs passed down to vertex
 typedef struct
@@ -141,8 +139,10 @@ u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
                     chunk->bucket_ptr[count++] = (Face){
                         .pos = VEC3_ADD(VEC3_SCALE(pos, CHUNK_SIZE), local),
                         .face_id = f,
-                        .texture_id = face_texture_to_index(ft, neighbor_mask, b->state,
-                                                            hash3(local)),
+                        .texture_id = face_texture_to_index(
+                            ft, neighbor_mask,
+                            block_state_get(b->state, BLK_STATE_ACTIVATED_BIT),
+                            hash3(local)),
                     };
                 }
             }

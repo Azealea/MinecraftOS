@@ -130,7 +130,7 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
         if (c->bucket_ptr == NULL || c->face_count == 0)
             continue;
         vkCmdDraw(cmd, 6, c->face_count, 0,
-                 bucket_alloc_index_of(&app->mesher.mesh, c->bucket_ptr));
+                  bucket_alloc_index_of(&app->mesher.mesh, c->bucket_ptr));
     }
 
     vkCmdEndRenderPass(cmd);

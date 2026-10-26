@@ -1,5 +1,6 @@
 #include "voxel/block/app_controller.h"
 
+#include "voxel/block_state.h"
 #include "voxel/direction.h"
 #include "voxel/world/chunk.h"
 
@@ -66,7 +67,7 @@ void dfs_for_devices_and_source(VEC3(u8) start, Chunk* c,
     {
         Block* dev = chunk_get(c, found_devices[i]);
         dev->entity_id = root_entid;
-        dev->state = root_entid;
+        block_state_set(&dev->state, BLK_STATE_ACTIVATED_BIT, root_entid == 0 ? 0 : 1);
     }
 }
 

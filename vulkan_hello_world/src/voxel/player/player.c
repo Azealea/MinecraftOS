@@ -1,10 +1,8 @@
 #include "player.h"
 
 #include "app.h"
-#include "input/input.h"
 #include "raycast.h"
-#include "utils/log.h"
-#include "voxel/block.h"
+#include "voxel/block_state.h"
 
 Player player_init(VEC3(i32) pos)
 {
@@ -71,7 +69,10 @@ void player_consume_input(App* app)
             }
             else
             {
-                place_on_hit(app, hit, (Block){.type = p->chosenBlock});
+                Block block = {.type = p->chosenBlock};
+                if (blockBehaviours[p->chosenBlock].rotates)
+                    block_state_set(&block.state, BLK_STATE_ROTATION_BIT, 0);
+                place_on_hit(app, hit, block);
             }
         }
     }
