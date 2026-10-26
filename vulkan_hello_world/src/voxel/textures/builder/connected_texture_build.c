@@ -1,9 +1,7 @@
 #include "connected_texture_build.h"
 
-#include <stdlib.h>
 #include <string.h>
 
-#include "voxel/textures/builder/array_atlas.h"
 #include "voxel/textures/connected_texture.h"
 
 #define QUAD_SIZE (TEXTURE_WIDTH_HEIGHT / 2)
@@ -42,17 +40,16 @@ static void blit_quadrant(texture_t out, texture_t border, int quad, int dst_x, 
             size_t di =
                 ((size_t)(dst_y + y) * TEXTURE_WIDTH_HEIGHT + (size_t)(dst_x + x)) * 4;
 
-            uint8_t a = border[si + 3];
+            u8 a = border[si + 3];
             for (int c = 0; c < 3; c++)
                 out[di + c] =
-                    (uint8_t)(((int)border[si + c] * a + (int)out[di + c] * (255 - a))
-                              / 255);
+                    (u8)(((int)border[si + c] * a + (int)out[di + c] * (255 - a)) / 255);
             out[di + 3] = out[di + 3] > a ? out[di + 3] : a;
         }
 }
 
-static void composite_connected_tile(VECTOR(texture_t)* atlas, texture_t inner,
-                                     texture_t border, uint16_t mask, bool has_diagonal)
+static texture_t bake_connected(texture_t inner, texture_t border, uint16_t mask,
+                                bool has_diagonal)
 {
     texture_t out = malloc((size_t)TEXTURE_WIDTH_HEIGHT * TEXTURE_WIDTH_HEIGHT * 4);
     memcpy(out, inner, (size_t)TEXTURE_WIDTH_HEIGHT * TEXTURE_WIDTH_HEIGHT * 4);
@@ -95,22 +92,22 @@ static void composite_connected_tile(VECTOR(texture_t)* atlas, texture_t inner,
                       corners[i].flip_y, transpose);
     }
 
-    atlas_push_pixels(atlas, out);
+    return out;
 }
 
 void bake_connected4(VECTOR(texture_t)* atlas, texture_t inner_px, texture_t border_px)
 {
-    for (uint16_t mask = 0; mask < CONNECTED4_CASE_COUNT; mask++)
-        composite_connected_tile(atlas, inner_px, border_px, mask, false);
+    for (u16 mask = 0; mask < CONNECTED4_CASE_COUNT; mask++)
+        VECTOR_PUSH_BACK(atlas, bake_connected(inner_px, border_px, mask, false));
 }
 
 void bake_connected8(VECTOR(texture_t)* atlas, texture_t inner_px, texture_t border_px)
 {
-    uint16_t representative[CONNECTED8_CASE_COUNT];
+    u16 representative[CONNECTED8_CASE_COUNT];
     bool seen[CONNECTED8_CASE_COUNT] = {false};
-    for (uint16_t mask = 0; mask < 256; mask++)
+    for (u16 mask = 0; mask < 256; mask++)
     {
-        uint8_t idx = connected8_case_index((uint8_t)mask);
+        u8 idx = connected8_case_index(mask);
         if (!seen[idx])
         {
             seen[idx] = true;
@@ -119,5 +116,6 @@ void bake_connected8(VECTOR(texture_t)* atlas, texture_t inner_px, texture_t bor
     }
 
     for (int idx = 0; idx < CONNECTED8_CASE_COUNT; idx++)
-        composite_connected_tile(atlas, inner_px, border_px, representative[idx], true);
+        VECTOR_PUSH_BACK(atlas,
+                         bake_connected(inner_px, border_px, representative[idx], true));
 }

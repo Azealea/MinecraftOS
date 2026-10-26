@@ -14,6 +14,5 @@ void atlas_clean(VECTOR(texture_t)* atlas);
 
 void atlas_push_from_base_texture(VECTOR(texture_t)* atlas, enum BaseTexture bid,
                                   uint16_t frame_count);
-void atlas_push_pixels(VECTOR(texture_t)* atlas, texture_t rgba); // takes ownership
 
 texture_t load_rgba(const char* path);

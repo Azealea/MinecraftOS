@@ -22,11 +22,6 @@ void atlas_push_from_base_texture(VECTOR(texture_t)* atlas, enum BaseTexture bid
         VECTOR_PUSH_BACK(atlas, load_rgba(TexturePaths[bid + i]));
 }
 
-void atlas_push_pixels(VECTOR(texture_t)* atlas, texture_t rgba)
-{
-    VECTOR_PUSH_BACK(atlas, rgba);
-}
-
 void atlas_clean(VECTOR(texture_t)* atlas)
 {
     VECTOR_FOR_EACH(atlas, texture)
