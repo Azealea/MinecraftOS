@@ -37,6 +37,6 @@ typedef struct textureNode textureNode;
 
 FaceTexture face_texture_build(const textureNode* nodes, txtNodeId root,
                                VECTOR(texture_t)* atlas);
-void build_texture_look_up(FaceTexture destination[][DIRECTION_COUNT],
-                           VECTOR(texture_t)* atlas);
+
+VECTOR(texture_t) build_texture_look_up(FaceTexture destination[][DIRECTION_COUNT]);
 bool validate_block_textures(void);

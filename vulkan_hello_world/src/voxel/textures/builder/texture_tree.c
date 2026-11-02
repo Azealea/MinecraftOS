@@ -206,9 +206,9 @@ FaceTexture face_texture_build(const textureNode* nodes, txtNodeId root,
     return res;
 }
 
-void build_texture_look_up(FaceTexture destination[][DIRECTION_COUNT],
-                           VECTOR(texture_t)* atlas)
+VECTOR(texture_t) build_texture_look_up(FaceTexture destination[][DIRECTION_COUNT])
 {
+    VECTOR(texture_t) atlas = VECTOR_INIT_CAP(texture_t, MAX_TEXTURE);
     FaceTexture cache[NODE_COUNT];
     bool built[NODE_COUNT] = {0};
 
@@ -220,11 +220,13 @@ void build_texture_look_up(FaceTexture destination[][DIRECTION_COUNT],
                 continue;
             if (!built[root])
             {
-                cache[root] = face_texture_build(BlockTextureNodes, root, atlas);
+                cache[root] = face_texture_build(BlockTextureNodes, root, &atlas);
                 built[root] = true;
             }
             destination[b][f] = cache[root];
         }
+
+    return atlas;
 }
 
 bool validate_block_textures(void)

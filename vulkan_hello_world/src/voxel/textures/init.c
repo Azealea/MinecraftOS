@@ -28,8 +28,7 @@ void create_texture_stuff(App* app)
 {
     ASSERT(validate_block_textures(), "block texture table is incomplete");
 
-    VECTOR(texture_t) atlas = VECTOR_INIT_CAP(texture_t, MAX_TEXTURE);
-    build_texture_look_up(app->mesher.Block2TextureMap, &atlas);
+    VECTOR(texture_t) atlas = build_texture_look_up(app->mesher.Block2TextureMap);
     //    debug_print_block_textures(app->mesher.Block2TextureMap);
     create_texture_image_from_atlas(app, &atlas);
     create_texture_sampler(app);
