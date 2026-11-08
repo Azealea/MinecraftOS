@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "app.h"
-#include "vk/buffer/buffer.h"
 #include "vk/gpu_resources.h"
 
 static vec3 worldup = {0.0f, 0.0f, 1.0f};

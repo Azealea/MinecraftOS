@@ -5,7 +5,7 @@ const VEC3(i8) DIRECTIONS[DIRECTION_COUNT] = {
     [Y_MINUS] = {0, -1, 0}, [Z_PLUS] = {0, 0, 1},   [Z_MINUS] = {0, 0, -1},
 };
 
-Direction direction_opposite(Direction d)
+enum Direction direction_opposite(enum Direction d)
 {
     switch (d)
     {
@@ -24,4 +24,20 @@ Direction direction_opposite(Direction d)
     default:
         return d;
     }
+}
+
+enum Direction direction_nearest(VEC3(f32) v)
+{
+    enum Direction res = 0;
+    float best_dot = -1000.0f;
+    for (enum Direction i = 0; i < DIRECTION_COUNT; i++)
+    {
+        float dot = VEC3_DOT(v, DIRECTIONS[i]);
+        if (dot > best_dot)
+        {
+            best_dot = dot;
+            res = i;
+        }
+    }
+    return res;
 }

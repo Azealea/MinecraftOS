@@ -8,7 +8,7 @@ void debug_print_block_textures(const FaceTexture block_faces[][DIRECTION_COUNT]
     for (int blk = 0; blk < BLOCK_COUNT; blk++)
     {
         printf("Block %d:\n", blk);
-        for (Direction face = 0; face < DIRECTION_COUNT; face++)
+        for (enum Direction face = 0; face < DIRECTION_COUNT; face++)
         {
             const FaceTexture* f = &block_faces[blk][face];
             printf("  face %d: base_id=%-4u flags=0x%02x variant_count=%-3u "

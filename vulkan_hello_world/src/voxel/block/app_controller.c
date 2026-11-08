@@ -39,7 +39,7 @@ void dfs_for_devices_and_source(VEC3(u8) start, Chunk* c,
             found_devices[found_devices_size++] = pos;
         }
 
-        for (Direction i = 0; i < DIRECTION_COUNT; i++)
+        for (enum Direction i = 0; i < DIRECTION_COUNT; i++)
         {
             VEC3(u8) npos = VEC3_ADD(pos, DIRECTIONS[i]);
 
@@ -85,7 +85,7 @@ void network_on_break(Block* b, Chunk* c)
     bool visited[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE] = {0};
     visited[pos.x][pos.y][pos.z] = true;
 
-    for (Direction i = 0; i < DIRECTION_COUNT; i++)
+    for (enum Direction i = 0; i < DIRECTION_COUNT; i++)
     {
         VEC3(u8) npos = VEC3_ADD(pos, DIRECTIONS[i]);
         if (!chunk_is_in_bound(npos))

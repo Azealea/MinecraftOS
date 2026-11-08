@@ -82,7 +82,6 @@ int main(int argc, char** argv)
     App app = {
         .applicationName = "hello_world",
         .engineName = "AZEA ENGINE",
-        .windowTitle = "KubeOs",
         .vkApiVersion = VK_API_VERSION_1_4,
         .backgroundColor = {{{0.01f, 0.1f, 0.1f, 0.01f}}},
         .maxFramesInFlight = 3,

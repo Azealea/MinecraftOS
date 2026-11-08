@@ -38,6 +38,15 @@
 
 #define VEC3_EQ(A, B) (A).x == (B).x && (A).y == (B).y && (A).z == (B).z
 
+#define VEC3_DOT(A, B) ((A).x * (B).x + (A).y * (B).y + (A).z * (B).z)
+
+#define VEC3_CROSS(A, B)                                                                 \
+    ((typeof(A)){                                                                        \
+        .x = (A).y * (B).z - (A).z * (B).y,                                              \
+        .y = (A).z * (B).x - (A).x * (B).z,                                              \
+        .z = (A).x * (B).y - (A).y * (B).x,                                              \
+    })
+
 #define VEC3_SUB(A, B)                                                                   \
     ((typeof(A)){                                                                        \
         .x = (A).x - (B).x,                                                              \
@@ -89,4 +98,11 @@
         (F)((V).x),                                                                      \
         (F)((V).y),                                                                      \
         (F)((V).z),                                                                      \
+    })
+
+#define VEC3_FROM_ARR(T, ARR)                                                            \
+    ((VEC3(T)){                                                                          \
+        (T)((ARR))[0],                                                                   \
+        (T)((ARR))[1],                                                                   \
+        (T)((ARR))[2],                                                                   \
     })

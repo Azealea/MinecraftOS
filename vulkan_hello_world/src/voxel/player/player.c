@@ -2,6 +2,7 @@
 
 #include "app.h"
 #include "raycast.h"
+#include "voxel/block_orientation.h"
 #include "voxel/block_state.h"
 
 Player player_init(VEC3(i32) pos)
@@ -20,6 +21,26 @@ static void place_on_hit(App* app, RaycastHit hit, Block block)
     VEC3(i32) blockPlace = VEC3_ADD(hit.block, hit.normal);
     world_set_block(&app->world, blockPlace, block, &app->mesher.dirty);
     TRACE("placing " VEC3_FMT, VEC3_ARGS(blockPlace));
+}
+
+static enum BlockOrientation rotation_from_camera(const Camera* cam)
+{
+    VEC3(f32) away = VEC3_SCALE(VEC3_FROM_ARR(f32, cam->basis.front), -1);
+    enum Direction facing = direction_nearest(away);
+
+    if (facing != Z_PLUS && facing != Z_MINUS)
+    {
+        return (enum BlockOrientation)facing;
+    }
+
+    VEC3(f32) roll = VEC3_FROM_ARR(f32, cam->basis.up);
+    if (facing == Z_MINUS)
+        roll = VEC3_SCALE(roll, -1);
+    enum Direction roll_id = direction_nearest(roll);
+
+    return (enum BlockOrientation)((facing == Z_MINUS ? BLKORIENT_DOWN_X_PLUS
+                                                  : BLKORIENT_UP_X_PLUS)
+                              + roll_id);
 }
 
 static void interact_on_hit(App* app, RaycastHit hit)
@@ -71,7 +92,8 @@ void player_consume_input(App* app)
             {
                 Block block = {.type = p->chosenBlock};
                 if (blockBehaviours[p->chosenBlock].rotates)
-                    block_state_set(&block.state, BLK_STATE_ROTATION_BIT, 0);
+                    block_state_set(&block.state, BLK_STATE_ROTATION_BIT,
+                                    rotation_from_camera(&app->player.cam));
                 place_on_hit(app, hit, block);
             }
         }

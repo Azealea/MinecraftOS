@@ -15,7 +15,6 @@ typedef struct App
 {
     const char* applicationName;
     const char* engineName;
-    const char* windowTitle;
     u32 vkApiVersion;
     VkClearValue backgroundColor;
     u32 maxFramesInFlight;

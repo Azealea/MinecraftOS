@@ -2,7 +2,7 @@
 
 #include "utils/utils.h"
 
-typedef enum Direction : i8
+enum Direction : i8
 {
     X_PLUS,
     X_MINUS,
@@ -11,8 +11,9 @@ typedef enum Direction : i8
     Z_PLUS,
     Z_MINUS,
     DIRECTION_COUNT,
-} Direction;
+};
 
-Direction direction_opposite(Direction d);
+enum Direction direction_opposite(enum Direction d);
+enum Direction direction_nearest(VEC3(f32) v);
 
 extern const VEC3(i8) DIRECTIONS[DIRECTION_COUNT];

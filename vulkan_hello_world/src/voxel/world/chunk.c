@@ -41,7 +41,7 @@ VEC3(u8) chunk_pos_of(const Chunk* chunk, const Block* b)
 
 void chunk_trigger_update_around(Chunk* c, VEC3(u8) pos)
 {
-    for (Direction i = 0; i < DIRECTION_COUNT; i++)
+    for (enum Direction i = 0; i < DIRECTION_COUNT; i++)
     {
         VEC3(u8) npos = VEC3_ADD(pos, DIRECTIONS[i]);
         if (!chunk_is_in_bound(npos))

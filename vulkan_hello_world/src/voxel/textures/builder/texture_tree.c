@@ -213,7 +213,7 @@ VECTOR(texture_t) build_texture_look_up(FaceTexture destination[][DIRECTION_COUN
     bool built[NODE_COUNT] = {0};
 
     for (int b = 0; b < BLOCK_COUNT; b++)
-        for (Direction f = 0; f < DIRECTION_COUNT; f++)
+        for (enum Direction f = 0; f < DIRECTION_COUNT; f++)
         {
             txtNodeId root = BlockTextures[b][f];
             if (root == NODE_NONE) // block without texture (eg: air)
@@ -236,7 +236,7 @@ bool validate_block_textures(void)
     {
         if (b == BLK_AIR)
             continue;
-        for (Direction f = 0; f < DIRECTION_COUNT; f++)
+        for (enum Direction f = 0; f < DIRECTION_COUNT; f++)
         {
             if (BlockTextures[b][f] == NODE_NONE)
             {

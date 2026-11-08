@@ -71,7 +71,7 @@ void generate_chunk_terrain_random(World* w, ChunkPos pos, VECTOR(ChunkPos)* dir
 // update connected texture (and mesh ) // TODO do a function to update texture only ?
 void world_dirty_existing_neighbors(World* w, ChunkPos pos, VECTOR(ChunkPos)* dirty)
 {
-    for (Direction i = 0; i < DIRECTION_COUNT; i++)
+    for (enum Direction i = 0; i < DIRECTION_COUNT; i++)
     {
         ChunkPos npos = VEC3_ADD(pos, DIRECTIONS[i]);
         if (world_get_chunk(w, npos))

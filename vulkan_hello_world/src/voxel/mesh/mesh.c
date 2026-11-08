@@ -1,5 +1,6 @@
 #include "mesh.h"
 
+#include "voxel/block_orientation.h"
 #include "voxel/block_state.h"
 #include "voxel/textures/connected_texture.h"
 #include "voxel/textures/texture_flags.h"
@@ -55,10 +56,10 @@ static u8 connected_mask_pack(bool u0, bool u1, bool v0, bool v1, bool nw, bool 
 }
 
 static u8 connected_neighbor_mask(const Chunk* chunk, ChunkPos pos, World* world,
-                                  VEC3(i32) local, Direction face, BlockType type,
+                                  VEC3(i32) local, enum Direction face, BlockType type,
                                   u8 flags)
 {
-    static const FaceEdgeDirs face_edge_dirs[DIRECTION_COUNT] = {
+    static const FaceEdgeDirs face_edge_dirs[] = {
         [X_PLUS] = {.u0 = {0, -1, 0}, .u1 = {0, 1, 0}, .v0 = {0, 0, 1}, .v1 = {0, 0, -1}},
         [X_MINUS] = {.u0 = {0, 1, 0},
                      .u1 = {0, -1, 0},
@@ -106,6 +107,37 @@ static inline u32 hash3(VEC3(u8) pos)
     return h ^ (h >> 16);
 }
 
+static enum Direction direction_from_vec(VEC3(i8) v)
+{
+    for (enum Direction i = 0; i < DIRECTION_COUNT; i++)
+        if (DIRECTIONS[i].x == v.x && DIRECTIONS[i].y == v.y && DIRECTIONS[i].z == v.z)
+            return i;
+    return X_PLUS;
+}
+
+static int get_rotated_index(enum Direction face, enum BlockOrientation orientation)
+{
+    enum Direction facing = block_orientation_facing(orientation);
+    enum Direction up_ref = block_orientation_up(orientation);
+    enum Direction back = direction_opposite(facing);
+    enum Direction down_ref = direction_opposite(up_ref);
+
+    enum Direction right =
+        direction_from_vec(VEC3_CROSS(DIRECTIONS[facing], DIRECTIONS[up_ref]));
+
+    if (face == facing)
+        return 0;
+    if (face == back)
+        return 1;
+    if (face == up_ref)
+        return 2;
+    if (face == down_ref)
+        return 3;
+    if (face == right)
+        return 4;
+    return 5;
+}
+
 u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
                         const FaceTexture block_faces[][6])
 {
@@ -120,9 +152,9 @@ u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
                 if (b->type == BLK_AIR)
                     continue;
 
-                // bool rotates = blockBehaviours[b->type].rotates;
+                bool rotates = blockBehaviours[b->type].rotates;
 
-                for (Direction f = 0; f < DIRECTION_COUNT; f++)
+                for (enum Direction f = 0; f < DIRECTION_COUNT; f++)
                 {
                     VEC3(u8) neighbor = VEC3_ADD(local, DIRECTIONS[f]);
 
@@ -130,9 +162,10 @@ u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
                         && chunk_get(chunk, neighbor)->type != BLK_AIR)
                         continue;
 
-                    // u16 rotation = block_state_get(b->state, BLK_STATE_ROTATION_BIT);
-                    // int tex_face = rotates ? get_rotated_index(f, rotation) : f;
-                    const FaceTexture* ft = &block_faces[b->type][f];
+                    enum BlockOrientation orientation =
+                        block_state_get(b->state, BLK_STATE_ROTATION_BIT);
+                    int tex_face = rotates ? get_rotated_index(f, orientation) : f;
+                    const FaceTexture* ft = &block_faces[b->type][tex_face];
                     u8 neighbor_mask = connected_neighbor_mask(
                         chunk, pos, world, VEC3_CAST(i32, local), f, b->type, ft->flags);
 
