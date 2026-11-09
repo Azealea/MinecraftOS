@@ -1,6 +1,6 @@
 #include "voxel/block/app_controller.h"
 
-#include "voxel/block_state.h"
+#include "voxel/block/block_state.h"
 #include "voxel/direction.h"
 #include "voxel/world/chunk.h"
 

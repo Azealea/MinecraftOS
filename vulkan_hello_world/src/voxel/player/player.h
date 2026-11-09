@@ -1,7 +1,7 @@
 #pragma once
 
 #include "camera.h"
-#include "voxel/block.h"
+#include "voxel/block/block.h"
 
 typedef struct
 {

@@ -2,8 +2,8 @@
 
 #include "app.h"
 #include "raycast.h"
-#include "voxel/block_orientation.h"
-#include "voxel/block_state.h"
+#include "voxel/block/block_orientation.h"
+#include "voxel/block/block_state.h"
 
 Player player_init(VEC3(i32) pos)
 {

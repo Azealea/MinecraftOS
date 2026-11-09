@@ -1,7 +1,7 @@
 #include "texture_tree.h"
 
 #include "connected_texture_build.h"
-#include "voxel/block.h"
+#include "voxel/block/block.h"
 
 // VVVV description of the "dynamic" textures
 

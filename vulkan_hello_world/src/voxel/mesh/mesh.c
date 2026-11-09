@@ -1,7 +1,7 @@
 #include "mesh.h"
 
-#include "voxel/block_orientation.h"
-#include "voxel/block_state.h"
+#include "voxel/block/block_orientation.h"
+#include "voxel/block/block_state.h"
 #include "voxel/textures/connected_texture.h"
 #include "voxel/textures/texture_flags.h"
 

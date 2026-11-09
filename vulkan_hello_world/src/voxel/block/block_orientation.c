@@ -1,4 +1,4 @@
-#include "voxel/block_orientation.h"
+#include "voxel/block/block_orientation.h"
 
 enum Direction block_orientation_facing(enum BlockOrientation o)
 {
