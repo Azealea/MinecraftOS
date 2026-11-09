@@ -82,9 +82,8 @@ void create_descriptor_sets(App* app)
         .pSetLayouts = layouts,
     };
 
-    app->renderer.descriptors.sets = calloc(
-        app->maxFramesInFlight,
-        sizeof(*app->renderer.descriptors.sets)); // TODO FREE THAT AT THE END OF PROGRAM
+    app->renderer.descriptors.sets =
+        calloc(app->maxFramesInFlight, sizeof(*app->renderer.descriptors.sets));
 
     ASSERTVK(vkAllocateDescriptorSets(app->renderer.context.device, &allocInfo,
                                       app->renderer.descriptors.sets),
@@ -137,4 +136,5 @@ void destroy_descriptor_pool(App* app)
 {
     vkDestroyDescriptorPool(app->renderer.context.device, app->renderer.descriptors.pool,
                             app->renderer.allocator);
+    free(app->renderer.descriptors.sets);
 }
