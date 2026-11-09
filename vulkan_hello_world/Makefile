@@ -12,7 +12,7 @@ SRC += $(SHADERS_C)
 OBJ := $(SRC:.c=.o)
 DEP := $(OBJ:.o=.d)
 
-PKG = glfw3 vulkan cglm
+PKG = glfw3 vulkan
 PKG_CFLAGS = $(shell pkg-config --cflags $(PKG))
 PKG_LDFLAGS = $(shell pkg-config --libs $(PKG))
 

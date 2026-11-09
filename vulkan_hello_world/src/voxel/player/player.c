@@ -25,7 +25,7 @@ static void place_on_hit(App* app, RaycastHit hit, Block block)
 
 static enum BlockOrientation rotation_from_camera(const Camera* cam)
 {
-    VEC3(f32) away = VEC3_SCALE(VEC3_FROM_ARR(f32, cam->basis.front), -1);
+    VEC3(f32) away = VEC3_SCALE(cam->basis.front, -1);
     enum Direction facing = direction_nearest(away);
 
     if (facing != Z_PLUS && facing != Z_MINUS)
@@ -33,7 +33,7 @@ static enum BlockOrientation rotation_from_camera(const Camera* cam)
         return (enum BlockOrientation)facing;
     }
 
-    VEC3(f32) roll = VEC3_FROM_ARR(f32, cam->basis.up);
+    VEC3(f32) roll = cam->basis.up;
     if (facing == Z_MINUS)
         roll = VEC3_SCALE(roll, -1);
     enum Direction roll_id = direction_nearest(roll);

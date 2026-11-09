@@ -1,8 +1,7 @@
 #pragma once
 
-#include <cglm/mat4.h>
-
 #include "app.h"
+#include "utils/mat.h"
 
 struct UniformBufferObject
 {

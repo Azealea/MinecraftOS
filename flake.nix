@@ -37,9 +37,6 @@
         pkgs.gcc
         pkgs.ccache
         pkgs.pkg-config
-
-        # math helper
-        pkgs.cglm
       ];
 
       shellHook = ''

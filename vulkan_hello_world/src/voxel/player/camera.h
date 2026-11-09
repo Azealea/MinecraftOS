@@ -1,20 +1,19 @@
 #pragma once
 
-#include <cglm/mat4.h>
-
 #include "input/input.h"
+#include "utils/mat.h"
 #include "utils/utils.h"
 
 typedef struct CameraBasis
 {
-    vec3 front;
-    vec3 right;
-    vec3 up;
+    VEC3(f32) front;
+    VEC3(f32) right;
+    VEC3(f32) up;
 } CameraBasis;
 
 typedef struct Camera
 {
-    vec3 pos;
+    VEC3(f32) pos;
 
     float yaw;
     float pitch;

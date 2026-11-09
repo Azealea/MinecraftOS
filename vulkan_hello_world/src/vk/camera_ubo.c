@@ -1,13 +1,11 @@
 #include "camera_ubo.h"
 
-#include <cglm/affine.h>
-#include <cglm/cam.h>
 #include <string.h>
 
 #include "app.h"
 #include "vk/gpu_resources.h"
 
-static vec3 worldup = {0.0f, 0.0f, 1.0f};
+static VEC3(f32) worldup = {0.0f, 0.0f, 1.0f};
 
 void create_uniform_buffers(App* app)
 {
@@ -42,16 +40,15 @@ void update_uniform_buffer(App* app, uint32_t currentImage)
 {
     struct UniformBufferObject ubo = {0};
 
-    glm_mat4_identity(ubo.model);
+    mat4_identity(ubo.model);
 
     Camera* cam = &app->player.cam;
 
-    vec3 look_pos;
-    glm_vec3_add(cam->pos, cam->basis.front, look_pos);
+    VEC3(f32) look_pos = VEC3_ADD(cam->pos, cam->basis.front);
 
-    glm_lookat(cam->pos, look_pos, worldup, ubo.view);
+    mat4_lookat(cam->pos, look_pos, worldup, ubo.view);
 
-    glm_perspective(glm_rad(45.0f),
+    mat4_perspective(deg_to_rad(45.0f),
                     (float)app->renderer.swapchain.extent.width
                         / (float)app->renderer.swapchain.extent.height,
                     0.1f, 100.0f, ubo.proj);

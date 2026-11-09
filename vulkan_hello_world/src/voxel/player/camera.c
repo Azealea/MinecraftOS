@@ -1,6 +1,6 @@
 #include "camera.h"
 
-static vec3 worldup = {0.0f, 0.0f, 1.0f};
+static VEC3(f32) worldup = {0.0f, 0.0f, 1.0f};
 
 void update_camera_pos(Camera* camera, const Input* input)
 {
@@ -14,38 +14,18 @@ void update_camera_pos(Camera* camera, const Input* input)
     if (camera->fast)
         movescale *= 10.0f;
 
-    vec3 delta = {0};
-
     if (input_key_held(input, KEY_W))
-    {
-        glm_vec3_scale(camera->basis.front, movescale, delta);
-        glm_vec3_add(camera->pos, delta, camera->pos);
-    }
+        camera->pos = VEC3_ADD(camera->pos, VEC3_SCALE(camera->basis.front, movescale));
     if (input_key_held(input, KEY_S))
-    {
-        glm_vec3_scale(camera->basis.front, -movescale, delta);
-        glm_vec3_add(camera->pos, delta, camera->pos);
-    }
+        camera->pos = VEC3_ADD(camera->pos, VEC3_SCALE(camera->basis.front, -movescale));
     if (input_key_held(input, KEY_A))
-    {
-        glm_vec3_scale(camera->basis.right, -movescale, delta);
-        glm_vec3_add(camera->pos, delta, camera->pos);
-    }
+        camera->pos = VEC3_ADD(camera->pos, VEC3_SCALE(camera->basis.right, -movescale));
     if (input_key_held(input, KEY_D))
-    {
-        glm_vec3_scale(camera->basis.right, movescale, delta);
-        glm_vec3_add(camera->pos, delta, camera->pos);
-    }
+        camera->pos = VEC3_ADD(camera->pos, VEC3_SCALE(camera->basis.right, movescale));
     if (input_key_held(input, KEY_SPACE))
-    {
-        glm_vec3_scale(worldup, movescale, delta);
-        glm_vec3_add(camera->pos, delta, camera->pos);
-    }
+        camera->pos = VEC3_ADD(camera->pos, VEC3_SCALE(worldup, movescale));
     if (input_key_held(input, KEY_LEFT_SHIFT))
-    {
-        glm_vec3_scale(worldup, -movescale, delta);
-        glm_vec3_add(camera->pos, delta, camera->pos);
-    }
+        camera->pos = VEC3_ADD(camera->pos, VEC3_SCALE(worldup, -movescale));
 
     if (camera->firstMouse)
     {
@@ -57,18 +37,16 @@ void update_camera_pos(Camera* camera, const Input* input)
     camera->yaw -= (float)input->mouse_dx * sensitivity;
     camera->pitch -= (float)input->mouse_dy * sensitivity;
 
-    if (camera->pitch > glm_rad(89.9f))
-        camera->pitch = glm_rad(89.9f);
-    if (camera->pitch < -glm_rad(89.9f))
-        camera->pitch = -glm_rad(89.9f);
+    if (camera->pitch > deg_to_rad(89.9f))
+        camera->pitch = deg_to_rad(89.9f);
+    if (camera->pitch < -deg_to_rad(89.9f))
+        camera->pitch = -deg_to_rad(89.9f);
 
-    vec3 front = {cosf(camera->yaw) * cosf(camera->pitch),
-                  sinf(camera->yaw) * cosf(camera->pitch), sinf(camera->pitch)};
-    glm_normalize(front);
-    glm_vec3_copy(front, camera->basis.front);
-    glm_vec3_cross(camera->basis.front, worldup, camera->basis.right);
-    glm_normalize(camera->basis.right);
-    glm_vec3_cross(camera->basis.right, camera->basis.front, camera->basis.up);
+    VEC3(f32) front = {cosf(camera->yaw) * cosf(camera->pitch),
+                       sinf(camera->yaw) * cosf(camera->pitch), sinf(camera->pitch)};
+    camera->basis.front = vec3_normalize(front);
+    camera->basis.right = vec3_normalize(VEC3_CROSS(camera->basis.front, worldup));
+    camera->basis.up = VEC3_CROSS(camera->basis.right, camera->basis.front);
 }
 
 Camera camera_init(VEC3(i32) pos)
@@ -78,20 +56,17 @@ Camera camera_init(VEC3(i32) pos)
         .pos = {pos.x, pos.y, pos.z},
     };
 
-    camera.yaw = glm_rad(90.0f);
+    camera.yaw = deg_to_rad(90.0f);
     camera.pitch = 0.0f;
 
     camera.firstMouse = true;
 
-    vec3 front = {cosf(camera.yaw) * cosf(camera.pitch),
-                  sinf(camera.yaw) * cosf(camera.pitch), sinf(camera.pitch)};
-    glm_normalize(front);
-    glm_vec3_copy(front, camera.basis.front);
+    VEC3(f32) front = {cosf(camera.yaw) * cosf(camera.pitch),
+                       sinf(camera.yaw) * cosf(camera.pitch), sinf(camera.pitch)};
+    camera.basis.front = vec3_normalize(front);
 
-    glm_vec3_cross(camera.basis.front, worldup, camera.basis.right);
-    glm_normalize(camera.basis.right);
-
-    glm_vec3_cross(camera.basis.right, camera.basis.front, camera.basis.up);
+    camera.basis.right = vec3_normalize(VEC3_CROSS(camera.basis.front, worldup));
+    camera.basis.up = VEC3_CROSS(camera.basis.right, camera.basis.front);
 
     return camera;
 }

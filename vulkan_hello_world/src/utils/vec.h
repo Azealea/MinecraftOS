@@ -99,10 +99,3 @@
         (F)((V).y),                                                                      \
         (F)((V).z),                                                                      \
     })
-
-#define VEC3_FROM_ARR(T, ARR)                                                            \
-    ((VEC3(T)){                                                                          \
-        (T)((ARR))[0],                                                                   \
-        (T)((ARR))[1],                                                                   \
-        (T)((ARR))[2],                                                                   \
-    })

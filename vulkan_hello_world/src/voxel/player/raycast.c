@@ -2,18 +2,8 @@
 
 RaycastHit raycast(const Camera* cam, World* world, float max_dist)
 {
-    VEC3(f32)
-    o = {
-        cam->pos[0],
-        cam->pos[1],
-        cam->pos[2],
-    };
-    VEC3(f32)
-    d = {
-        cam->basis.front[0],
-        cam->basis.front[1],
-        cam->basis.front[2],
-    };
+    VEC3(f32) o = cam->pos;
+    VEC3(f32) d = cam->basis.front;
 
     VEC3(i32) b = {floorf(o.x), floorf(o.y), floorf(o.z)};
     VEC3(i32) s = {d.x > 0 ? 1 : -1, d.y > 0 ? 1 : -1, d.z > 0 ? 1 : -1};
