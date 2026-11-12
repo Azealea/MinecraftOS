@@ -1,4 +1,4 @@
-// auto-generated from ../../../../assets/block_textures the 2026-10-26
+// auto-generated from ../../../../assets/block_textures the 2026-11-09
 #pragma once
 
 enum BaseTexture
@@ -10,11 +10,13 @@ enum BaseTexture
     TEX_BORDER_ACTIVE,
     TEX_BORDER_INACTIVE,
     TEX_DARKSTONE,
+    TEX_DIRT2,
     TEX_DIRT,
     TEX_FOLIAGE,
     TEX_FOLIAGESEETHROUGH,
     TEX_GRASS1,
     TEX_GRASS2,
+    TEX_GRASS_SIDE2,
     TEX_GRASS_SIDE,
     TEX_GRAVEL,
     TEX_LAMP_OFF,
@@ -33,6 +35,6 @@ enum BaseTexture
     TEX_TEST_UP,
 };
 
-#define TEXTURE_COUNT 28
+#define TEXTURE_COUNT 30
 
 extern const char* TexturePaths[TEXTURE_COUNT];

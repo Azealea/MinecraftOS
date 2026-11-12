@@ -33,7 +33,11 @@
 
 #define NODE_LIST(X)                                                                     \
     X(NODE_DIRT, LEAF(TEX_DIRT))                                                         \
+    X(NODE_DIRT2, LEAF(TEX_DIRT2))                                                       \
+    X(NODE_DIRT_VARIANT, VARIANT(NODE_DIRT, NODE_DIRT2))                                 \
     X(NODE_GRASS_SIDE, LEAF(TEX_GRASS_SIDE))                                             \
+    X(NODE_GRASS_SIDE2, LEAF(TEX_GRASS_SIDE2))                                           \
+    X(NODE_GRASS_SIDE_VARIANT, VARIANT(NODE_GRASS_SIDE, NODE_GRASS_SIDE2))               \
     X(NODE_GRASS_TOP1, LEAF(TEX_GRASS1))                                                 \
     X(NODE_GRASS_TOP2, LEAF(TEX_GRASS2))                                                 \
     X(NODE_GRASS_TOP, VARIANT(NODE_GRASS_TOP1, NODE_GRASS_TOP2))                         \
@@ -95,8 +99,8 @@ const struct textureNode BlockTextureNodes[NODE_COUNT] = {
 
 const txtNodeId BlockTextures[BLOCK_COUNT][DIRECTION_COUNT] = {
     [BLK_AIR] = UNIFO(NODE_NONE),
-    [BLK_DIRT] = UNIFO(NODE_DIRT),
-    [BLK_GRASS] = DONUT(NODE_GRASS_SIDE, NODE_GRASS_TOP, NODE_DIRT),
+    [BLK_DIRT] = UNIFO(NODE_DIRT_VARIANT),
+    [BLK_GRASS] = DONUT(NODE_GRASS_SIDE_VARIANT, NODE_GRASS_TOP, NODE_DIRT_VARIANT),
     [BLK_STONE] = UNIFO(NODE_STONE),
     [BLK_DARKSTONE] = UNIFO(NODE_DARKSTONE),
     [BLK_SAND] = UNIFO(NODE_SAND),
