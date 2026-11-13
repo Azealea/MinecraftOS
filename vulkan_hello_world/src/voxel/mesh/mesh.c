@@ -156,10 +156,10 @@ u32 generate_chunk_mesh(const Chunk* chunk, ChunkPos pos, World* world,
 
                 for (enum Direction f = 0; f < DIRECTION_COUNT; f++)
                 {
-                    VEC3(u8) neighbor = VEC3_ADD(local, DIRECTIONS[f]);
+                    VEC3(i32) neighbor = VEC3_ADD(VEC3_CAST(i32, local), DIRECTIONS[f]);
+                    const Block* nb = block_at(chunk, pos, world, neighbor);
 
-                    if (chunk_is_in_bound(neighbor)
-                        && chunk_get(chunk, neighbor)->type != BLK_AIR)
+                    if (nb && nb->type != BLK_AIR)
                         continue;
 
                     enum BlockOrientation orientation =

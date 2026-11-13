@@ -41,9 +41,26 @@ Block* world_get_block(World* w, VEC3(i32) global_pos)
 void world_set_block(World* w, VEC3(i32) global_pos, Block block, VECTOR(ChunkPos)* dirty)
 {
     ChunkPos cpos = pos_glob_to_chunk(global_pos);
+    VEC3(u8) local = pos_glob_to_rel(global_pos);
+
     Chunk* c = world_get_or_add_chunk(w, cpos);
-    chunk_set(c, pos_glob_to_rel(global_pos), block);
+    chunk_set(c, local, block);
     world_mark_chunk_dirty(w, cpos, dirty);
+
+    if (local.x == 0)
+        world_mark_chunk_dirty(w, VEC3_ADD(cpos, DIRECTIONS[X_MINUS]), dirty);
+    else if (local.x == CHUNK_SIZE - 1)
+        world_mark_chunk_dirty(w, VEC3_ADD(cpos, DIRECTIONS[X_PLUS]), dirty);
+
+    if (local.y == 0)
+        world_mark_chunk_dirty(w, VEC3_ADD(cpos, DIRECTIONS[Y_MINUS]), dirty);
+    else if (local.y == CHUNK_SIZE - 1)
+        world_mark_chunk_dirty(w, VEC3_ADD(cpos, DIRECTIONS[Y_PLUS]), dirty);
+
+    if (local.z == 0)
+        world_mark_chunk_dirty(w, VEC3_ADD(cpos, DIRECTIONS[Z_MINUS]), dirty);
+    else if (local.z == CHUNK_SIZE - 1)
+        world_mark_chunk_dirty(w, VEC3_ADD(cpos, DIRECTIONS[Z_PLUS]), dirty);
 }
 
 void world_interact_block(World* w, VEC3(i32) global_pos, VECTOR(ChunkPos)* dirty)
