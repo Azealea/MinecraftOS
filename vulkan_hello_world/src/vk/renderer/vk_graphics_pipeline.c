@@ -1,78 +1,8 @@
 #include "vk/renderer/vk_graphics_pipeline.h"
 
-#include <stdlib.h>
-
 #include "vk/buffer/vertex.h"
 #include "vk/renderer/vk_shaders.h"
 #include "vk/vk_depth.h"
-
-void create_renderpass(App* app)
-{
-    VkAttachmentDescription colorAttachment = {
-        .format = app->renderer.swapchain.format,
-        .samples = VK_SAMPLE_COUNT_1_BIT,
-        .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-        .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-    };
-
-    VkAttachmentDescription depthAttachment = {
-        .format = findDepthFormat(app),
-        .samples = VK_SAMPLE_COUNT_1_BIT,
-        .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-        .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-        .stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-        .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-    };
-
-    VkAttachmentReference colorAttachmentRef = {
-        .attachment = 0,
-        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-    };
-
-    VkAttachmentReference depthAttachmentRef = {
-        .attachment = 1, .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL};
-
-    VkSubpassDescription subpass = {
-        .pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-        .colorAttachmentCount = 1,
-        .pColorAttachments = &colorAttachmentRef,
-        .pDepthStencilAttachment = &depthAttachmentRef,
-    };
-
-    VkSubpassDependency dependency = {
-        .srcSubpass = VK_SUBPASS_EXTERNAL,
-        .dstSubpass = 0,
-        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-            | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-        .srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-            | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
-            | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-    };
-
-    VkAttachmentDescription attachments[] = {colorAttachment, depthAttachment};
-    VkRenderPassCreateInfo renderPassInfo = {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-        .attachmentCount = COUNTOF(attachments),
-        .pAttachments = attachments,
-        .subpassCount = 1,
-        .pSubpasses = &subpass,
-        .dependencyCount = 1,
-        .pDependencies = &dependency,
-    };
-
-    ASSERTVK(vkCreateRenderPass(app->renderer.context.device, &renderPassInfo,
-                                app->renderer.allocator,
-                                &app->renderer.pipeline.renderpass),
-             "failed to create render pass!");
-}
 
 void create_graphics_pipeline(App* app)
 {
@@ -172,7 +102,14 @@ void create_graphics_pipeline(App* app)
                     .pAttachments = colorBlendAttachmentStates,
                 },
             .layout = app->renderer.pipeline.layout,
-            .renderPass = app->renderer.pipeline.renderpass,
+            .renderPass = VK_NULL_HANDLE,
+            .pNext =
+                &(VkPipelineRenderingCreateInfo){
+                    .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
+                    .colorAttachmentCount = 1,
+                    .pColorAttachmentFormats = &app->renderer.swapchain.format,
+                    .depthAttachmentFormat = findDepthFormat(app),
+                },
         },
         app->renderer.allocator, &app->renderer.pipeline.graphics);
     ASSERTVK(res, "Couldn't create graphics pipeline");
@@ -184,60 +121,10 @@ void create_graphics_pipeline(App* app)
     }
 }
 
-void create_framebuffers(App* app)
-{
-    uint32_t framebufferCount = app->renderer.swapchain.imageCount;
-    app->renderer.pipeline.framebuffers =
-        malloc(framebufferCount * sizeof(VkFramebuffer));
-    ASSERT(app->renderer.pipeline.framebuffers != nullptr,
-           "Couldn't allocate memory for framebuffers array");
-
-    for (uint32_t i = 0; i < framebufferCount; ++i)
-    {
-        VkImageView attachments[] = {app->renderer.swapchain.imageViews[i],
-                                     app->renderer.depth.view};
-
-        VkFramebufferCreateInfo framebufferInfo = {
-            .sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-            .renderPass = app->renderer.pipeline.renderpass,
-            .attachmentCount = COUNTOF(attachments),
-            .pAttachments = attachments,
-            .width = app->renderer.swapchain.extent.width,
-            .height = app->renderer.swapchain.extent.height,
-            .layers = 1,
-        };
-        ASSERTVK(vkCreateFramebuffer(app->renderer.context.device, &framebufferInfo,
-                                     app->renderer.allocator,
-                                     &app->renderer.pipeline.framebuffers[i]),
-                 "Couldn't create framebuffer %i", i);
-    }
-}
-
-void destroy_framebuffers(App* app)
-{
-    uint32_t framebuffer_count = app->renderer.swapchain.imageCount;
-
-    for (uint32_t framebuffer_index = 0; framebuffer_index < framebuffer_count;
-         ++framebuffer_index)
-    {
-        vkDestroyFramebuffer(app->renderer.context.device,
-                             app->renderer.pipeline.framebuffers[framebuffer_index],
-                             app->renderer.allocator);
-    }
-
-    free(app->renderer.pipeline.framebuffers);
-}
-
 void destroy_graphics_pipeline(App* app)
 {
     vkDestroyPipelineLayout(app->renderer.context.device, app->renderer.pipeline.layout,
                             app->renderer.allocator);
     vkDestroyPipeline(app->renderer.context.device, app->renderer.pipeline.graphics,
                       app->renderer.allocator);
-}
-
-void destroy_renderpass(App* app)
-{
-    vkDestroyRenderPass(app->renderer.context.device, app->renderer.pipeline.renderpass,
-                        app->renderer.allocator);
 }

@@ -16,12 +16,10 @@ void init_vk(App* app)
 {
     create_vk_context(app);
     create_swapchain(app);
-    create_renderpass(app);
     create_descriptor_set_layout(app);
     create_graphics_pipeline(app);
     create_command_pool(app);
     create_depth_resources(app);
-    create_framebuffers(app);
     create_texture_stuff(app);
 
     create_vertex_buffer(app);
@@ -37,10 +35,8 @@ void clean_vk(App* app)
     vkDeviceWaitIdle(app->renderer.context.device);
     destroy_command_buffer(app);
     destroy_depth_resources(app);
-    destroy_framebuffers(app);
     destroy_swapchain(app);
     destroy_graphics_pipeline(app);
-    destroy_renderpass(app);
     destroy_uniform_buffers(app);
     destroy_descriptor_pool(app);
     destroy_texture_stuff(app);

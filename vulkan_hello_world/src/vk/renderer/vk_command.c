@@ -94,25 +94,72 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
     ASSERTVK(vkBeginCommandBuffer(cmd, &beginInfo),
              "Failed to begin recording command buffer");
 
-    VkClearValue clearValues[2];
-    clearValues[0] = app->backgroundColor;
-    clearValues[1].depthStencil = (VkClearDepthStencilValue){1.0f, 0};
+    VkImage swapImage = app->renderer.swapchain.images[imageIndex];
 
-    VkRenderPassBeginInfo renderPassInfo = {
-        .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        .pNext = NULL,
-        .renderPass = app->renderer.pipeline.renderpass,
-        .framebuffer = app->renderer.pipeline.framebuffers[imageIndex],
-        .renderArea =
-            {
-                .offset = {0, 0},
-                .extent = app->renderer.swapchain.extent,
-            },
-        .clearValueCount = COUNTOF(clearValues),
-        .pClearValues = clearValues,
-    };
+    vkCmdPipelineBarrier2(
+        cmd,
+        &(VkDependencyInfo){
+            .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+            .imageMemoryBarrierCount = 2,
+            .pImageMemoryBarriers =
+                (VkImageMemoryBarrier2[]){
+                    // color
+                    {
+                        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                        .srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .srcAccessMask = VK_ACCESS_2_NONE,
+                        .dstStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+                        .dstAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+                        .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                        .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        .image = swapImage,
+                        .subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1},
+                    },
+                    // depth
+                    {
+                        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                        .srcStageMask = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT
+                            | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
+                        .srcAccessMask = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                        .dstStageMask = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT
+                            | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
+                        .dstAccessMask = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_READ_BIT
+                            | VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                        .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+                        .newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                        .image = app->renderer.depth.img,
+                        .subresourceRange = {VK_IMAGE_ASPECT_DEPTH_BIT, 0, 1, 0, 1},
+                    },
+                },
+        });
 
-    vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRendering(
+        cmd,
+        &(VkRenderingInfo){
+            .sType = VK_STRUCTURE_TYPE_RENDERING_INFO,
+            .renderArea = {{0, 0}, app->renderer.swapchain.extent},
+            .layerCount = 1,
+            .colorAttachmentCount = 1,
+            .pColorAttachments =
+                &(VkRenderingAttachmentInfo){
+                    .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+                    .imageView = app->renderer.swapchain.imageViews[imageIndex],
+                    .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                    .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+                    .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+                    .clearValue = app->backgroundColor,
+                },
+            .pDepthAttachment =
+                &(VkRenderingAttachmentInfo){
+                    .sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+                    .imageView = app->renderer.depth.view,
+                    .imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                    .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+                    .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+                    .clearValue.depthStencil = {1.0f, 0},
+                },
+        });
+
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
                       app->renderer.pipeline.graphics);
 
@@ -133,7 +180,27 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
                   bucket_alloc_index_of(&app->mesher.mesh, c->bucket_ptr));
     }
 
-    vkCmdEndRenderPass(cmd);
+    vkCmdEndRendering(cmd);
+
+    vkCmdPipelineBarrier2(
+        cmd,
+        &(VkDependencyInfo){
+            .sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO,
+            .imageMemoryBarrierCount = 1,
+            .pImageMemoryBarriers =
+                &(VkImageMemoryBarrier2){
+                    .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2,
+                    .srcStageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+                    .srcAccessMask = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+                    .dstStageMask = VK_PIPELINE_STAGE_2_NONE,
+                    .dstAccessMask = VK_ACCESS_2_NONE,
+                    .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                    .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                    .image = swapImage,
+                    .subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1},
+                },
+        });
+
     ASSERTVK(vkEndCommandBuffer(cmd), "Failed to record command buffer for image %u",
              imageIndex);
 }

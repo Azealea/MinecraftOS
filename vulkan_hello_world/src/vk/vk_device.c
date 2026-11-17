@@ -18,6 +18,24 @@ void select_physical_device(App* app)
     vkGetPhysicalDeviceFeatures(app->renderer.context.physicalDevice, &supportedFeatures);
 
     ASSERT(supportedFeatures.samplerAnisotropy, "no anisotropy support!");
+    ASSERT(supportedFeatures.geometryShader, "no geometry shader support!");
+
+    VkPhysicalDeviceProperties props;
+    vkGetPhysicalDeviceProperties(app->renderer.context.physicalDevice, &props);
+    ASSERT(props.apiVersion >= VK_API_VERSION_1_3, "device doesn't support vulkan 1.3");
+
+    VkPhysicalDeviceVulkan13Features features13 = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+    };
+    vkGetPhysicalDeviceFeatures2(
+        app->renderer.context.physicalDevice,
+        &(VkPhysicalDeviceFeatures2){
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+            .pNext = &features13,
+        });
+
+    ASSERT(features13.dynamicRendering, "no dynamic rendering support!");
+    ASSERT(features13.synchronization2, "no synchronization2 support!");
 }
 
 void select_queue_family(App* app)
@@ -56,26 +74,35 @@ void select_queue_family(App* app)
 void create_device(App* app)
 {
     ASSERTVK(
-        vkCreateDevice(app->renderer.context.physicalDevice,
-                       &(VkDeviceCreateInfo){
-                           .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-                           .pQueueCreateInfos =
-                               &(VkDeviceQueueCreateInfo){
-                                   .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-                                   .queueFamilyIndex = app->renderer.context.queueFamily,
-                                   .queueCount = 1,
-                                   .pQueuePriorities = &(float){1.0},
-                               },
-                           .queueCreateInfoCount = 1,
-                           .enabledExtensionCount = 1,
-                           .ppEnabledExtensionNames =
-                               &(const char*){VK_KHR_SWAPCHAIN_EXTENSION_NAME},
-                           .pEnabledFeatures =
-                               &(VkPhysicalDeviceFeatures){
-                                   .samplerAnisotropy = VK_TRUE,
-                               },
-                       },
-                       app->renderer.allocator, &app->renderer.context.device),
+        vkCreateDevice(
+            app->renderer.context.physicalDevice,
+            &(VkDeviceCreateInfo){
+                .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+                .pQueueCreateInfos =
+                    &(VkDeviceQueueCreateInfo){
+                        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+                        .queueFamilyIndex = app->renderer.context.queueFamily,
+                        .queueCount = 1,
+                        .pQueuePriorities = &(float){1.0},
+                    },
+                .queueCreateInfoCount = 1,
+                .enabledExtensionCount = 1,
+                .ppEnabledExtensionNames =
+                    &(const char*){VK_KHR_SWAPCHAIN_EXTENSION_NAME},
+                .pEnabledFeatures =
+                    &(VkPhysicalDeviceFeatures){
+                        .samplerAnisotropy = VK_TRUE,
+                        .geometryShader = VK_TRUE,
+                    },
+                .pNext =
+                    &(VkPhysicalDeviceVulkan13Features){
+                        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+                        .dynamicRendering = VK_TRUE,
+                        .synchronization2 = VK_TRUE,
+                    },
+
+            },
+            app->renderer.allocator, &app->renderer.context.device),
         "Couldn't create device and queues");
 }
 
