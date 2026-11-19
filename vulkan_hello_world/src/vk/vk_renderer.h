@@ -58,8 +58,6 @@ typedef struct Renderer
     struct
     {
         GpuBuffer vertex;
-        GpuBuffer* uniforms; // [maxFramesInFlight]
-        void** uniformsMapped; // [maxFramesInFlight]
     } buffers;
 
     struct

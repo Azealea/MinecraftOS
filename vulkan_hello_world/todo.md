@@ -32,3 +32,6 @@
     - [X] raytrace in voxel space
     - [ ] provide a way to select block : a BSM block selection menu
         - [X] simple 0 through 9 block selection
+
+# CLEAN UP
+- [ ] without ubos, need only one descriptor set instead of one per frame

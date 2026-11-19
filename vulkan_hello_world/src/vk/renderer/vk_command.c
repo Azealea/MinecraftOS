@@ -31,19 +31,36 @@ VkCommandBuffer begin_single_time_commands(App* app)
 
 void end_single_time_commands(App* app, VkCommandBuffer commandBuffer)
 {
-    vkEndCommandBuffer(commandBuffer);
+    VkDevice device = app->renderer.context.device;
 
-    VkSubmitInfo submitInfo = {
-        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        .commandBufferCount = 1,
-        .pCommandBuffers = &commandBuffer,
+    ASSERTVK(vkEndCommandBuffer(commandBuffer),
+             "Failed to end single-time command buffer");
+
+    VkFence fence;
+    ASSERTVK(vkCreateFence(device,
+                           &(VkFenceCreateInfo){
+                               .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+                           },
+                           app->renderer.allocator, &fence),
+             "Failed to create single-time fence");
+
+    VkSubmitInfo2 submitInfo = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
+        .commandBufferInfoCount = 1,
+        .pCommandBufferInfos =
+            &(VkCommandBufferSubmitInfo){
+                .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
+                .commandBuffer = commandBuffer,
+            },
     };
 
-    vkQueueSubmit(app->renderer.context.queue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(app->renderer.context.queue);
+    ASSERTVK(vkQueueSubmit2(app->renderer.context.queue, 1, &submitInfo, fence),
+             "Failed to submit single-time command buffer");
+    ASSERTVK(vkWaitForFences(device, 1, &fence, VK_TRUE, UINT64_MAX),
+             "Failed to wait for single-time fence");
 
-    vkFreeCommandBuffers(app->renderer.context.device, app->renderer.sync.pool, 1,
-                         &commandBuffer);
+    vkDestroyFence(device, fence, app->renderer.allocator);
+    vkFreeCommandBuffers(device, app->renderer.sync.pool, 1, &commandBuffer);
 }
 
 void create_command_pool(App* app)
@@ -216,23 +233,31 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
 
 void submit_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
 {
-    VkSubmitInfo submitInfo = {
-        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        .pNext = NULL,
-        .waitSemaphoreCount = 1,
-        .pWaitSemaphores = (VkSemaphore[]){app->renderer.sync.imageAvailable[frameIndex]},
-        .pWaitDstStageMask =
-            (VkPipelineStageFlags[]){
-                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+    VkSubmitInfo2 submitInfo = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2,
+        .waitSemaphoreInfoCount = 1,
+        .pWaitSemaphoreInfos =
+            &(VkSemaphoreSubmitInfo){
+                .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+                .semaphore = app->renderer.sync.imageAvailable[frameIndex],
+                .stageMask = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
             },
-        .commandBufferCount = 1,
-        .pCommandBuffers = &app->renderer.sync.buffers[frameIndex],
-        .signalSemaphoreCount = 1,
-        .pSignalSemaphores =
-            (VkSemaphore[]){app->renderer.sync.renderFinished[imageIndex]},
+        .commandBufferInfoCount = 1,
+        .pCommandBufferInfos =
+            &(VkCommandBufferSubmitInfo){
+                .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO,
+                .commandBuffer = app->renderer.sync.buffers[frameIndex],
+            },
+        .signalSemaphoreInfoCount = 1,
+        .pSignalSemaphoreInfos =
+            &(VkSemaphoreSubmitInfo){
+                .sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO,
+                .semaphore = app->renderer.sync.renderFinished[imageIndex],
+                .stageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT,
+            },
     };
 
-    ASSERTVK(vkQueueSubmit(app->renderer.context.queue, 1, &submitInfo,
-                           app->renderer.sync.inFlight[frameIndex]),
+    ASSERTVK(vkQueueSubmit2(app->renderer.context.queue, 1, &submitInfo,
+                            app->renderer.sync.inFlight[frameIndex]),
              "Failed to submit draw command buffer for frame %u", frameIndex);
 }
