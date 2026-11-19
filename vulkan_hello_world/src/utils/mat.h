@@ -69,3 +69,15 @@ static inline void mat4_perspective(float fovy, float aspect, float nearZ, float
     dest[2][3] = -1.0f;
     dest[3][2] = 2.0f * nearZ * farZ * fn;
 }
+
+static inline void mat4_mul(mat4 a, mat4 b, mat4 dest)
+{
+    for (int col = 0; col < 4; col++)
+        for (int row = 0; row < 4; row++)
+        {
+            float sum = 0.0f;
+            for (int k = 0; k < 4; k++)
+                sum += a[k][row] * b[col][k];
+            dest[col][row] = sum;
+        }
+}

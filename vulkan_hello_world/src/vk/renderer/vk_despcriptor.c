@@ -3,17 +3,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "vk/camera_ubo.h"
-
 void create_descriptor_set_layout(App* app)
 {
-    VkDescriptorSetLayoutBinding uboLayoutBinding = {
-        .binding = 0,
-        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = 1,
-        .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-    };
-
     VkDescriptorSetLayoutBinding samplerLayoutBinding = {
         .binding = 1,
         .descriptorCount = 1,
@@ -22,7 +13,7 @@ void create_descriptor_set_layout(App* app)
         .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
     };
 
-    VkDescriptorSetLayoutBinding bindings[2] = {uboLayoutBinding, samplerLayoutBinding};
+    VkDescriptorSetLayoutBinding bindings[1] = {samplerLayoutBinding};
     VkDescriptorSetLayoutCreateInfo layoutInfo = {
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         .bindingCount = COUNTOF(bindings),
@@ -44,14 +35,8 @@ void destroy_descriptor_set_layout(App* app)
 
 void create_descriptor_pool(App* app)
 {
-    VkDescriptorPoolSize poolSize[2] = {
+    VkDescriptorPoolSize poolSize[1] = {
         [0] =
-            {
-                .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                .descriptorCount = app->maxFramesInFlight,
-            },
-
-        [1] =
             {
                 .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                 .descriptorCount = app->maxFramesInFlight,
@@ -91,29 +76,14 @@ void create_descriptor_sets(App* app)
 
     for (size_t i = 0; i < app->maxFramesInFlight; i++)
     {
-        VkDescriptorBufferInfo bufferInfo = {
-            .buffer = app->renderer.buffers.uniforms[i].buf,
-            .offset = 0,
-            .range = sizeof(struct UniformBufferObject),
-        };
         VkDescriptorImageInfo imageInfo = {
             .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             .imageView = app->renderer.texture.image.view,
             .sampler = app->renderer.texture.sampler,
         };
 
-        VkWriteDescriptorSet descriptorWrite[2] = {
+        VkWriteDescriptorSet descriptorWrite[1] = {
             [0] =
-                {
-                    .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                    .dstSet = app->renderer.descriptors.sets[i],
-                    .dstBinding = 0,
-                    .dstArrayElement = 0,
-                    .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    .descriptorCount = 1,
-                    .pBufferInfo = &bufferInfo,
-                },
-            [1] =
                 {
                     .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
                     .dstSet = app->renderer.descriptors.sets[i],

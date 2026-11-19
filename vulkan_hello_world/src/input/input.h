@@ -18,6 +18,7 @@ typedef enum
     KEY_D,
     KEY_SPACE,
     KEY_LEFT_SHIFT,
+    KEY_LEFT_CONTROL,
     KEY_TAB,
     KEY_COUNT
 } InputKey;

@@ -18,8 +18,6 @@ typedef struct Camera
     float yaw;
     float pitch;
 
-    bool fast;
-
     bool firstMouse;
 
     CameraBasis basis;
@@ -28,3 +26,4 @@ typedef struct Camera
 Camera camera_init(VEC3(i32) pos);
 
 void update_camera_pos(Camera* camera, const Input* input);
+void camera_view_proj(const Camera* cam, const VEC3(u32)* extent, mat4 dest);

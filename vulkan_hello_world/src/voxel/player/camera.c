@@ -7,11 +7,9 @@ void update_camera_pos(Camera* camera, const Input* input)
     if (input->meta)
         return;
 
-    if (input_key_pressed(input, KEY_TAB))
-        camera->fast = !camera->fast;
-
     float movescale = 0.02f;
-    if (camera->fast)
+
+    if (input_key_held(input, KEY_LEFT_CONTROL))
         movescale *= 10.0f;
 
     if (input_key_held(input, KEY_W))
@@ -69,4 +67,19 @@ Camera camera_init(VEC3(i32) pos)
     camera.basis.up = VEC3_CROSS(camera.basis.right, camera.basis.front);
 
     return camera;
+}
+
+void camera_view_proj(const Camera* cam, const VEC3(u32)* extent, mat4 dest)
+{
+    VEC3(f32) look_pos = VEC3_ADD(cam->pos, cam->basis.front);
+
+    mat4 view;
+    mat4_lookat(cam->pos, look_pos, worldup, view);
+
+    mat4 proj;
+    mat4_perspective(deg_to_rad(45.0f), (float)extent->x / (float)extent->y, 0.1f, 500.0f,
+                     proj);
+    proj[1][1] *= -1;
+
+    mat4_mul(proj, view, dest);
 }

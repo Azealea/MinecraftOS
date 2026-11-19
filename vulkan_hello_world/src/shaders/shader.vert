@@ -1,10 +1,8 @@
 #version 460
 
-layout(binding = 0) uniform UniformBufferObject {
-    mat4 model;
-    mat4 view;
-    mat4 proj;
-} ubo;
+layout(push_constant) uniform PushConstants {
+    mat4 viewProj;
+} pc;
 
 layout(location = 0) in ivec3 inBlockPos;
 layout(location = 1) in int   inFaceId;
@@ -36,7 +34,7 @@ void main() {
     int v = quadIndices[gl_VertexIndex % 6];
 
     ivec3 worldPos = inBlockPos + faceOffsets[inFaceId][v];
-    gl_Position  = ubo.proj * ubo.view * ubo.model * vec4(worldPos, 1.0);
+    gl_Position  = pc.viewProj * vec4(worldPos, 1.0);
     fragTexCoord = vec3(faceUVs[inFaceId][v], float(inTextureId));
 }
 

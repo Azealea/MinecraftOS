@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 
+#include "voxel/player/camera.h"
+
 VkCommandBuffer begin_single_time_commands(App* app)
 {
     VkCommandBufferAllocateInfo allocInfo = {
@@ -162,6 +164,13 @@ void record_command_buffer(App* app, uint32_t imageIndex, uint32_t frameIndex)
 
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS,
                       app->renderer.pipeline.graphics);
+
+    mat4 viewProj;
+
+    camera_view_proj(&app->player.cam, (VEC3(u32)*)(&app->renderer.swapchain.extent),
+                     viewProj);
+    vkCmdPushConstants(cmd, app->renderer.pipeline.layout, VK_SHADER_STAGE_VERTEX_BIT, 0,
+                       sizeof(mat4), viewProj);
 
     VkBuffer instanceBuffers[] = {app->renderer.buffers.vertex.buf};
     VkDeviceSize offsets[] = {0};

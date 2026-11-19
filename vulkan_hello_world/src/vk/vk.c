@@ -1,7 +1,6 @@
 #include "vk.h"
 
 #include "vk/buffer/vertex.h"
-#include "vk/camera_ubo.h"
 #include "vk/renderer/vk_command.h"
 #include "vk/renderer/vk_despcriptor.h"
 #include "vk/renderer/vk_graphics_pipeline.h"
@@ -23,7 +22,6 @@ void init_vk(App* app)
     create_texture_stuff(app);
 
     create_vertex_buffer(app);
-    create_uniform_buffers(app);
     create_descriptor_pool(app);
     create_descriptor_sets(app);
     allocate_command_buffer(app);
@@ -37,7 +35,6 @@ void clean_vk(App* app)
     destroy_depth_resources(app);
     destroy_swapchain(app);
     destroy_graphics_pipeline(app);
-    destroy_uniform_buffers(app);
     destroy_descriptor_pool(app);
     destroy_texture_stuff(app);
     destroy_descriptor_set_layout(app);
@@ -61,8 +58,6 @@ void drawFrame(App* app)
 
     ASSERTVK(vkResetFences(device, 1, &app->renderer.sync.inFlight[currentFrame]),
              "Failed to reset in-flight fence for frame %u", currentFrame);
-
-    update_uniform_buffer(app, currentFrame);
 
     record_command_buffer(app, imageIndex, currentFrame);
     submit_command_buffer(app, imageIndex, currentFrame);

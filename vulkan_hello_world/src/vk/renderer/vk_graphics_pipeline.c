@@ -35,6 +35,14 @@ void create_graphics_pipeline(App* app)
                      .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
                      .setLayoutCount = 1,
                      .pSetLayouts = &app->renderer.pipeline.descriptorSetLayout,
+                     .pushConstantRangeCount = 1,
+                     .pPushConstantRanges =
+                         &(VkPushConstantRange){
+                             // cam
+                             .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+                             .offset = 0,
+                             .size = sizeof(mat4),
+                         },
                  },
                  app->renderer.allocator, &app->renderer.pipeline.layout),
              "Couldn't create pipeline layout");
