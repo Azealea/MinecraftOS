@@ -1,11 +1,12 @@
 #pragma once
 #include <stdio.h>
 
-#define LOG_LEVEL_TRACE 0
-#define LOG_LEVEL_DEBUG 1
-#define LOG_LEVEL_INFO 2
-#define LOG_LEVEL_WARN 3
-#define LOG_LEVEL_ERROR 4
+#define LOG_LEVEL_NONE 0
+#define LOG_LEVEL_ERROR 1
+#define LOG_LEVEL_WARN 2
+#define LOG_LEVEL_INFO 3
+#define LOG_LEVEL_DEBUG 4
+#define LOG_LEVEL_TRACE 5
 
 #ifndef LOG_LEVEL
 #    define LOG_LEVEL LOG_LEVEL_INFO
@@ -22,31 +23,31 @@
     fprintf(stderr, color "[" label "] %s:%d %s: " fmt _LOG_COL_RESET "\n",              \
             __FILE_NAME__, __LINE__, __func__, ##__VA_ARGS__)
 
-#if LOG_LEVEL <= LOG_LEVEL_TRACE
+#if LOG_LEVEL >= LOG_LEVEL_TRACE
 #    define TRACE(fmt, ...) _LOG(_LOG_COL_TRACE, "TRACE", fmt, ##__VA_ARGS__)
 #else
 #    define TRACE(fmt, ...) ((void)0)
 #endif
 
-#if LOG_LEVEL <= LOG_LEVEL_DEBUG
+#if LOG_LEVEL >= LOG_LEVEL_DEBUG
 #    define DEBUG(fmt, ...) _LOG(_LOG_COL_DEBUG, "DEBUG", fmt, ##__VA_ARGS__)
 #else
 #    define DEBUG(fmt, ...) ((void)0)
 #endif
 
-#if LOG_LEVEL <= LOG_LEVEL_INFO
+#if LOG_LEVEL >= LOG_LEVEL_INFO
 #    define INFO(fmt, ...) _LOG(_LOG_COL_INFO, "INFO", fmt, ##__VA_ARGS__)
 #else
 #    define INFO(fmt, ...) ((void)0)
 #endif
 
-#if LOG_LEVEL <= LOG_LEVEL_WARN
+#if LOG_LEVEL >= LOG_LEVEL_WARN
 #    define WARN(fmt, ...) _LOG(_LOG_COL_WARN, "WARN", fmt, ##__VA_ARGS__)
 #else
 #    define WARN(fmt, ...) ((void)0)
 #endif
 
-#if LOG_LEVEL <= LOG_LEVEL_ERROR
+#if LOG_LEVEL >= LOG_LEVEL_ERROR
 #    define ERROR(fmt, ...) _LOG(_LOG_COL_ERROR, "ERROR", fmt, ##__VA_ARGS__)
 #else
 #    define ERROR(fmt, ...) ((void)0)

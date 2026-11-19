@@ -133,7 +133,7 @@ void app_controller_on_break(Block* b, Chunk* c)
     chunk_release_entity_slot(c, b->entity_id);
 }
 
-void app_controller_on_interact(Block* b, Chunk* c)
+void app_controller_on_interact([[maybe_unused]] Block* b, [[maybe_unused]] Chunk* c)
 {
     // EntityData* data = chunk_get_entity(c, b->type);
 

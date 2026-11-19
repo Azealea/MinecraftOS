@@ -18,7 +18,11 @@ PKG_LDFLAGS = $(shell pkg-config --libs $(PKG))
 
 CSTD := -std=c23
 WARN = -Wall -Wextra -Wpedantic -Werror
-CFLAGS := $(CSTD) $(WARN) -I$(SRC_DIR) -Ilibraries $(DEFS) $(PKG_CFLAGS) -MMD -MP
+
+LOG_LEVEL ?= 0
+
+CPPFLAGS := -I$(SRC_DIR) -Ilibraries -DLOG_LEVEL=$(LOG_LEVEL)
+CFLAGS := $(CSTD) $(WARN) $(PKG_CFLAGS) -MMD -MP
 LDFLAGS := -lm $(PKG_LDFLAGS)
 
 TARGET := vulkan_hello_world

@@ -16,12 +16,10 @@ static void display_info()
     uint32_t instanceApiVersion;
     ASSERTVK(vkEnumerateInstanceVersion(&instanceApiVersion),
              "Couldn't enumerate instance version");
-    uint32_t apiVersionVariant = VK_API_VERSION_VARIANT(instanceApiVersion);
-    uint32_t apiVersionMajor = VK_API_VERSION_MAJOR(instanceApiVersion);
-    uint32_t apiVersionMinor = VK_API_VERSION_MINOR(instanceApiVersion);
-    uint32_t apiVersionPatch = VK_API_VERSION_PATCH(instanceApiVersion);
-    INFO("Vulkan API %i.%i.%i.%i", apiVersionVariant, apiVersionMajor, apiVersionMinor,
-         apiVersionPatch);
+    INFO("Vulkan API %i.%i.%i.%i", VK_API_VERSION_VARIANT(instanceApiVersion),
+         VK_API_VERSION_MAJOR(instanceApiVersion),
+         VK_API_VERSION_MINOR(instanceApiVersion),
+         VK_API_VERSION_PATCH(instanceApiVersion));
     INFO("GLFW %s", glfwGetVersionString());
 }
 
